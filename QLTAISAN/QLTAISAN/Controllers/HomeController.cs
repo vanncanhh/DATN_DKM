@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using QLTAISAN.Models;
 using System.Diagnostics;
 
 namespace QLTAISAN.Controllers
