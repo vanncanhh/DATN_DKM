@@ -1,7 +1,7 @@
+using Libs.Data;
 using Libs.Models;
-using Microsoft.AspNetCore.Identity;
+using Libs.Service;
 using Microsoft.EntityFrameworkCore;
-using QLTAISAN;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<QuanLyTaiSanCtyDATNContext>(options =>
@@ -12,6 +12,12 @@ builder.Services.AddDbContext<QuanLyTaiSanCtyDATNContext>(options =>
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
+builder.Services.AddTransient<IDeviceService, DeviceService>();
+builder.Services.AddTransient<IDepartmentService, DepartmentService>();
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 

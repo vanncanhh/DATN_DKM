@@ -1,0 +1,73 @@
+﻿using Libs.Models;
+using Libs.Service;
+using Microsoft.AspNetCore.Mvc;
+
+namespace QLTAISAN.Controllers
+{
+    public class DepartmentController : Controller
+    {
+        private readonly IDepartmentService _departmentService;
+        public DepartmentController(IDepartmentService departmentService)
+        {
+            _departmentService = departmentService;
+        }
+        public async Task<ActionResult> Department()
+        {
+            ViewBag.ProjectNb = (await _departmentService.GetDepartmentsAsync()).Count;
+            return View(await _departmentService.GetDepartmentsAsync());
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> SearchDepartment(string projectSymbol, int? managerProject)
+        {
+            var departments = await _departmentService.SearchDepartmentAsync(projectSymbol, managerProject);
+            ViewBag.ProjectNb = departments.Count;
+            return View("Department", departments);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> AddDepartment(ProjectDkc project)
+        {
+            var result = await _departmentService.AddDepartmentAsync(project);
+            if (!result)
+            {
+                ViewBag.Tb = "Mã bị trùng";
+                return View();
+            }
+            return RedirectToAction("Department");
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> EditDepartment(ProjectDkc project)
+        {
+            var result = await _departmentService.EditDepartmentAsync(project);
+            if (!result)
+            {
+                ViewBag.Tb = "Không tìm thấy phòng ban";
+                return View();
+            }
+            return RedirectToAction("Department");
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> DeleteDepartment(int id)
+        {
+            var result = await _departmentService.DeleteDepartmentAsync(id);
+            return Json(result);
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> AddDeviceToDepartment(int departmentId, int deviceId, string notes)
+        {
+            var result = await _departmentService.AddDeviceToDepartmentAsync(departmentId, deviceId, notes);
+            return Json(result);
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> RemoveDeviceFromDepartment(int departmentId, int deviceId, string notes)
+        {
+            var result = await _departmentService.RemoveDeviceFromDepartmentAsync(departmentId, deviceId, notes);
+            return Json(result);
+        }
+    }
+}

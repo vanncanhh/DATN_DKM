@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Libs.Models
 {
-    public partial class Credential
+    public class Credential
     {
-        public string UserGroupId { get; set; } = null!;
-        public string RoleId { get; set; } = null!;
+        public string UserGroupId { get; set; }
+        public string RoleId { get; set; }
         public int Id { get; set; }
 
-        public virtual Role Role { get; set; } = null!;
-        public virtual UserGroup UserGroup { get; set; } = null!;
+        public virtual Role Role { get; set; }
+        public virtual UserGroup UserGroup { get; set; }
     }
 }

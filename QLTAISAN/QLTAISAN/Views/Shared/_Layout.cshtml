@@ -1,4 +1,11 @@
-﻿<!DOCTYPE html>
+﻿@using Libs.Models
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = null;
+
+    var secName = "Người dùng";
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -9,38 +16,95 @@
     <link rel="stylesheet" href="~/QLTAISAN.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">QLTAISAN</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="@Url.Action("Index", "Home")">Quản Lý Tài Sản</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Xin chào, @secName</a>
+                    </li>
+                    <li class="nav-item">
+                        <form method="post" asp-controller="Account" asp-action="LogOff" id="logoutForm">
+                            <button type="submit" class="btn btn-outline-light btn-sm">Đăng Xuất</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" href="@Url.Action("Index", "Home")">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
                         </li>
+
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link" data-bs-toggle="collapse" href="#deviceMenu">
+                                <i class="bi bi-laptop"></i> Thiết bị
+                            </a>
+                            <ul id="deviceMenu" class="collapse list-unstyled">
+                                <li><a class="nav-link" href="@Url.Action("Index", "Device")">Tất cả thiết bị</a></li>
+                                <li><a class="nav-link" href="@Url.Action("Deviceliquidation", "Device")">Đã thanh lý</a></li>
+                                <li><a class="nav-link" href="@Url.Action("Create", "Device")">Thêm thiết bị mới</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="collapse" href="#departmentMenu">
+                                <i class="bi bi-building"></i> Phòng ban
+                            </a>
+                            <ul id="departmentMenu" class="collapse list-unstyled">
+                                <li><a class="nav-link" href="@Url.Action("Department", "Department")">Danh sách phòng ban</a></li>
+                                <li><a class="nav-link" href="@Url.Action("AddDepartment", "Department")">Thêm mới phòng ban</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="collapse" href="#userMenu">
+                                <i class="bi bi-person"></i> Người dùng
+                            </a>
+                            <ul id="userMenu" class="collapse list-unstyled">
+                                <li><a class="nav-link" href="@Url.Action("UserIndex", "UserRole")">Danh sách người dùng</a></li>
+                                <li><a class="nav-link" href="@Url.Action("RoleIndex", "Role")">Phân quyền</a></li>
+                            </ul>
                         </li>
                     </ul>
                 </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="pt-3">
+                    @RenderBody()
+                </div>
+            </main>
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="footer mt-auto py-3 bg-dark text-white text-center">
         <div class="container">
-            &copy; 2025 - QLTAISAN - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <span>2025 &copy; Quản Lý Tài Sản</span>
         </div>
     </footer>
+    <script>
+        $(document).ready(function () {
+            $('.nav-link').click(function () {
+                $('.nav-link').removeClass('active');
+                $(this).addClass('active');
+            });
+        });
+    </script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
