@@ -1,8 +1,3 @@
-using Libs.Data;
-using Libs.Models;
-using Libs.Service;
-using Microsoft.EntityFrameworkCore;
-
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<QuanLyTaiSanCtyDATNContext>(options =>
 {
@@ -12,12 +7,33 @@ builder.Services.AddDbContext<QuanLyTaiSanCtyDATNContext>(options =>
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 builder.Services.AddTransient<IDeviceService, DeviceService>();
 builder.Services.AddTransient<IDepartmentService, DepartmentService>();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(RepositoryBase<>));
+builder.Services.AddScoped<ISupplierService, SupplierService>();
+builder.Services.AddScoped<IScheduleTestService , ScheduleTestService>();
+builder.Services.AddScoped<IRoleService , RoleService>();
+builder.Services.AddScoped<IRequestDeviceService , RequestDeviceService>();
+builder.Services.AddScoped<IRepairTypeService, RepairTypeService>();
+builder.Services.AddScoped<IRepairDetailsService, RepairDetailsService>();
+builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<IHomeService, HomeService>();
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+builder.Services.AddScoped<IDeviceTypeService, DeviceTypeService>();
+builder.Services.AddScoped<IUserRoleService, UserRoleService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
 
 var app = builder.Build();
 
@@ -33,7 +49,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseSession();
 app.UseAuthorization();
 
 app.MapControllerRoute(

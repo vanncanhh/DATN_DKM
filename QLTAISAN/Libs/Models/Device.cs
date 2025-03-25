@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Libs.Models
+﻿namespace Libs.Models
 {
     public partial class Device
     {

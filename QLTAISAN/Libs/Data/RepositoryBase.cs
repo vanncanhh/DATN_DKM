@@ -1,8 +1,4 @@
-﻿using Libs.Models;
-using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
-
-namespace Libs.Data
+﻿namespace Libs.Data
 {
     public class RepositoryBase<T> : IRepository<T> where T : class
     {
@@ -104,6 +100,20 @@ namespace Libs.Data
         public virtual bool Any(Expression<Func<T, bool>> where)
         {
             return dbset.Where(where).Any<T>();
+        }
+        public async Task<IEnumerable<T>> GetAllAsync()
+        {
+            return await dbset.ToListAsync();
+        }
+
+        public async Task<T?> GetByIdAsync(object id)
+        {
+            return await dbset.FindAsync(id);
+        }
+
+        public async Task AddAsync(T entity)
+        {
+            await dbset.AddAsync(entity);
         }
     }
 }

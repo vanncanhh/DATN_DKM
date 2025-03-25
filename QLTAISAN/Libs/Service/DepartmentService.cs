@@ -1,8 +1,4 @@
-﻿using Libs.Data;
-using Libs.Models;
-using Microsoft.EntityFrameworkCore;
-
-namespace Libs.Service
+﻿namespace Libs.Service
 {
     public interface IDepartmentService
     {

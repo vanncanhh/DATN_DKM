@@ -1,6 +1,4 @@
-﻿using System.Linq.Expressions;
-
-namespace Libs.Data
+﻿namespace Libs.Data
 {
     public interface IRepository<T> where T : class
     {
@@ -24,5 +22,8 @@ namespace Libs.Data
         IEnumerable<T> GetMany(Expression<Func<T, bool>> where);
 
         bool Any(Expression<Func<T, bool>> where);
+        Task<IEnumerable<T>> GetAllAsync();
+        Task<T?> GetByIdAsync(object id);
+        Task AddAsync(T entity);
     }
 }

@@ -1,8 +1,4 @@
-﻿using Libs.Models;
-using Libs.Service;
-using Microsoft.AspNetCore.Mvc;
-
-namespace QLTAISAN.Controllers
+﻿namespace QLTAISAN.Controllers
 {
     public class DeviceController : Controller
     {

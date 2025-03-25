@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
-
-namespace Libs.Models
+﻿namespace Libs.Models
 {
     public partial class QuanLyTaiSanCtyDATNContext : DbContext
     {

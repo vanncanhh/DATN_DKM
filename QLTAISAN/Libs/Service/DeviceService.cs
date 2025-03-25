@@ -1,7 +1,4 @@
-﻿using Libs.Data;
-using Libs.Models;
-
-namespace Libs.Service
+﻿namespace Libs.Service
 {
     public interface IDeviceService
     {

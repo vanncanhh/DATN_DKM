@@ -1,0 +1,12 @@
+﻿global using Microsoft.EntityFrameworkCore;
+global using System.Linq.Expressions;
+global using Libs.Models;
+global using Libs.Data;
+global using System.ComponentModel;
+global using System.Security.Cryptography;
+global using System.Text;
+global using Libs.Common;
+global using Microsoft.AspNetCore.Mvc.Filters;
+global using Microsoft.AspNetCore.Http;
+global using Microsoft.AspNetCore.Mvc;
+global using Newtonsoft.Json;
