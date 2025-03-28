@@ -45,6 +45,7 @@
         public IRepository<User> UserRepository => _uRepository ??= new RepositoryBase<User>(_context);
         public IRepository<UserGroup> UserGroupRepository => _ugRepository ??= new RepositoryBase<UserGroup>(_context);
         public IRepository<UserLogin> UserLoginRepository => _ulRepository ??= new RepositoryBase<UserLogin>(_context);
+        public QuanLyTaiSanCtyDATNContext Context => _context;
 
         public async Task<int> SaveChangesAsync()
         {

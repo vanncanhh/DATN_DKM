@@ -1,0 +1,43 @@
+﻿@model QLTAISAN.Models.LoginViewModel
+<div class="container">
+    <form asp-action="Login" asp-controller="Account" method="post" class="form-horizontal form-signin">
+        @Html.AntiForgeryToken()
+        <h2 class="form-signin-heading">Đăng Nhập</h2>
+        <div class="login-wrap">
+            <h4 class="text-danger text-center">Bạn Không có quyền truy câp trang web này</h4>
+            <div asp-validation-summary="All" class="text-danger"></div>
+
+            <div class="form-group row">
+                <label class="col-md-4 control-label">Tên Đăng Nhập</label>
+                <div class="col-md-8">
+                    <input class="form-control" asp-for="Username" autocomplete="username" />
+                    <span asp-validation-for="Username" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-md-4 control-label">Mật Khẩu</label>
+                <div class="col-md-8">
+                    <input class="form-control" asp-for="Password" type="password" autocomplete="current-password" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="offset-md-4 col-md-8">
+                    <div class="form-check">
+                        <input class="form-check-input" asp-for="RememberMe" />
+                        <label class="form-check-label" asp-for="RememberMe">Remember me?</label>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-lg btn-login btn-block" type="submit">Đăng Nhập</button>
+        </div>
+
+        <div class="registration">
+            Bạn chưa có tài khoản?
+            <a asp-controller="Account" asp-action="Register">Tạo Tài Khoản Mới</a>
+        </div>
+    </form>
+</div>

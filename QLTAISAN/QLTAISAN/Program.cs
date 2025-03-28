@@ -1,4 +1,7 @@
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<QuanLyTaiSanCtyDATNContext>()
+    .AddDefaultTokenProviders();
 builder.Services.AddDbContext<QuanLyTaiSanCtyDATNContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -9,7 +12,6 @@ builder.Services.AddDbContext<QuanLyTaiSanCtyDATNContext>(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
-builder.Services.AddTransient<IDeviceService, DeviceService>();
 builder.Services.AddTransient<IDepartmentService, DepartmentService>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(RepositoryBase<>));
 builder.Services.AddScoped<ISupplierService, SupplierService>();

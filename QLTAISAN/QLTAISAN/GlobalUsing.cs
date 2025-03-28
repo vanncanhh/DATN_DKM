@@ -2,5 +2,10 @@
 global using Libs.Service;
 global using Microsoft.AspNetCore.Mvc;
 global using Libs.Data;
-global using Libs.Common;
 global using Microsoft.EntityFrameworkCore;
+global using Microsoft.AspNetCore.Authorization;
+global using System.ComponentModel.DataAnnotations;
+global using Microsoft.AspNetCore.Identity;
+global using QLTAISAN.Models;
+global using Libs.Common;
+global using Libs.ViewModels;

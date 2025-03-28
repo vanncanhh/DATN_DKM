@@ -23,5 +23,6 @@
         IRepository<User> UserRepository { get; }
         IRepository<UserGroup> UserGroupRepository { get; }
         IRepository<UserLogin> UserLoginRepository { get; }
+        QuanLyTaiSanCtyDATNContext Context { get; }
     }
 }

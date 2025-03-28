@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-
-namespace QLTAISAN.Controllers
+﻿namespace QLTAISAN.Controllers
 {
     public class HomeController : Controller
     {

@@ -10,7 +10,17 @@
             _dbContext = dbContext;
             dbset = _dbContext.Set<T>();
         }
-
+        public virtual async Task<bool> AnyAsync(Expression<Func<T, bool>> filter)
+        {
+            return await dbset.AnyAsync(filter);
+        }
+        public virtual IQueryable<T> Query(Expression<Func<T, bool>> filter = null)
+        {
+            IQueryable<T> query = dbset;
+            if (filter != null)
+                query = query.Where(filter);
+            return query;
+        }
         public virtual void Add(T entity)
         {
             dbset.Add(entity);

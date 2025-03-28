@@ -10,7 +10,15 @@
             : base(options)
         {
         }
-
+        public virtual DbSet<SearchDevice_Result> SearchDevice_Results { get; set; }
+        public virtual DbSet<SearchProject_Result> SearchProject_Results { get; set; }
+        public virtual DbSet<DeviceById_Result> DeviceById_Results { get; set; }
+        public virtual DbSet<DeviceHistory_Result> DeviceHistory_Results { get; set; }
+        public virtual DbSet<SearchRepairDetails_Result> SearchRepairDetails_Results { get; set; }
+        public virtual DbSet<SearchUseDevice_Result> SearchUseDevice_Results { get; set; }
+        public virtual DbSet<TypeComponantOfDevice_Result> TypeComponantOfDevice_Results { get; set; }
+        public virtual DbSet<ChildrenOfDevice_Result> ChildrenOfDevice_Results { get; set; }
+        //
         public virtual DbSet<Credential> Credentials { get; set; } = null!;
         public virtual DbSet<DestructiveType> DestructiveTypes { get; set; } = null!;
         public virtual DbSet<DestructivelDevice> DestructivelDevices { get; set; } = null!;
@@ -39,9 +47,77 @@
                 optionsBuilder.UseSqlServer("Server=LAPTOP-3T5GPVS5\\SQLEXPRESS; Database=QuanLyTaiSanCtyDATN; Trusted_Connection=True; TrustServerCertificate=True;");
             }
         }
+        public IQueryable<SearchDevice_Result> SearchDevice(int? status, int? devicetype, int? guarantee, int? projectid, string devicecode)
+        {
+            return SearchDevice_Results.FromSqlInterpolated(
+                $"EXEC dbo.SearchDevice {status}, {devicetype}, {guarantee}, {projectid}, {devicecode}");
+        }
+        public IQueryable<SearchProject_Result> SearchProject(int? managerProject, int? status, int? typeProject, string projectSymbol)
+        {
+            return SearchProject_Results.FromSqlInterpolated(
+                $"EXEC dbo.SearchProject {managerProject}, {status}, {typeProject}, {projectSymbol}");
+        }
+        public int AddDevice(string deviceCode, string newCode, string deviceName, Nullable<int> typeOfDevice, Nullable<int> parentId,
+            string configuration, Nullable<double> price, string purchaseContract, Nullable<System.DateTime> dateOfPurchase,
+            Nullable<int> supplierId, Nullable<int> projectId, Nullable<System.DateTime> guarantee, string notes,
+            Nullable<int> userId, Nullable<int> status)            
+        {
+            // Sử dụng ExecuteSqlInterpolated để truyền tham số một cách an toàn
+            var result = this.Database.ExecuteSqlInterpolated(
+                $"EXEC dbo.AddDevice {deviceCode}, {newCode}, {deviceName}, {typeOfDevice}, {parentId}, {configuration}, {price}, {purchaseContract}, {dateOfPurchase}, {supplierId}, {projectId}, {guarantee}, {notes}, {userId}, {status}");
+            return result;
+        }
+        public IQueryable<DeviceById_Result> DeviceById(Nullable<int> id)
+        {
+            return DeviceById_Results.FromSqlInterpolated($"EXEC dbo.DeviceById {id}");
+        }
 
+        // SP DeviceHistory
+        public IQueryable<DeviceHistory_Result> DeviceHistory()
+        {
+            return DeviceHistory_Results.FromSqlInterpolated($"EXEC dbo.DeviceHistory");
+        }
+
+        // SP SearchRepairDetails
+        public IQueryable<SearchRepairDetails_Result> SearchRepairDetails(int? repairtypes, int? user, int? iddevice, int? status)
+        {
+            return SearchRepairDetails_Results.FromSqlInterpolated($"EXEC dbo.SearchRepairDetails {repairtypes}, {user}, {iddevice}, {status}");
+        }
+
+        public IQueryable<SearchUseDevice_Result> SearchUseDevice(int deviceId)
+        {
+            return SearchUseDevice_Results.FromSqlInterpolated($"EXEC dbo.SearchUseDevice {deviceId}");
+        }
+
+        public IQueryable<TypeComponantOfDevice_Result> TypeComponantOfDevice(int typeParent)
+        {
+            return TypeComponantOfDevice_Results.FromSqlInterpolated($"EXEC dbo.TypeComponantOfDevice {typeParent}");
+        }
+        public IQueryable<ChildrenOfDevice_Result> ChildrenOfDevice(Nullable<int> deviceCodeParents, Nullable<int> typeSymbolChildren)
+        {
+            return ChildrenOfDevice_Results.FromSqlInterpolated($"EXEC dbo.ChildrenOfDevice {deviceCodeParents}, {typeSymbolChildren}");
+        }
+        public int UpdateDevice(int id, string deviceCode, string newCode, string deviceName, int? typeOfDevice, int? parentId,
+                                string configuration, double price, string purchaseContract, DateTime? dateOfPurchase,
+                                int? supplierId, DateTime? guarantee, int? userId, string notes, DateTime? createdDate, int status)
+        {
+            return Database.ExecuteSqlInterpolated(
+                $"EXEC dbo.UpdateDevice {id}, {deviceCode}, {newCode}, {deviceName}, {typeOfDevice}, {parentId}, {configuration}, {price}, {purchaseContract}, {dateOfPurchase}, {supplierId}, {guarantee}, {userId}, {notes}, {createdDate}, {status}");
+        }
+        public int UpdateUserDevice(int idDv, int idUser)
+        {
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.UpdateUserDevice {idDv}, {idUser}");
+        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<SearchDevice_Result>().HasNoKey();
+            modelBuilder.Entity<SearchProject_Result>().HasNoKey();
+            modelBuilder.Entity<DeviceById_Result>().HasNoKey();
+            modelBuilder.Entity<DeviceHistory_Result>().HasNoKey();
+            modelBuilder.Entity<SearchRepairDetails_Result>().HasNoKey();
+            modelBuilder.Entity<SearchUseDevice_Result>().HasNoKey();
+            modelBuilder.Entity<TypeComponantOfDevice_Result>().HasNoKey();
+            modelBuilder.Entity<ChildrenOfDevice_Result>().HasNoKey();
             modelBuilder.Entity<Credential>(entity =>
             {
                 entity.HasKey(e => new { e.UserGroupId, e.RoleId });
