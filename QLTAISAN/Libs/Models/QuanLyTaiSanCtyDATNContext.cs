@@ -18,6 +18,7 @@
         public virtual DbSet<SearchUseDevice_Result> SearchUseDevice_Results { get; set; }
         public virtual DbSet<TypeComponantOfDevice_Result> TypeComponantOfDevice_Results { get; set; }
         public virtual DbSet<ChildrenOfDevice_Result> ChildrenOfDevice_Results { get; set; }
+        public virtual DbSet<SearchScheduleTest_Result> SearchScheduleTest { get; set; }
         //
         public virtual DbSet<Credential> Credentials { get; set; } = null!;
         public virtual DbSet<DestructiveType> DestructiveTypes { get; set; } = null!;
@@ -108,6 +109,10 @@
         {
             return Database.ExecuteSqlInterpolated($"EXEC dbo.UpdateUserDevice {idDv}, {idUser}");
         }
+        public IQueryable<SearchScheduleTest_Result> GetSearchScheduleTest(int? user, int? status)
+        {
+            return SearchScheduleTest.FromSqlInterpolated($"EXEC dbo.SearchScheduleTest {user}, {status}");
+        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<SearchDevice_Result>().HasNoKey();
@@ -118,6 +123,7 @@
             modelBuilder.Entity<SearchUseDevice_Result>().HasNoKey();
             modelBuilder.Entity<TypeComponantOfDevice_Result>().HasNoKey();
             modelBuilder.Entity<ChildrenOfDevice_Result>().HasNoKey();
+            modelBuilder.Entity<SearchScheduleTest_Result>().HasNoKey();
             modelBuilder.Entity<Credential>(entity =>
             {
                 entity.HasKey(e => new { e.UserGroupId, e.RoleId });

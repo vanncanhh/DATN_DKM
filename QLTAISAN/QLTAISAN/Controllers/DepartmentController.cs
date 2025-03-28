@@ -3,14 +3,22 @@
     public class DepartmentController : Controller
     {
         private readonly IDepartmentService _departmentService;
-        public DepartmentController(IDepartmentService departmentService)
+        private readonly QuanLyTaiSanCtyDATNContext Ql;
+        public DepartmentController(IDepartmentService departmentService, QuanLyTaiSanCtyDATNContext ql)
         {
             _departmentService = departmentService;
+            Ql = ql;
         }
-        public async Task<ActionResult> Department()
+        public ActionResult Department()
         {
-            ViewBag.ProjectNb = (await _departmentService.GetDepartmentsAsync()).Count;
-            return View(await _departmentService.GetDepartmentsAsync());
+            ViewBag.ProjectNb = Ql.SearchProject(null, null, 1, null)
+                        .AsEnumerable()
+                        .Count();
+            ViewData["User"] = Ql.Users.Where(x => x.Status != 1 && x.IsDeleted == false).ToList();
+            var lstProject = Ql.SearchProject(null, null, 1, null)
+                                    .AsEnumerable()
+                                    .ToList();
+            return View(lstProject);
         }
 
         [HttpPost]

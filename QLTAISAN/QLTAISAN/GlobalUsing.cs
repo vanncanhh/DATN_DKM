@@ -7,5 +7,4 @@ global using Microsoft.AspNetCore.Authorization;
 global using System.ComponentModel.DataAnnotations;
 global using Microsoft.AspNetCore.Identity;
 global using QLTAISAN.Models;
-global using Libs.Common;
-global using Libs.ViewModels;
+global using Libs.DTOs;

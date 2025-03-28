@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
-namespace QLTAISAN.Controllers
+﻿namespace QLTAISAN.Controllers
 {
     public class EmployeesController : Controller
     {

@@ -1,6 +1,4 @@
-﻿using Libs.DTOs;
-
-namespace QLTAISAN.Controllers
+﻿namespace QLTAISAN.Controllers
 {
     public class DeviceController : Controller
     {

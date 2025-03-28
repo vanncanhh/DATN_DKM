@@ -3,17 +3,18 @@
     public class RepairTypeController : Controller
     {
         private readonly IRepairTypeService _repairTypeService;
+        private readonly QuanLyTaiSanCtyDATNContext Ql;
 
-        public RepairTypeController(IRepairTypeService repairTypeService)
+        public RepairTypeController(IRepairTypeService repairTypeService, QuanLyTaiSanCtyDATNContext ql)
         {
             _repairTypeService = repairTypeService;
+            Ql = ql;
         }
 
-        public async Task<IActionResult> RepairType()
+        public ActionResult RepairType()
         {
-            var repairTypes = await _repairTypeService.GetAllRepairTypesAsync();
-            ViewData["RepairTypes"] = repairTypes;
-            return View(repairTypes);
+            ViewData["RepairTypes"] = Ql.RepairTypes.ToList();
+            return View();
         }
 
         [HttpGet]

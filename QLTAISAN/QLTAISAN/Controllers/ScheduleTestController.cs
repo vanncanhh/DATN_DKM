@@ -3,20 +3,21 @@
     public class ScheduleTestController : Controller
     {
         private readonly IScheduleTestService _scheduleTestService;
+        QuanLyTaiSanCtyDATNContext Ql;
 
-        public ScheduleTestController(IScheduleTestService scheduleTestService)
+        public ScheduleTestController(IScheduleTestService scheduleTestService, QuanLyTaiSanCtyDATNContext ql)
         {
             _scheduleTestService = scheduleTestService;
+            Ql = ql;
         }
 
         // Hiển thị danh sách
-        public async Task<IActionResult> ScheduleTest()
+        public ActionResult ScheduleTest()
         {
-            var users = await _scheduleTestService.GetAllUsersAsync();
-            var scheduleTests = await _scheduleTestService.GetAllScheduleTestsAsync();
-            ViewData["User"] = users;
-            ViewData["ScheduleTests"] = scheduleTests;
-            return View(scheduleTests);
+            ViewData["User"] = Ql.Users.ToList();
+            ViewData["ScheduleTests"] = Ql.ScheduleTests.ToList();
+            var lstScheduleTests = Ql.GetSearchScheduleTest(null, null).ToList();
+            return View(lstScheduleTests);
         }
 
         // Tìm kiếm
