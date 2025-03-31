@@ -10,3 +10,7 @@ global using QLTAISAN.Models;
 global using Libs.DTOs;
 global using System.Drawing;
 global using System.Drawing.Text;
+global using Libs.Common;
+global using OfficeOpenXml;
+global using System.Text.RegularExpressions;
+global using Libs.ViewModels;

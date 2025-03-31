@@ -1,8 +1,4 @@
-﻿using Libs.ViewModels;
-using OfficeOpenXml;
-using System.Text.RegularExpressions;
-
-namespace QLTAISAN.Controllers
+﻿namespace QLTAISAN.Controllers
 {
     public class DeviceController : Controller
     {

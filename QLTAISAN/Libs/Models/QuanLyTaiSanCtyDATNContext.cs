@@ -22,6 +22,8 @@
         public virtual DbSet<OderCode> OrderCode { get; set; }
         public virtual DbSet<StatisticalDevice_Result> StatisticalDevice_Results { get; set; }
         public virtual DbSet<SearchRequestDeviceNew_Result> SearchRequestDeviceNew_Results { get; set; }
+        public virtual DbSet<DeviceOfProjectAll_Result> DeviceOfProjectAll_Results { get; set; }
+        public virtual DbSet<StatisticProject_Result> StatisticProject_Results { get; set; }
         //
         public virtual DbSet<Credential> Credentials { get; set; } = null!;
         public virtual DbSet<DestructiveType> DestructiveTypes { get; set; } = null!;
@@ -122,47 +124,55 @@
         }
         public int ReturnDeviceProject(Nullable<int> deviceId)
         {
-            return Database.ExecuteSqlInterpolated($"EXEC dbo.ReturnDeviceProject{deviceId}");
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.ReturnDeviceProject {deviceId}");
         }
         public int AddSupplier(string name, string email, string phone, string address, string support)
         {
-            return Database.ExecuteSqlInterpolated($"EXEC dbo.AddSupplier{name}, {email}, {phone}, {address}, {support}");
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.AddSupplier {name}, {email}, {phone}, {address}, {support}");
         }
         public int AddUser(string userName, string passWord, string fullName, string email, string phoneNumber, string address, string department, string position, Nullable<int> roleId, Nullable<int> status)
         {
-            return Database.ExecuteSqlInterpolated($"EXEC dbo.AddUser{userName}, {passWord}, {fullName}, {email}, {phoneNumber}, {address}, {department}, {position}, {roleId}, {status}");
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.AddUser {userName}, {passWord}, {fullName}, {email}, {phoneNumber}, {address}, {department}, {position}, {roleId}, {status}");
         }
         public int AddRepairDetails(Nullable<int> deviceId, Nullable<System.DateTime> dateOfRepair, Nullable<System.DateTime> nextDateOfRepair, Nullable<int> timeOrder, Nullable<int> typeOfRepair, string addressOfRepair, Nullable<int> userId, string notes)
         {
-            return Database.ExecuteSqlInterpolated($"EXEC dbo.AddRepairDetails{deviceId}, {dateOfRepair}, {nextDateOfRepair}, {timeOrder}, {typeOfRepair}, {addressOfRepair}, {userId}, {notes}");
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.AddRepairDetails {deviceId}, {dateOfRepair}, {nextDateOfRepair}, {timeOrder}, {typeOfRepair}, {addressOfRepair}, {userId}, {notes}");
         }
         public int AddDeviceType(string typeName, string typeSymbol, string notes)
         {
-            return Database.ExecuteSqlInterpolated($"EXEC dbo.AddDeviceType{typeName}, {typeSymbol}, {notes}");
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.AddDeviceType {typeName}, {typeSymbol}, {notes}");
         }
         public int AddDeviceOfProject(Nullable<int> projectId, Nullable<int> deviceId, string notes)
         {
-            return Database.ExecuteSqlInterpolated($"EXEC dbo.AddDeviceOfProject{projectId}, {deviceId}, {notes}");
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.AddDeviceOfProject {projectId}, {deviceId}, {notes}");
         }
         public IQueryable<OderCode> OderCode(Nullable<int> id)
         {
-            return OrderCode.FromSqlInterpolated($"EXEC dbo.OderCode{id}");
+            return OrderCode.FromSqlInterpolated($"EXEC dbo.OderCode {id}");
         }
         public int LiquidationDevice(string id)
         {
-            return Database.ExecuteSqlInterpolated($"EXEC dbo.LiquidationDevice{id}");
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.LiquidationDevice {id}");
         }
         public int DeleteDeviceOfDevice(Nullable<int> idParent, Nullable<int> idChild, string resons)
         {
-            return Database.ExecuteSqlInterpolated($"EXEC dbo.DeleteDeviceOfDevice{idParent}, {idChild}, {resons}");
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.DeleteDeviceOfDevice {idParent}, {idChild}, {resons}");
         }
         public int DeleteDevice1(string id)
         {
-            return Database.ExecuteSqlInterpolated($"EXEC dbo.DeleteDevice1{id}");
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.DeleteDevice1 {id}");
         }
         public IQueryable<StatisticalDevice_Result> StatisticalDevice()
         {
             return StatisticalDevice_Results.FromSqlInterpolated($"EXEC dbo.StatisticalDevice");
+        }
+        public IQueryable<StatisticProject_Result> StatisticProject()
+        {
+            return StatisticProject_Results.FromSqlInterpolated($"EXEC dbo.StatisticProject");
+        }
+        public IQueryable<DeviceOfProjectAll_Result> DeviceOfProjectAll(Nullable<int> projectId)
+        {
+            return DeviceOfProjectAll_Results.FromSqlInterpolated($"EXEC dbo.DeviceOfProjectAll {projectId}");
         }
         public IQueryable<SearchRequestDeviceNew_Result> SearchRequestDeviceNew(Nullable<int> status, Nullable<bool> approved)
         {
@@ -170,19 +180,39 @@
         }
         public int UpdateUser(Nullable<int> id, string userName, string passWord, string fullName, string email, string phoneNumber, string address, string department, string position, Nullable<int> roleId, Nullable<int> status)
         {
-            return Database.ExecuteSqlInterpolated($"EXEC dbo.UpdateUser{id}, {userName}, {passWord}, {fullName}, {email}, {phoneNumber}, {address}, {department}, {position}, {roleId}, {status}");
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.UpdateUser {id}, {userName}, {passWord}, {fullName}, {email}, {phoneNumber}, {address}, {department}, {position}, {roleId}, {status}");
         }
         public int AddTypeChidren(Nullable<int> typeChidren, Nullable<int> typeParent, Nullable<int> type_TypeCom)
         { 
-            return Database.ExecuteSqlInterpolated($"EXEC dbo.AddTypeChidren{typeChidren}, {typeParent}, {type_TypeCom}");
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.AddTypeChidren {typeChidren}, {typeParent}, {type_TypeCom}");
         }
         public int AddDeviceOfDevice(Nullable<int> idParent, Nullable<int> idChild, Nullable<int> typeChild, Nullable<int> typeParent, Nullable<int> typeComponant)
         { 
-            return Database.ExecuteSqlInterpolated($"EXEC dbo.AddDeviceOfDevice{idParent}, {idChild}, {typeChild}, {typeParent}, {typeComponant}");
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.AddDeviceOfDevice {idParent}, {idChild}, {typeChild}, {typeParent}, {typeComponant}");
         }
         public int DeleteTypeParentTypeChild(Nullable<int> typeChidren, Nullable<int> typeParent)
         { 
-            return Database.ExecuteSqlInterpolated($"EXEC dbo.DeleteTypeParentTypeChild{typeChidren}, {typeParent}");
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.DeleteTypeParentTypeChild {typeChidren}, {typeParent}");
+        }
+        public int AddRepairType(string typeName, string notes)
+        { 
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.AddRepairType {typeName}, {notes}");
+        }
+        public int AddProject_(string projectSymbol, string projectName, Nullable<int> managerProject, string address, Nullable<System.DateTime> fromDate, Nullable<System.DateTime> toDate, Nullable<int> status)
+        { 
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.AddProject {projectSymbol}, {projectName}, {managerProject}, {address}, {fromDate}, {toDate}, {status}");
+        }
+        public int UpdateProject(Nullable<int> id, string projectSymbol, string projectName, Nullable<int> managerProject, string address, Nullable<System.DateTime> fromDate, Nullable<System.DateTime> toDate, Nullable<System.DateTime> createdDate, Nullable<System.DateTime> modifiedDate, Nullable<int> status, Nullable<bool> isDeleted)
+        { 
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.UpdateProject {id}, {projectSymbol}, {projectName}, {managerProject}, {address}, {fromDate}, {toDate}, {createdDate}, {modifiedDate}, {status}, {isDeleted}");
+        }
+        public int DeleteProject1(string id)
+        {
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.DeleteProject1 {id}");
+        }
+        public int DeleteProject(Nullable<int> id)
+        {
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.DeleteProject {id}");
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -196,6 +226,8 @@
             modelBuilder.Entity<ChildrenOfDevice_Result>().HasNoKey();
             modelBuilder.Entity<SearchScheduleTest_Result>().HasNoKey();
             modelBuilder.Entity<StatisticalDevice_Result>().HasNoKey();
+            modelBuilder.Entity<DeviceOfProjectAll_Result>().HasNoKey();
+            modelBuilder.Entity<StatisticProject_Result>().HasNoKey();
             modelBuilder.Entity<OderCode>().HasNoKey();
             modelBuilder.Entity<Credential>(entity =>
             {
