@@ -8,3 +8,5 @@ global using System.ComponentModel.DataAnnotations;
 global using Microsoft.AspNetCore.Identity;
 global using QLTAISAN.Models;
 global using Libs.DTOs;
+global using System.Drawing;
+global using System.Drawing.Text;

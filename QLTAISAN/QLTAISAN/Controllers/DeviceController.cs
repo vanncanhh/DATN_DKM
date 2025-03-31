@@ -1,8 +1,18 @@
-﻿namespace QLTAISAN.Controllers
+﻿using Libs.ViewModels;
+using OfficeOpenXml;
+using System.Text.RegularExpressions;
+
+namespace QLTAISAN.Controllers
 {
     public class DeviceController : Controller
     {
-        QuanLyTaiSanCtyDATNContext data = new QuanLyTaiSanCtyDATNContext();
+        QuanLyTaiSanCtyDATNContext data;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public DeviceController(QuanLyTaiSanCtyDATNContext _data, IWebHostEnvironment webHostEnvironment)
+        {
+            _webHostEnvironment = webHostEnvironment;
+            data = _data;
+        }
         public ActionResult Device()
         {
             ViewData["TypeOfDevice"] = data.DeviceTypes.ToList();
@@ -321,6 +331,669 @@
             }
 
             return RedirectToAction("EditDevice", new { id = model.Id });
+        }
+        public ActionResult ReturnDeviceInProject(int Idpr, int Iddv)
+        {
+            bool result = true;
+            var check = 0;
+            check += data.DeviceDevices.Where(x => x.DeviceCodeChildren == Iddv & x.IsDeleted == false & x.TypeComponant == 1).Count();
+            if (check > 0)
+            {
+                result = false;
+            }
+            else
+            {
+
+                int checkdele = data.ReturnDeviceOfProject(Idpr, Iddv, "");
+                if (checkdele > 0)
+                    result = true;
+            }
+            return Json(result);
+        }
+        [HttpPost]
+        public JsonResult ReturnDeviceProject(string Id)
+        {
+
+            bool result = true;
+            var lstId = Id.Split(',');
+            var check = 0;
+            for (int i = 0; i < lstId.Length; i++)
+            {
+                var IdP = Convert.ToInt32(lstId[i]);
+                check += data.DeviceDevices.Where(x => x.DeviceCodeChildren == IdP & x.IsDeleted == false & x.TypeComponant == 1).Count();
+            }
+            if (check > 0)
+            {
+                result = false;
+            }
+            else
+            {
+                for (int i = 0; i < lstId.Length; i++)
+                {
+                    var IdP = Convert.ToInt32(lstId[i]);
+                    var lstComponant = data.DeviceDevices.Where(x => x.DeviceCodeParents == IdP & x.IsDeleted == false & x.TypeComponant == 1).Select(x => x.DeviceCodeChildren).ToList();
+                    foreach (var item in lstComponant)
+                    {
+                        data.ReturnDeviceProject(Convert.ToInt32(item));
+                    }
+                }
+                for (int i = 0; i < lstId.Length; i++)
+                {
+                    if (!lstId[i].Equals(""))
+                        data.ReturnDeviceProject(Convert.ToInt32(lstId[i]));
+                }
+                result = true;
+            }
+            return Json(result);
+        }
+        [HttpPost]
+        public JsonResult AddSupplier(string Name, string Email, string PhoneNumber, string Address, string Support)
+        {
+            data.AddSupplier(Name, Email, PhoneNumber, Address, Support);
+            bool result = true;
+            return Json(result);
+        }
+        [HttpPost]
+        public JsonResult AddEmployees(string UserName, string FullName, string Email, string PhoneNumber, string Address, string Department, string Position)
+        {
+            data.AddUser(UserName, null, FullName, Email, PhoneNumber, Address, Department, Position, null, 0);
+            bool result = true;
+            return Json(result);
+        }
+        [HttpPost]
+        public JsonResult AddRepairDevice(int Iddv, int user, string Notesrepair)
+        {
+            if (user == 0)
+            {
+                data.AddRepairDetails(Iddv, DateTime.Now, null, null, null, null, null, Notesrepair);
+            }
+            else { data.AddRepairDetails(Iddv, DateTime.Now, null, null, null, null, user, Notesrepair); }
+            bool result = true;
+            return Json(result);
+        }
+        [HttpPost]
+        public JsonResult AddDeviceType(string TypeName, string TypeSymbol, string Notes)
+        {
+            bool result = false;
+            var listdvt = data.DeviceTypes.Where(x => x.TypeSymbol.Trim() == TypeSymbol.Trim()).ToList();
+            if (listdvt.Count() > 0) { result = false; }
+            else
+            {
+                data.AddDeviceType(TypeName, TypeSymbol, Notes);
+                result = true;
+            }
+            return Json(result);
+        }
+
+        public JsonResult AddDeviceProject1(string Id, int PJ)
+        {
+            bool result = true;
+            var IdParent = Id.Split(',');
+            var check = 0;
+            for (int i = 0; i < IdParent.Length; i++)
+            {
+                var IdP = Convert.ToInt32(IdParent[i]);
+                //Check thiết bị xem có phải là thiết bị con nằm trong
+                check += data.DeviceDevices.Where(x => x.DeviceCodeChildren == IdP & x.IsDeleted == false & x.TypeComponant == 1).Count();
+            }
+            if (check > 0)
+            {
+                result = false;
+            }
+            else
+            {
+                // Lấy danh sách thiết bị con từ danh sách thiết bị cha
+                for (int i = 0; i < IdParent.Length; i++)
+                {
+                    var IdP = Convert.ToInt32(IdParent[i]);
+                    var lstComponant = data.DeviceDevices.Where(x => x.DeviceCodeParents == IdP & x.IsDeleted == false & x.TypeComponant == 1).Select(x => x.DeviceCodeChildren).ToList();
+                    foreach (var item in lstComponant)
+                    {
+                        // Thêm thiết bị con vào DeviceOfProject
+                        data.AddDeviceOfProject(PJ, Convert.ToInt32(item), "");
+                    }
+                }
+                //Thêm thiết bị cha vào DeviceOfProject
+                var lstId = Id.Split(',');
+                for (int i = 0; i < lstId.Length; i++)
+                {
+                    if (!lstId[i].Equals(""))
+                        data.AddDeviceOfProject(PJ, Convert.ToInt32(lstId[i]), "");
+                }
+                result = true;
+            }
+            return Json(result);
+        }
+        [HttpGet]
+        public JsonResult Searchdv(int TypeOfDevice, int Status, int Guarantee, int Project, string DeviceCode)
+        {
+            data.ChangeTracker.QueryTrackingBehavior = Microsoft.EntityFrameworkCore.QueryTrackingBehavior.NoTracking;
+            var charts = data.SearchDevice(Status, TypeOfDevice, Guarantee, Project, DeviceCode).ToList();
+            var model = charts.ToList();
+            return Json(new
+            {
+                data = model,
+            });
+        }
+        [HttpGet]
+        public JsonResult AddDeviceCode(int TypeOfDevice)
+        {
+            data.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+            var type = data.OderCode(TypeOfDevice).Single().Code;
+            var TypeSymbol = data.DeviceTypes.Where(x => x.Id == TypeOfDevice).Single().TypeSymbol.Trim() + type.ToString().PadLeft(5, '0');
+            var charts = data.Devices.Where(x => x.DeviceCode == TypeSymbol).FirstOrDefault();
+            if (charts == null)
+            {
+            }
+            else
+            {
+                type = data.OderCode(TypeOfDevice).Single().Code;
+                TypeSymbol = data.DeviceTypes.Where(x => x.Id == TypeOfDevice).Single().TypeSymbol.Trim() + type.ToString().PadLeft(5, '0');
+            }
+            return Json(new
+            {
+                data = TypeSymbol,
+            });
+        }
+        public JsonResult AddDeviceProject(int Iddv, int Idpj)
+        {
+            bool result = true;
+            var Check = data.DeviceDevices.Where(x => x.DeviceCodeChildren == Iddv & x.IsDeleted == false & x.TypeComponant == 1).Select(x => x.DeviceCodeChildren).Count();
+            if (Check > 0)
+            {
+                result = false;
+            }
+            else
+            {
+                var lstComponant = data.DeviceDevices.Where(x => x.DeviceCodeParents == Iddv & x.IsDeleted == false & x.TypeComponant == 1).Select(x => x.DeviceCodeChildren).ToList();
+                foreach (var item in lstComponant)
+                {
+                    data.AddDeviceOfProject(Idpj, item.Value, "");
+                }
+                int checkdele = data.AddDeviceOfProject(Idpj, Iddv, "");
+                result = true;
+            }
+            return Json(result);
+        }
+        public JsonResult LiquidationDevice(string Id)
+        {
+            bool result = true;
+            var check = 0;
+            var IdParent = Id.Split(',');
+            for (int i = 0; i < IdParent.Length; i++)
+            {
+                // Kiểm tra có tồn tại thiết bị con nằm trong thiết bị cha
+                var IdCom = Convert.ToInt32(IdParent[i]);
+                check += data.DeviceDevices.Where(x => x.DeviceCodeChildren == IdCom & x.IsDeleted == false & x.TypeComponant == 1).Select(x => x.DeviceCodeChildren).Count();
+            }
+            if (check > 0)
+            {
+                result = false;
+            }
+            else
+            {
+                // Lấy danh sách thiết bị con trong  từ danh sách thiết bị cha
+                for (int i = 0; i < IdParent.Length; i++)
+                {
+                    var IdP = Convert.ToInt32(IdParent[i]);
+                    var lstComponant = data.DeviceDevices.Where(x => x.DeviceCodeParents == IdP & x.IsDeleted == false & x.TypeComponant == 1).Select(x => x.DeviceCodeChildren).ToList();
+                    foreach (var item in lstComponant)
+                    {
+                        string v = "," + item + ",";
+                        // Thanh lý thiết bị con trong theo thiết bị cha
+                        data.LiquidationDevice(v);
+                    }
+                    //Khi thanh lý TB cha thì  Gỡ thiết bị con ngoài khỏi thiết bị cha
+                    var lstComponant_out = data.DeviceDevices.Where(x => x.DeviceCodeParents == IdP & x.IsDeleted == false & x.TypeComponant == 0).Select(x => x.DeviceCodeChildren).ToList();
+                    {
+                        foreach (var item in lstComponant_out)
+                        {
+                            data.DeleteDeviceOfDevice(IdP, item, "Thiết bị cha bị thanh lý");
+                        }
+                    }
+                    // KHi thanh lý tb con ở ngoài thì xóa mối quan hệ cha con của thiết bị vs cha còn hoạt động
+                    var lstParent = data.DeviceDevices.Where(x => x.DeviceCodeChildren == IdP & x.IsDeleted == false & x.TypeComponant == 0).Select(x => x.DeviceCodeParents).ToList();
+                    {
+                        foreach (var item in lstParent)
+                        {
+                            data.DeleteDeviceOfDevice(item, IdP, "Thiết bị con bị thanh lý");
+                        }
+                    }
+                }
+                // Thanh lý thiết bị cha
+                string a = "," + Id + ",";
+                int checkdele = data.LiquidationDevice(a);
+                if (checkdele > 0)
+                    result = true;
+            }
+            return Json(result);
+        }
+
+        public JsonResult DeleteDevice(string Id)
+        {
+            bool result = true;
+            var check = 0;
+            var IdParent = Id.Split(',');
+            for (int i = 0; i < IdParent.Length; i++)
+            {
+                // Kiểm tra có tồn tại thiết bị con nằm trong thiết bị cha
+                var IdCom = Convert.ToInt32(IdParent[i]);
+                check += data.DeviceDevices.Where(x => x.DeviceCodeChildren == IdCom & x.IsDeleted == false & x.TypeComponant == 1).Select(x => x.DeviceCodeChildren).Count();
+            }
+            if (check > 0)
+            {
+                result = false;
+            }
+            else
+            {
+                // Lấy danh sách thiết bị con từ danh sách thiết bị cha
+                for (int i = 0; i < IdParent.Length; i++)
+                {
+                    var IdP = Convert.ToInt32(IdParent[i]);
+                    var lstComponant = data.DeviceDevices.Where(x => x.DeviceCodeParents == IdP & x.IsDeleted == false & x.TypeComponant == 1).Select(x => x.DeviceCodeChildren).ToList();
+                    foreach (var item in lstComponant)
+                    {
+                        string v = "," + item + ",";
+                        // Thanh lý thiết bị con theo thiết bị cha
+                        data.DeleteDevice1(v);
+                    }
+                    //Khi xóa TB cha thì  Gỡ thiết bị con ngoài khỏi thiết bị cha
+                    var lstComponant_out = data.DeviceDevices.Where(x => x.DeviceCodeParents == IdP & x.IsDeleted == false & x.TypeComponant == 0).Select(x => x.DeviceCodeChildren).ToList();
+                    {
+                        foreach (var item in lstComponant_out)
+                        {
+                            data.DeleteDeviceOfDevice(IdP, item, "Thiết bị cha bị xóa");
+                        }
+                    }
+                    // KHi xóa tb con ở ngoài thì xóa mối quan hệ cha con của thiết bị cha còn hoạt động
+                    var lstParent = data.DeviceDevices.Where(x => x.DeviceCodeChildren == IdP & x.IsDeleted == false & x.TypeComponant == 0).Select(x => x.DeviceCodeParents).ToList();
+                    {
+                        foreach (var item in lstParent)
+                        {
+                            data.DeleteDeviceOfDevice(item, IdP, "Thiết bị con bị xóa");
+                        }
+                    }
+                }
+                string a = "," + Id + ",";
+                int checkdele = data.DeleteDevice1(a);
+                if (checkdele > 0)
+                    result = true;
+            }
+            return Json(result);
+        }
+        [HttpPost]
+        public JsonResult GenerateBarCode(string barcode)
+        {
+            string src = "";
+
+            using (Bitmap bitMap = new Bitmap(barcode.Length * 46, 80))
+            {
+                using (Graphics graphics = Graphics.FromImage(bitMap))
+                {
+                    // Load font from file
+                    PrivateFontCollection pfc = new PrivateFontCollection();
+                    string path = Path.Combine(_webHostEnvironment.WebRootPath, "App_Data", "IDAutomationHC39XL.ttf"); // Change to correct path
+                    pfc.AddFontFile(path);
+
+                    Font oFont = new Font(pfc.Families[0], 14, FontStyle.Regular);
+                    PointF point = new PointF(2f, 2f);
+                    SolidBrush blackBrush = new SolidBrush(Color.Black);
+                    SolidBrush whiteBrush = new SolidBrush(Color.White);
+
+                    graphics.FillRectangle(whiteBrush, 0, 0, bitMap.Width, bitMap.Height);
+                    graphics.DrawString("*" + barcode + "*", oFont, blackBrush, point);
+                }
+
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    bitMap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                    byte[] byteImage = ms.ToArray();
+                    src = "data:image/png;base64," + Convert.ToBase64String(byteImage);
+                }
+            }
+
+            return Json(new
+            {
+                data = src
+            });
+        }
+        [HttpPost]
+        public JsonResult GenerateBarCodeDevice(string dvcode, string dvid)
+        {
+            List<int> idList = dvid.Split(',')
+                .Where(id => !string.IsNullOrEmpty(id))
+                .Select(id => Convert.ToInt32(id))
+                .ToList();
+            var Listdv = data.SearchDevice(null, null, null, null, null)
+                .Where(t => idList.Contains(t.Id))
+                .ToList();
+            List<string> list = new List<string>();
+            var lstdv = dvcode.Split(',');
+
+            foreach (var code in lstdv)
+            {
+                string barcodeImagePath = SaveBarcodeImage(code);
+                list.Add(barcodeImagePath);
+            }
+
+            var result = new { list, Listdv };
+            return Json(result); // Trả về kết quả dưới dạng JSON
+        }
+
+        private string SaveBarcodeImage(string barcode)
+        {
+            string fileName = $"{barcode}.png";  // Tạo tên tệp hình ảnh
+            string filePath = Path.Combine(_webHostEnvironment.WebRootPath, "barcodes", fileName);
+            using (Bitmap bitMap = new Bitmap(barcode.Length * 46, 80))
+            {
+                using (Graphics graphics = Graphics.FromImage(bitMap))
+                {
+                    // Tải font từ file
+                    PrivateFontCollection pfc = new PrivateFontCollection();
+                    string path = Path.Combine(_webHostEnvironment.WebRootPath, "App_Data", "IDAutomationHC39XL.ttf");  // Đảm bảo font có sẵn trong thư mục wwwroot/App_Data
+                    pfc.AddFontFile(path);
+
+                    Font oFont = new Font(pfc.Families[0], 14, FontStyle.Regular);
+                    PointF point = new PointF(2f, 2f);
+                    SolidBrush blackBrush = new SolidBrush(Color.Black);
+                    SolidBrush whiteBrush = new SolidBrush(Color.White);
+
+                    graphics.FillRectangle(whiteBrush, 0, 0, bitMap.Width, bitMap.Height);
+                    graphics.DrawString("*" + barcode + "*", oFont, blackBrush, point);
+                }
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath));  // Tạo thư mục nếu chưa có
+                bitMap.Save(filePath, System.Drawing.Imaging.ImageFormat.Png);
+            }
+            return "/barcodes/" + fileName;
+        }
+
+        public static string HtmlToPlainText(string html)
+        {
+            const string tagWhiteSpace = @"(>|$)(\W|\n|\r)+<";//matches one or more (white space or line breaks) between '>' and '<'
+            const string stripFormatting = @"<[^>]*(>|$)";//match any character between '<' and '>', even when end tag is missing
+            const string lineBreak = @"<(br|BR)\s{0,1}\/{0,1}>";//matches: <br>,<br/>,<br />,<BR>,<BR/>,<BR />
+            var lineBreakRegex = new Regex(lineBreak, RegexOptions.Multiline);
+            var stripFormattingRegex = new Regex(stripFormatting, RegexOptions.Multiline);
+            var tagWhiteSpaceRegex = new Regex(tagWhiteSpace, RegexOptions.Multiline);
+            var text = html;
+            //Decode html specific characters
+            text = System.Net.WebUtility.HtmlDecode(text);
+            //Remove tag whitespace/line breaks
+            text = tagWhiteSpaceRegex.Replace(text, "><");
+            //Replace <br /> with line breaks
+            text = lineBreakRegex.Replace(text, Environment.NewLine);
+            //Strip formatting
+            text = stripFormattingRegex.Replace(text, string.Empty);
+            return text;
+        }
+        public IActionResult ExportToExcel(int? TypeOfDevice, int Status, int Guarantee, int? Project, string DeviceCode)
+        {
+            if (Project == 0) { Project = null; }
+            if (TypeOfDevice == 0) { TypeOfDevice = null; }
+
+            // Lấy dữ liệu từ cơ sở dữ liệu
+            var charts = data.SearchDevice(Status, TypeOfDevice, Guarantee, Project, DeviceCode)
+                .Select(i => new { i.DeviceCode, i.DeviceName, i.TypeName, i.Configuration, i.PriceOne, i.FullName, i.Name, i.ProjectSymbol, i.Status })
+                .Where(x => x.Status != 2)
+                .ToList();
+
+            var model = charts.ToList();
+
+            // Chuyển đổi HTML thành văn bản thuần túy
+            List<NewConfig> numbers = new List<NewConfig>();
+            foreach (var item in model)
+            {
+                string plainTextConfig = HtmlToPlainText(item.Configuration);
+                numbers.Add(new NewConfig
+                {
+                    DeviceCode = item.DeviceCode,
+                    DeviceName = item.DeviceName,
+                    TypeName = item.TypeName,
+                    Configuration = plainTextConfig,
+                    PriceOne = item.PriceOne,
+                    FullName = item.FullName,
+                    Name = item.Name,
+                    ProjectSymbol = item.ProjectSymbol,
+                    Status = item.Status
+                });
+            }
+
+            // Tạo file Excel bằng EPPlus
+            using (var package = new ExcelPackage())
+            {
+                // Tạo worksheet
+                var worksheet = package.Workbook.Worksheets.Add("DeviceDetails");
+
+                // Tạo tiêu đề cột
+                worksheet.Cells[1, 1].Value = "Device Code";
+                worksheet.Cells[1, 2].Value = "Device Name";
+                worksheet.Cells[1, 3].Value = "Type Name";
+                worksheet.Cells[1, 4].Value = "Configuration";
+                worksheet.Cells[1, 5].Value = "Price One";
+                worksheet.Cells[1, 6].Value = "Full Name";
+                worksheet.Cells[1, 7].Value = "Name";
+                worksheet.Cells[1, 8].Value = "Project Symbol";
+                worksheet.Cells[1, 9].Value = "Status";
+
+                // Điền dữ liệu vào các hàng
+                for (int i = 0; i < numbers.Count; i++)
+                {
+                    var item = numbers[i];
+                    worksheet.Cells[i + 2, 1].Value = item.DeviceCode;
+                    worksheet.Cells[i + 2, 2].Value = item.DeviceName;
+                    worksheet.Cells[i + 2, 3].Value = item.TypeName;
+                    worksheet.Cells[i + 2, 4].Value = item.Configuration;
+                    worksheet.Cells[i + 2, 5].Value = item.PriceOne;
+                    worksheet.Cells[i + 2, 6].Value = item.FullName;
+                    worksheet.Cells[i + 2, 7].Value = item.Name;
+                    worksheet.Cells[i + 2, 8].Value = item.ProjectSymbol;
+                    worksheet.Cells[i + 2, 9].Value = item.Status;
+                }
+
+                // Thiết lập kiểu file Excel và trả về file
+                var fileName = $"DeviceDetails_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+                var fileBytes = package.GetAsByteArray();
+
+                // Trả về file Excel cho client tải về
+                return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+            }
+        }
+        public ActionResult StatisticalDevice()
+        {
+            ViewData["TypeOfDevice"] = data.DeviceTypes.ToList();
+            var lstdv = data.StatisticalDevice().ToList();
+            return View(lstdv);
+        }
+        // [HttpPost]
+        public ActionResult SearchStatisticalDevice(FormCollection collection)
+        {
+            ViewData["TypeOfDevice"] = data.DeviceTypes.ToList();
+            int? Status = Convert.ToInt32(collection["Status"]);
+            int? TypeOfDevice = Convert.ToInt32(collection["TypeOfDevice"]);
+            var charts = data.StatisticalDevice().ToList();
+            if (Status == -1 & TypeOfDevice != 0) { charts = data.StatisticalDevice().Where(x => x.TypeOfDevice == TypeOfDevice).ToList(); }
+            else if (TypeOfDevice == 0 & Status != -1) { charts = data.StatisticalDevice().Where(x => x.Status == Status).ToList(); }
+            else if (Status != -1 & TypeOfDevice != 0) { charts = data.StatisticalDevice().Where(x => x.Status == Status & x.TypeOfDevice == TypeOfDevice).ToList(); }
+            ViewBag.status = Status;
+            ViewBag.type = TypeOfDevice;
+            var model = charts.ToList();
+            return View("StatisticalDevice", model);
+        }
+        public IActionResult ExportStatisticalDevice()
+        {
+            data.ChangeTracker.QueryTrackingBehavior = Microsoft.EntityFrameworkCore.QueryTrackingBehavior.NoTracking;
+
+            // Lấy dữ liệu từ cơ sở dữ liệu
+            var charts = data.StatisticalDevice()
+                .Select(i => new
+                {
+                    i.DeviceCode,
+                    i.DeviceName,
+                    i.PriceOne,
+                    i.TimeUse,
+                    i.TimeRepair,
+                    i.SumPrice
+                })
+                .ToList();
+
+            // Tạo file Excel bằng EPPlus
+            using (var package = new ExcelPackage())
+            {
+                // Tạo worksheet trong file Excel
+                var worksheet = package.Workbook.Worksheets.Add("DeviceStatistics");
+
+                // Tạo tiêu đề cột
+                worksheet.Cells[1, 1].Value = "Device Code";
+                worksheet.Cells[1, 2].Value = "Device Name";
+                worksheet.Cells[1, 3].Value = "Price One";
+                worksheet.Cells[1, 4].Value = "Time Use";
+                worksheet.Cells[1, 5].Value = "Time Repair";
+                worksheet.Cells[1, 6].Value = "Sum Price";
+
+                // Điền dữ liệu vào các hàng
+                for (int i = 0; i < charts.Count; i++)
+                {
+                    var item = charts[i];
+                    worksheet.Cells[i + 2, 1].Value = item.DeviceCode;
+                    worksheet.Cells[i + 2, 2].Value = item.DeviceName;
+                    worksheet.Cells[i + 2, 3].Value = item.PriceOne;
+                    worksheet.Cells[i + 2, 4].Value = item.TimeUse;
+                    worksheet.Cells[i + 2, 5].Value = item.TimeRepair;
+                    worksheet.Cells[i + 2, 6].Value = item.SumPrice;
+                }
+
+                // Thiết lập kiểu file Excel và trả về file cho người dùng
+                var fileName = $"DeviceStatistics_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+                var fileBytes = package.GetAsByteArray();
+
+                return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+            }
+        }
+
+        [HttpGet]
+        public JsonResult GetEmployees(int id)
+        {
+            data.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+            var Employees = data.Users.Find(id);
+            return Json(new
+            {
+                data = Employees,
+            });
+        }
+        [HttpPost]
+        public JsonResult EditEmployees(int Id, string UserName, string FullName, string PhoneNumber, string Email, string Department, string Position, string Address)
+        {
+            bool result = true;
+            data.UpdateUser(Id, UserName, null, FullName, Email, PhoneNumber, Address, Department, Position, null, 0);
+            return Json(result);
+        }
+        public JsonResult AddTypeChidren(int TypeChidren, int TypeParent)
+        {
+            bool result = false;
+            // Check xem đã tồn tại loại Cha-con
+            var listdvt = data.DeviceTypeComponantTypes.Where(x => x.TypeSymbolChildren == TypeChidren && x.TypeSymbolParents == TypeParent).Where(x => x.IsDeleted == false).ToList();
+            if (listdvt.Count() > 0)
+            { result = false; }
+            else
+            {
+                data.AddTypeChidren(TypeChidren, TypeParent, null);
+                result = true;
+            }
+            return Json(result);
+        }
+
+        [HttpPost]
+        public JsonResult SearchDeviceComponant(int TypeChidren)
+        {
+            var lst = data.SearchDevice(null, TypeChidren, null, null, null).Where(x => (x.Status == 0 || x.Status == 1) & x.StatusRepair != 1 & x.ParentId == null).ToList();
+            var result = new { lst };
+            return Json(result);
+        }
+        [HttpPost]
+        public JsonResult AddDeviceOfDevice(string dvChild, int dvParent, int TypeChild, int TypeParent, int Type_TypeCom)
+        {
+            var lstId = dvChild.Split(',');
+            for (int i = 0; i < lstId.Length; i++)
+            {
+                if (!lstId[i].Equals(""))
+                    data.AddDeviceOfDevice(dvParent, Convert.ToInt32(lstId[i]), TypeChild, TypeParent, Type_TypeCom);
+            }
+            bool result = true;
+            return Json(result);
+        }
+        [HttpPost]
+        public JsonResult DeleteDvComponent(int dvChild, int dvParent, string Resons)
+        {
+            data.DeleteDeviceOfDevice(dvParent, dvChild, Resons);
+            bool result = true;
+            return Json(result);
+        }
+        [HttpPost]
+        public JsonResult AddDeviceComponantNew(Com com)
+        {
+            // Xét null tránh bị lỗi kiểu dữ liệu
+            if (com.Config.Trim() == "" || com.Config == null)
+            {
+                com.Config = "";
+            }
+            int? Project = com.Project.Equals(0) ? (int?)null : Convert.ToInt32(com.Project);
+            int? SupplierId = com.SupplierId.Equals(0) ? (int?)null : Convert.ToInt32(com.SupplierId);
+            int? UserId = com.UserId.Equals(0) ? (int?)null : Convert.ToInt32(com.UserId);
+            DateTime? DateOfPurchase = (com.PurchaseDate).ToString().Equals("1/1/0001 12:00:00 AM") ? (DateTime?)null : Convert.ToDateTime(com.PurchaseDate);
+            DateTime? Guarantee = (com.Guarantee).ToString().Equals("1/1/0001 12:00:00 AM") ? (DateTime?)null : Convert.ToDateTime(com.Guarantee);
+            bool result = true;
+            //Thêm thiết bị mới
+            data.AddDevice((com.DeviceCode).Trim(), null, com.Name, com.TypeComponant, null, com.Config, com.Price, com.PurchaseContract, DateOfPurchase, SupplierId, Project, Guarantee, com.Notes, UserId, com.status);
+
+            //Thêm vào bảng cha con
+            var IdChild = data.Devices.Where(x => x.DeviceCode == com.DeviceCode).Single().Id;
+            data.AddDeviceOfDevice(com.IdParent, IdChild, com.TypeComponant, com.TypeParent, com.Type_TypeCom);
+            return Json(result);
+        }
+
+        public ActionResult ManagerTypeParent()
+        {
+            List<Libs.DTOs.TypeComponantOfDevice_Result> numbers = new List<Libs.DTOs.TypeComponantOfDevice_Result>();
+            var lstTypeParent = data.DeviceTypeComponantTypes.Where(x => x.IsDeleted == false).Select(x => x.TypeSymbolParents).Distinct().ToList();
+
+            foreach (var item in lstTypeParent)
+            {
+                if (item.HasValue)
+                {
+                    var Name_Parent = data.TypeComponantOfDevice(item.Value).Select(i => new { i.TypeSymbolParents, i.NameTypeParents }).FirstOrDefault();
+
+                    if (Name_Parent != null)
+                    {
+                        var lstChild = data.TypeComponantOfDevice(item.Value).Where(x => x.IsDeleted == false).ToList();
+                        Array a2 = lstChild.ToArray();
+                        numbers.Add(new Libs.DTOs.TypeComponantOfDevice_Result
+                        {
+                            NameTypeParents = Name_Parent.NameTypeParents,
+                            TypeSymbolParents = Name_Parent.TypeSymbolParents,
+                            numbers = a2
+                        });
+                    }
+                }
+            }
+            ViewData["TypeParentTypeChild"] = numbers;
+            return View();
+            // public Array numbers { get; set; }
+        }
+        public ActionResult DeleteTypeChildOfParent(int idChild, int idParent)
+        {
+            bool result = true;
+            // Check xem còn tồn tại thiết bị con thuộc loại bị xóa không ?
+            int check = data.DeviceDevices.Where(x => x.TypeSymbolChildren == idChild & x.TypeSymbolParents == idParent & x.IsDeleted == false).Count();
+            if (check > 0)
+            {
+                result = false;
+            }
+            else
+            {
+                data.DeleteTypeParentTypeChild(idChild, idParent);
+                result = true;
+            }
+            return Json(result);
         }
     }
 }
