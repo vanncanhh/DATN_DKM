@@ -2,52 +2,58 @@
 {
     public class RoleController : Controller
     {
-        private readonly IRoleService _roleService;
+        QuanLyTaiSanCtyDATNContext data = new QuanLyTaiSanCtyDATNContext();
+        // GET: Role
 
-        public RoleController(IRoleService roleService)
+        [HasCredential(RoleID = "VIEW_GROUP_ROLE")]
+        public ActionResult RoleIndex()
         {
-            _roleService = roleService;
-        }
-
-        // Trang hiển thị danh sách vai trò và nhóm người dùng
-        public async Task<IActionResult> RoleIndex()
-        {
-            ViewData["ListUserGroup"] = await _roleService.GetAllUserGroupsAsync();
-            ViewData["ListRoleForGroup"] = await _roleService.GetAllRolesAsync();
+            ViewData["ListUserGroup"] = data.UserGroups.ToList();
+            ViewData["ListRoleForGroup"] = data.Roles.ToList();
             return View();
         }
 
-        // Thêm nhóm người dùng
         [HttpPost]
-        public async Task<IActionResult> AddUserGroup(string id, string name)
+        
+        [HasCredential(RoleID = "ADD_GROUP_ROLE")]
+        public ActionResult AddUserGroup(string ID, string Name)
         {
-            var result = await _roleService.AddUserGroupAsync(id, name);
-            return Json(result);
+            var dao = new UserDao();
+            bool result = dao.AddUserGroup(ID.Trim(), Name.Trim());
+            return Json(result );
         }
 
-        // Xóa nhóm người dùng
         [HttpPost]
-        public async Task<IActionResult> ConfirmDelete(string id)
+        [HasCredential(RoleID = "DELETE_GROUP_ROLE")]
+        public ActionResult ConfirmDelete(string ID)
         {
-            var result = await _roleService.DeleteUserGroupAsync(id);
-            return Json(result);
+            var dao = new UserDao();
+            bool result = dao.DeleteUserGroup(ID.Trim());
+            return Json(result );
         }
 
-        // Lấy vai trò cho nhóm người dùng
         [HttpPost]
-        public async Task<IActionResult> GetRoleForGroup(string groupId)
+        [HasCredential(RoleID = "ADD_ROLE_FOR_GROUP")]
+        
+        public ActionResult GetRoleForeGroup(string GroupID)
         {
-            var roles = await _roleService.GetRolesForGroupAsync(groupId);
-            var result = new { lstRole = roles };
-            return Json(result);
+            //  var dao = new UserDao();
+            var lstRole = data.Credentials.Where(x => x.UserGroupId == GroupID).Select(x => x.RoleId).ToList();
+            // bool result = dao.DeleteUserGroup(RoleID.Trim());
+            // bool Result = true; 
+            var result = new { lstRole };
+            return Json(result );
         }
 
-        // Thêm vai trò cho nhóm người dùng
         [HttpPost]
-        public async Task<IActionResult> AddRoleForGroup(string roleId, string groupId)
+        
+        [HasCredential(RoleID = "ADD_ROLE_FOR_GROUP")]
+        public ActionResult AddRoleForGroup(string RoleId, string GroupId)
         {
-            var result = await _roleService.AddRoleForGroupAsync(roleId, groupId);
-            return Json(result);
+            data.DeleteAllRole(GroupId);
+            var dao = new UserDao();
+            bool result = dao.AddRoleForGroup(RoleId, GroupId.Trim());
+            return Json(result );
         }
     }
 }

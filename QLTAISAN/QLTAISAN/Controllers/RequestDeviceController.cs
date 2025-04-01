@@ -2,66 +2,104 @@
 {
     public class RequestDeviceController : Controller
     {
-        private readonly IRequestDeviceService _requestDeviceService;
+        QuanLyTaiSanCtyDATNContext Ql = new QuanLyTaiSanCtyDATNContext();
 
-        public RequestDeviceController(IRequestDeviceService requestDeviceService)
+        [HasCredential(RoleID = "VIEW_REQUEST_DEVICE")]
+        public ActionResult RequestDevice()
         {
-            _requestDeviceService = requestDeviceService;
-        }
-
-        public async Task<IActionResult> RequestDevice()
-        {
-            var users = await _requestDeviceService.GetAllRequestDevicesAsync();
-            ViewData["User"] = users;
-            ViewData["RequestDevices"] = users;
-            return View(users);
+            ViewData["User"] = Ql.Users.ToList();
+            ViewData["RequestDevices"] = Ql.RequestDevices.ToList();
+            var x = Ql.RequestDevices.ToList();
+            var lstRequestDevices = Ql.SearchRequestDeviceNew(null, null).ToList();
+            return View(lstRequestDevices);
         }
 
         [HttpPost]
-        public async Task<IActionResult> SearchRequestDevices(int? status)
+        public ActionResult SeachRequestDevices(FormCollection colection, RequestDevice RequestDevice)
         {
-            var requestDevices = await _requestDeviceService.SearchRequestDevicesAsync(status);
-            ViewBag.Status = status;
-            return View("RequestDevice", requestDevices);
+            ViewData["User"] = Ql.Users.ToList();
+            ViewData["RequestDevices"] = Ql.RequestDevices.ToList();
+            int? Status = colection["Status"].Equals("") ? (int?)null : Convert.ToInt32(colection["Status"]);
+            var lstRequestDevices = Ql.SearchRequestDeviceNew(Status, false).ToList();
+            var ViewRequestDevices = lstRequestDevices;
+            ViewBag.Status = Status;
+            return View("RequestDevice", ViewRequestDevices);
         }
 
-        public async Task<IActionResult> AddRequestDevice()
+        [HasCredential(RoleID = "ADD_REQUEST_DEVICE")]
+        public ActionResult AddRequestDevice()
         {
+            ViewData["User"] = Ql.Users.Where(x => x.Status != 1 && x.IsDeleted != true).ToList();
+            ViewData["DeviceTypes"] = Ql.DeviceTypes.ToList();
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddRequestDevice(RequestDevice requestDevice)
+        [HasCredential(RoleID = "ADD_REQUEST_DEVICE")]
+        public ActionResult AddRequestDevice(FormCollection colection, RequestDevice RequestDevice)
         {
-            await _requestDeviceService.AddRequestDeviceAsync(requestDevice);
-            return RedirectToAction("RequestDevice");
+            int? UserRequest = colection["UserRequest"].Equals("") ? (int?)null : Convert.ToInt32(colection["UserRequest"]);
+            DateTime? DateOfRequest = colection["DateOfRequest"].Equals("") ? (DateTime?)null : Convert.ToDateTime(colection["DateOfRequest"]);
+            DateTime? DateOfUse = colection["DateOfUse"].Equals("") ? (DateTime?)null : Convert.ToDateTime(colection["DateOfUse"]);
+            String DeviceName = colection["DeviceName"];
+            int? TypeOfDevice = colection["TypeOfDevice"].Equals("") ? (int?)null : Convert.ToInt32(colection["TypeOfDevice"]);
+            String Configuration = colection["Configuration"];
+            String Notes = colection["Notes"];
+            int? Status = colection["Status"].Equals("-1") ? (int?)null : Convert.ToInt32(colection["Status"]);
+            int? NumDevice = colection["NumDevice"].Equals("") ? (int?)null : Convert.ToInt32(colection["NumDevice"]);
+            Ql.AddRequestDevice(UserRequest, DateOfRequest, DateOfUse, DeviceName, TypeOfDevice, Configuration, Notes, Status, NumDevice, null);
+            return RedirectToAction("RequestDevice", "RequestDevice");
         }
 
-        public async Task<IActionResult> EditRequestDevice(int id)
+        [HasCredential(RoleID = "EDIT_REQUEST_DEVICE")]
+        public ActionResult EditRequestDevice(int Id)
         {
-            var requestDevice = await _requestDeviceService.GetRequestDeviceByIdAsync(id);
-            return View(requestDevice);
+            ViewData["DeviceTypes"] = Ql.DeviceTypes.ToList();
+            ViewData["User"] = Ql.Users.Where(x => x.Status != 1 && x.IsDeleted != true).ToList();
+            return View(Ql.RequestDevices.Find(Id));
         }
-
         [HttpPost]
-        public async Task<IActionResult> EditRequestDevice(RequestDevice requestDevice)
+        [HasCredential(RoleID = "EDIT_REQUEST_DEVICE")]
+        public ActionResult EditRequestDevice(FormCollection colection, RequestDevice RequestDevice)
         {
-            await _requestDeviceService.UpdateRequestDeviceAsync(requestDevice);
-            return RedirectToAction("RequestDevice");
+            int? IdRequest = colection["IdRequest"].Equals("-1") ? (int?)null : Convert.ToInt32(colection["IdRequest"]);
+            int? UserRequest = colection["UserRequest"].Equals("0") ? (int?)null : Convert.ToInt32(colection["UserRequest"]);
+            DateTime? DateOfRequest = colection["DateOfRequest"].Equals("") ? (DateTime?)null : Convert.ToDateTime(colection["DateOfRequest"]);
+            DateTime? DateOfUse = colection["DateOfUse"].Equals("") ? (DateTime?)null : Convert.ToDateTime(colection["DateOfUse"]);
+            String DeviceName = colection["DeviceName"];
+            int? TypeOfDevice = colection["TypeOfDevice"].Equals("0") ? (int?)null : Convert.ToInt32(colection["TypeOfDevice"]);
+            String Configuration = colection["Configuration"];
+            String Notes = colection["Notes"];
+            int? Status = colection["Status"].Equals("") ? (int?)null : Convert.ToInt32(colection["Status"]);
+            bool? Approved = Convert.ToBoolean(colection["Approved"]);
+            int? NumDevice = colection["NumDevice"].Equals("") ? (int?)null : Convert.ToInt32(colection["NumDevice"]);
+            String NoteProcess = colection["NoteProcess"];
+            String NoteReasonRefuse = colection["NoteReasonRefuse"];
+            String NameUserApproved = colection["NameUserApproved"];
+            Ql.UpdateRequestDevice(IdRequest, UserRequest, DateOfRequest, DateOfUse, DeviceName, TypeOfDevice, Configuration, Notes, Approved, null, Status, NumDevice, NoteProcess, NoteReasonRefuse, NameUserApproved);
+            ViewData["DeviceTypes"] = Ql.DeviceTypes.ToList();
+            ViewData["User"] = Ql.Users.Where(x => x.Status != 1 && x.IsDeleted != true).ToList();
+            return View(Ql.RequestDevices.Find(IdRequest));
+
         }
 
-        [HttpPost]
-        public async Task<JsonResult> DeleteRequestDevice(string id)
+        [HasCredential(RoleID = "DELETE_REQUEST_DEVICE")]
+        public JsonResult DeleteRequestDevice(string Id)
         {
-            var result = await _requestDeviceService.DeleteRequestDeviceAsync(id);
-            return Json(new { success = result });
+            string a = "," + Id + ",";
+            bool result = false;
+            int checkdele = Ql.DeleteRequestDevice(a);
+            if (checkdele > 0)
+                result = true;
+            return Json(result);
         }
-
         [HttpPost]
-        public async Task<JsonResult> AddDeviceType(string typeName, string typeSymbol, string notes)
+        [HasCredential(RoleID = "ADD_DEVICE_TYPE")]
+        public JsonResult AddDeviceType(string TypeName, string TypeSymbol, string Notes)
         {
-            var result = await _requestDeviceService.AddDeviceTypeAsync(typeName, typeSymbol, notes);
-            return Json(new { success = result });
+            Ql.AddDeviceType(TypeName, TypeSymbol, Notes);
+            bool result = true;
+            return Json(result);
         }
     }
 }

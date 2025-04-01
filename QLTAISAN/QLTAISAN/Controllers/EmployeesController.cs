@@ -2,83 +2,120 @@
 {
     public class EmployeesController : Controller
     {
-        private readonly IEmployeeService _employeeService;
+        QuanLyTaiSanCtyDATNContext data = new QuanLyTaiSanCtyDATNContext();
 
-        public EmployeesController(IEmployeeService employeeService)
+        public ActionResult UserManagement()
         {
-            _employeeService = employeeService;
+            var lstUser = data.SearchUser(null).AsEnumerable().ToList();
+            return View(lstUser);
         }
-
-        public async Task<IActionResult> UserManagement()
-        {
-            var users = await _employeeService.GetAllUsersAsync();
-            return View(users);
-        }
-
         [HttpPost]
-        public async Task<IActionResult> SearchUser(int status)
+        public ActionResult SearchUser(FormCollection collection)
         {
-            var users = await _employeeService.SearchUsersAsync(status);
-            ViewBag.Status = status;
-            return View("UserManagement", users);
+            int Status = Convert.ToInt32(collection["Status"]);
+            ViewBag.status = Status;
+            var charts = data.SearchUser(Status).AsEnumerable().ToList();
+            var model = charts.ToList();
+            return View("UserManagement", model);
         }
 
-        public IActionResult CreateUser()
+        public ActionResult CreateUser()
         {
+            ViewData["Department"] = data.ProjectDkcs.Where(x => x.Status != 2 && x.IsDeleted == false).ToList();
             return View();
         }
-
         [HttpPost]
-        public async Task<IActionResult> CreateUser(User user)
+        public ActionResult CreateUser(FormCollection collection)
         {
-            await _employeeService.AddUserAsync(user);
-            return RedirectToAction("UserManagement");
+            string UserName = collection["UserName"];
+            string FullName = collection["FullName"];
+            string Email = collection["Email"];
+            string PhoneNumber = collection["PhoneNumber"];
+            string Address = collection["Address"];
+            string Department = collection["Department"];
+            string Position = collection["Position"];
+            data.AddUser(UserName, null, FullName, Email, PhoneNumber, Address, Department, Position, null, 0);
+            return RedirectToAction("UserManagement", "Employees");
         }
 
-        public async Task<IActionResult> DetailUser(int id)
+        public ActionResult DetailUser(int Id)
         {
-            var user = await _employeeService.GetUserByIdAsync(id);
-            return View(user);
-        }
+            ViewData["Department"] = data.ProjectDkcs.Where(x => x.Status != 2 && x.IsDeleted == false).ToList();
+            var ID = data.Users.Where(x => x.Id == Id).Select(x => x.Department).FirstOrDefault();
+            int ID1 = Convert.ToInt32(ID);
+            ViewBag.ID = ID1;
 
-        [HttpPost]
-        public async Task<IActionResult> DetailUser(User user)
-        {
-            await _employeeService.UpdateUserAsync(user);
-            return RedirectToAction("UserManagement");
+            return View(data.Users.Find(Id));
         }
-
         [HttpPost]
-        public async Task<JsonResult> DeleteUser(int id)
+        public ActionResult DetailUser(FormCollection collection)
         {
-            var result = await _employeeService.DeleteUserAsync(id);
+            int Id = Convert.ToInt32(collection["Id"]);
+            string UserName = collection["UserName"];
+            string FullName = collection["FullName"];
+            string Email = collection["Email"];
+            string PhoneNumber = collection["PhoneNumber"];
+            string Address = collection["Address"];
+            string Department = collection["Department"];
+            string Position = collection["Position"];
+            int Status = Convert.ToInt32(collection["Status"]);
+            data.UpdateUser(Id, UserName, null, FullName, Email, PhoneNumber, Address, Department, Position, null, Status);
+            return RedirectToAction("UserManagement", "Employees");
+        }
+        public JsonResult DeleteUser(int Id)
+        {
+            bool result = false;
+            var charts = data.SearchDevice(null, null, null, null, null).Where(x => x.UserId == Id).ToList().Count();
+            charts += data.SearchProject(Id, null, 0, null).ToList().Count();
+            charts += data.SearchRepairDetails(null, Id, null, null).ToList().Count();
+            charts += data.RequestDevices.Where(x => x.UserApproved == Id).ToList().Count();
+            charts += data.RequestDevices.Where(x => x.UserRequest == Id).ToList().Count();
+            charts += data.ScheduleTests.Where(x => x.UserTest == Id).ToList().Count();
+            if (charts == 0)
+            {
+                data.DeleteUser(Id);
+                result = true;
+            }
+            else result = false;
             return Json(result);
         }
 
-        public async Task<IActionResult> Role()
+        public ActionResult Role()
         {
-            var roles = await _employeeService.GetAllRolesAsync();
-            return View(roles);
+            ViewData["Role"] = data.Roles.ToList();
+            return View();
         }
-
         [HttpPost]
-        public async Task<IActionResult> AddRole(string roleName, string notes)
+        public ActionResult AddRole(FormCollection collection)
         {
-            await _employeeService.AddRoleAsync(roleName, notes);
-            return RedirectToAction("Role");
+            string RoleName = collection["RoleName"];
+            string Notes = collection["Notes"];
+            data.AddRole(RoleName, Notes);
+            return RedirectToAction("Role", "Employees");
         }
-
-        [HttpPost]
-        public async Task<IActionResult> EditRole(int id, string roleName, string notes)
+        [HttpGet]
+        public JsonResult GetDetail(int id)
         {
-            var result = await _employeeService.UpdateRoleAsync(id, roleName, notes);
+            data.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+            var Role = data.Roles.Find(id);
+            return Json(new
+            {
+                data = Role,
+            });
+        }
+        [HttpPost]
+        public JsonResult EditRole(int Id, string RoleName, string Notes)
+        {
+            bool result = true;
+            data.UpdateRole(Id, RoleName, Notes);
             return Json(result);
         }
-
-        [HttpPost]
-        public async Task<JsonResult> DeleteRole(int id)
+        public JsonResult DeleteRole(int Id)
         {
-            var result = await _employeeService.DeleteRoleAsync(id);
+            bool result = false;
+            int checkdele = data.DeleteRole(Id);
+            if (checkdele > 0)
+                result = true;
             return Json(result);
         }
     }

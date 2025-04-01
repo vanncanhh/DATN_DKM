@@ -1,7 +1,12 @@
-﻿@model IEnumerable<Libs.DTOs.SearchProject_Result>
+﻿odel IEnumerable<Libs.DTOs.SearchProject_Result>
 @{
     ViewBag.Title = "Danh sách phòng ban";
 }
+
+<link href="~/css/select2.min.css" rel="stylesheet" />
+<script src="~/Scripts/select2.min.js"></script>
+<!-- page start-->
+
 
 <section class="panel">
 
@@ -24,13 +29,13 @@
                         <option value="0">Người quản lí</option>
                         @foreach (var item in ViewData["User"] as IList<User>)
                         {
-                            if (ViewBag.ManagerProject == item.Id)
+                            if (ViewBag.ManagerProject == @item.Id)
                             {
-                                <option value="@item.Id"selected> @item.FullName </option>
+                                <option value="@item.Id" selected> @item.FullName </option>
                             }
                             else
                             {
-                                <option value="@item.Id" > @item.FullName </option>
+                                <option value="@item.Id"> @item.FullName </option>
                             }
                         }
                     </select>
@@ -129,8 +134,10 @@
 
 </section>
 
-
-@* @Html.Partial("DeleteDepartmentPartial") *@
+<partial name="DeleteDepartmentPartial" />
+<!-- page end-->
+<!--Scrip-->
+<!--The end Scrip-->
 <script>
     $(document).ready(function () {
         $('#exampleT').dataTable({

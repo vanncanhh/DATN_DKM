@@ -1,54 +1,55 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
-namespace QLTAISAN.Controllers
+﻿namespace QLTAISAN.Controllers
 {
     public class DeviceTypeController : Controller
     {
-        private readonly IDeviceTypeService _deviceTypeService;
+        QuanLyTaiSanCtyDATNContext data = new QuanLyTaiSanCtyDATNContext();
 
-        public DeviceTypeController(IDeviceTypeService deviceTypeService)
+        public ActionResult DeviceType()
         {
-            _deviceTypeService = deviceTypeService;
+            return View(data.DeviceTypes.ToList());
         }
-
-        public async Task<IActionResult> DeviceType()
-        {
-            var deviceTypes = await _deviceTypeService.GetAllDeviceTypesAsync();
-            return View(deviceTypes);
-        }
-
         [HttpPost]
-        public async Task<IActionResult> AddDeviceType(string typeName, string typeSymbol, string notes)
+        public ActionResult AddDeviceType(FormCollection collection)
         {
-            await _deviceTypeService.AddDeviceTypeAsync(typeName, typeSymbol, notes);
-            return RedirectToAction("DeviceType");
+            string TypeName = collection["TypeName"];
+            string Notes = collection["Notes"];
+            string TypeSymbol = collection["TypeSymbol"];
+            data.AddDeviceType(TypeName, TypeSymbol, Notes);
+            return RedirectToAction("DeviceType", "DeviceType");
         }
-
         [HttpGet]
-        public async Task<JsonResult> GetDetail(int id)
+        public JsonResult GetDetail(int id)
         {
-            var deviceType = await _deviceTypeService.GetDeviceTypeByIdAsync(id);
-            return Json(new { data = deviceType });
+            data.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+            var DeviceType = data.DeviceTypes.Find(id);
+            return Json(new
+            {
+                data = DeviceType,
+            });
         }
-
         [HttpPost]
-        public async Task<JsonResult> EditDeviceType(int id, string typeName, string typeSymbol, string notes)
+        public JsonResult EditDeviceType(int Id, string TypeName, string TypeSymbol, string Notes)
         {
-            var result = await _deviceTypeService.UpdateDeviceTypeAsync(id, typeName, typeSymbol, notes);
+            bool result = true;
+            data.UpdateDeviceType(Id, TypeName, TypeSymbol, Notes);
             return Json(result);
         }
-
-        [HttpPost]
-        public async Task<JsonResult> DeleteDeviceType(int id)
+        public JsonResult DeleteDeviceType(int Id)
         {
-            var result = await _deviceTypeService.DeleteDeviceTypeAsync(id);
+            bool result = false;
+            var charts = data.SearchDevice(null, Id, null, null, null).ToList().Count();
+            if (charts == 0)
+            {
+                int checkdele = data.DeleteDeviceType(Id);
+                result = true;
+            }
+            else result = false;
             return Json(result);
         }
-
-        public async Task<IActionResult> StatisticalDeviceType()
+        //  [AuthorizationViewHandler]
+        public ActionResult StatisticalDeviceType()
         {
-            var deviceTypes = await _deviceTypeService.GetAllDeviceTypesAsync();
-            return View(deviceTypes);
+            return View(data.DeviceTypes.ToList());
         }
     }
 }

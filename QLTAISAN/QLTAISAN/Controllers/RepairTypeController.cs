@@ -2,12 +2,10 @@
 {
     public class RepairTypeController : Controller
     {
-        private readonly IRepairTypeService _repairTypeService;
         private readonly QuanLyTaiSanCtyDATNContext Ql;
 
-        public RepairTypeController(IRepairTypeService repairTypeService, QuanLyTaiSanCtyDATNContext ql)
+        public RepairTypeController(QuanLyTaiSanCtyDATNContext ql)
         {
-            _repairTypeService = repairTypeService;
             Ql = ql;
         }
 
@@ -18,41 +16,58 @@
         }
 
         [HttpGet]
-        public async Task<JsonResult> GetDetail(int id)
+        public JsonResult GetDetail(int id)
         {
-            var repairType = await _repairTypeService.GetRepairTypeByIdAsync(id);
-            return Json(new { data = repairType });
+            Ql.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+            var RepairTypes = Ql.RepairTypes.Find(id);
+            return Json(new
+            {
+                data = RepairTypes,
+            } );
         }
 
-        public IActionResult AddRepairType()
+        public ActionResult AddRepairType()
         {
             return View();
         }
-
         [HttpPost]
-        public async Task<IActionResult> AddRepairType(string typeName, string notes)
+        public ActionResult AddRepairType(FormCollection colection, RepairType RepairType)
         {
-            var result = await _repairTypeService.AddRepairTypeAsync(typeName, notes);
-            return RedirectToAction("RepairType");
+            String Notes = colection["Notes"];
+            String TypeName = colection["TypeName"];
+            Ql.AddRepairType(TypeName, Notes);
+            return RedirectToAction("RepairType", "RepairType");
         }
 
-        public async Task<IActionResult> EditRepairType(int id)
+        public ActionResult EditRepairType(int Id)
         {
-            var repairType = await _repairTypeService.GetRepairTypeByIdAsync(id);
-            return View(repairType);
+            return View(Ql.RepairTypes.Find(Id));
+        }
+        [HttpPost]
+        public ActionResult EditRepairType(int Id, String TypeName, String Notes)
+        {
+            bool result = false;
+            int checkdele = Ql.EditRepairType(Id, TypeName, Notes);
+            if (checkdele > 0)
+                result = true;
+            return Json(result );
         }
 
-        [HttpPost]
-        public async Task<JsonResult> EditRepairType(int id, string typeName, string notes)
+        public ActionResult DeleteRepairType(int Id)
         {
-            var result = await _repairTypeService.EditRepairTypeAsync(id, typeName, notes);
-            return Json(result);
-        }
-
-        [HttpPost]
-        public async Task<JsonResult> DeleteRepairType(int id)
-        {
-            var result = await _repairTypeService.DeleteRepairTypeAsync(id);
+            bool result = false;
+            var dv = Ql.RepairDetails.Where(x => x.TypeOfRepair == Id);
+            if (dv.Count() > 0)
+            {
+                result = false;
+            }
+            else
+            {
+                string a = "," + Id + ",";
+                int checkdele = Ql.DeleteRepairType(a);
+                if (checkdele > 0)
+                    result = true;
+            }
             return Json(result);
         }
     }

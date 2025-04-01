@@ -2,71 +2,53 @@
 {
     public class SupplierController : Controller
     {
-        private readonly ISupplierService _supplierService;
-
-        public SupplierController(ISupplierService supplierService)
+        QuanLyTaiSanCtyDATNContext data = new QuanLyTaiSanCtyDATNContext();
+        public ActionResult Supplier()
         {
-            _supplierService = supplierService;
+            ViewData["Supplier"] = data.Suppliers.ToList();
+            return View(data.Suppliers.ToList());
         }
-
-        // Lấy danh sách tất cả các nhà cung cấp
-        public async Task<IActionResult> Supplier()
+        //   [AuthorizationViewHandler]
+        public ActionResult EditSupplier(int Id)
         {
-            var suppliers = await _supplierService.GetAllSuppliersAsync();
-            ViewData["Supplier"] = suppliers;
-            return View(suppliers);
+            ViewData["sDevice"] = data.SearchDevice(null, null, null, null, null).AsEnumerable().Where(x => x.SupplierId == Id).ToList();
+            return View(data.Suppliers.Find(Id));
         }
-
-        // Hiển thị trang chỉnh sửa nhà cung cấp
-        public async Task<IActionResult> EditSupplier(int id)
-        {
-            var supplier = await _supplierService.GetSupplierByIdAsync(id);
-            if (supplier == null)
-            {
-                return NotFound();
-            }
-
-            // Lấy danh sách thiết bị liên quan
-            var devices = await _supplierService.GetAllSuppliersAsync();
-            ViewData["sDevice"] = devices.Where(x => x.Id == id).ToList();
-
-            return View(supplier);
-        }
-
-        // Cập nhật thông tin nhà cung cấp
         [HttpPost]
-        public async Task<IActionResult> EditSupplier(int id, Supplier supplier)
+        public ActionResult EditSupplier(FormCollection collection)
         {
-            if (id != supplier.Id)
-            {
-                return BadRequest("ID không khớp.");
-            }
-
-            var result = await _supplierService.UpdateSupplierAsync(supplier);
-            if (result)
-            {
-                return RedirectToAction("Supplier");
-            }
-            return View(supplier);
+            int Id = Convert.ToInt32(collection["Id"]);
+            string Name = collection["Name"];
+            string Email = collection["Email"];
+            string PhoneNumber = collection["PhoneNumber"];
+            string Address = collection["Address"];
+            string Support = collection["Support"];
+            int Status = Convert.ToInt32(collection["Status"]);
+            data.UpdateSupplier(Id, Name, Email, PhoneNumber, Address, Support, Status);
+            return RedirectToAction("Supplier", "Supplier");
         }
-
-        // Thêm mới nhà cung cấp
         [HttpPost]
-        public async Task<IActionResult> AddSupplier(Supplier supplier)
+        public ActionResult AddSupplier(FormCollection collection)
         {
-            var result = await _supplierService.AddSupplierAsync(supplier);
-            if (result)
-            {
-                return RedirectToAction("Supplier");
-            }
-            return View(supplier);
+            string Name = collection["Name"];
+            string Email = collection["Email"];
+            string PhoneNumber = collection["PhoneNumber"];
+            string Address = collection["Address"];
+            string Support = collection["Position"];
+            data.AddSupplier(Name, Email, PhoneNumber, Address, Support);
+            return RedirectToAction("Supplier", "Supplier");
         }
-
-        // Xóa nhà cung cấp
-        public async Task<JsonResult> DeleteSupplier(int id)
+        public JsonResult DeleteSupplier(int Id)
         {
-            var result = await _supplierService.DeleteSupplierAsync(id);
-            return Json(new { success = result });
+            bool result = false;
+            var charts = data.SearchDevice(null, null, null, null, null).AsEnumerable().Where(x => x.SupplierId == Id).ToList();
+            if (charts.Count == 0)
+            {
+                data.DeleteSupplier(Id);
+                result = true;
+            }
+            else result = false;
+            return Json(result);
         }
     }
 }

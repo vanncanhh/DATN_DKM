@@ -2,36 +2,47 @@
 {
     public class HomeController : Controller
     {
-        private readonly IHomeService _homeService;
+        QuanLyTaiSanCtyDATNContext data;
 
-        public HomeController(IHomeService homeService)
+        public HomeController(QuanLyTaiSanCtyDATNContext _data)
         {
-            _homeService = homeService;
+            data = _data;
         }
 
-        public async Task<IActionResult> Index()
+        public ActionResult Index()
         {
-            var statistics = await _homeService.GetStatisticsAsync();
-            ViewData["Statistics"] = statistics;
-            return View(statistics);
+            var ListCount = new Dictionary<string, int>();
+            int CountDevice = data.SearchDevice(null, null, null, null, null).AsEnumerable().Where(x => x.Status != 2).Count();
+            ListCount.Add("CountDevice", CountDevice);
+            int Deviceliquidation = data.SearchDevice(null, null, null, null, null).AsEnumerable().Where(x => x.Status == 2).Count();
+            ListCount.Add("Deviceliquidation", Deviceliquidation);
+            int DeviceType = data.DeviceTypes.Count();
+            ListCount.Add("DeviceType", DeviceType);
+            int Project = data.ProjectDkcs.Where(x => x.IsDeleted == false & x.TypeProject == 1).Count();
+            ListCount.Add("Project", Project);
+            int User = data.Users.Where(x => x.IsDeleted == false).Count();
+            ListCount.Add("User", User);
+            int RequestDevice = data.RequestDevices.Count();
+            ListCount.Add("RequestDevice", RequestDevice);
+            ViewData["TypeOfDevice"] = data.DeviceTypes.ToList();
+            return View(ListCount);
         }
-
         [Authorize(Roles = "Administrator")]
-        public IActionResult About()
+        public ActionResult About()
         {
             ViewBag.Message = "Your application description page.";
             return View();
         }
 
         [Authorize(Roles = "StandardUser")]
-        public IActionResult Contact()
+        public ActionResult Contact()
         {
             ViewBag.Message = "Your contact page.";
             return View();
         }
 
         [AllowAnonymous]
-        public IActionResult Unauthorized()
+        public ActionResult Unauthorized()
         {
             return View();
         }

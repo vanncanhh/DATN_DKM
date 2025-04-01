@@ -2,67 +2,119 @@
 {
     public class RepairDetailsController : Controller
     {
-        private readonly IRepairDetailsService _repairDetailsService;
+        QuanLyTaiSanCtyDATNContext Ql = new QuanLyTaiSanCtyDATNContext();
 
-        public RepairDetailsController(IRepairDetailsService repairDetailsService)
+        public ActionResult RepairDetails()
         {
-            _repairDetailsService = repairDetailsService;
-        }
-
-        public async Task<IActionResult> RepairDetails()
-        {
-            var repairDetails = await _repairDetailsService.GetAllRepairDetailsAsync();
-            ViewData["RepairDetails"] = repairDetails;
-            return View(repairDetails);
+            ViewData["RepairTypes"] = Ql.RepairTypes.ToList();
+            ViewData["User"] = Ql.Users.Where(x => x.IsDeleted == false).ToList();
+            var lstRepairDetails = Ql.SearchRepairDetails(null, null, null, null).AsEnumerable().ToList();
+            return View(lstRepairDetails);
         }
 
         [HttpPost]
-        public async Task<IActionResult> SearchRepairDetails(int? repairType, int? userId, int? deviceId, int? status)
+        public ActionResult SeachRepairDetails(FormCollection colection, RepairDetail RepairDetails)
         {
-            var repairDetails = await _repairDetailsService.SearchRepairDetailsAsync(repairType, userId, deviceId, status);
-            ViewBag.RepairType = repairType;
-            ViewBag.UserId = userId;
-            ViewBag.DeviceId = deviceId;
-            ViewBag.Status = status;
-            return View("RepairDetails", repairDetails);
+            ViewData["User"] = Ql.Users.ToList();
+            ViewData["RepairTypes"] = Ql.RepairTypes.ToList();
+            int? RepairType1 = colection["RepairType1"].Equals("0") ? (int?)null : Convert.ToInt32(colection["RepairType1"]);
+            int? Users = colection["User"].Equals("0") ? (int?)null : Convert.ToInt32(colection["User"]);
+            int? Status = colection["Status"].Equals("-1") ? (int?)null : Convert.ToInt32(colection["Status"]);
+            int? IdDevice = colection["IdDevice"].Equals("") ? (int?)null : Convert.ToInt32(colection["IdDevice"]);
+            var lstRepairDetails = Ql.SearchRepairDetails(RepairType1, Users, IdDevice, Status).AsEnumerable().ToList();
+            var ViewRepairDetails = lstRepairDetails;
+            ViewBag.RepairType1 = RepairType1;
+            ViewBag.Users = Users;
+            ViewBag.Status = Status;
+            return View("RepairDetails", ViewRepairDetails);
         }
 
-        public async Task<IActionResult> AddRepairDetails()
+        [HttpGet]
+        public JsonResult GetDetail(int id)
         {
+            Ql.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+            var getDevices = Ql.SearchRepairDevice(id).AsEnumerable().FirstOrDefault();
+            return Json(new
+            {
+                data = getDevices,
+            });
+        }
+
+        public ActionResult AddRepairDetails()
+        {
+            ViewData["Devices"] = Ql.SearchDevice(null, null, null, null, null).AsEnumerable().Where(x => x.Status != 2 && x.StatusRepair != 1).ToList();
+            ViewData["User"] = Ql.Users.Where(x => x.Status != 1 && x.IsDeleted == false).ToList();
+            ViewData["RepairTypes"] = Ql.RepairTypes.ToList();
             return View();
         }
-
         [HttpPost]
-        public async Task<IActionResult> AddRepairDetails(RepairDetail repairDetail)
+        public ActionResult AddRepairDetails(FormCollection colection, RepairDetail RepairDetail)
         {
-            await _repairDetailsService.AddRepairDetailAsync(repairDetail);
-            return RedirectToAction("RepairDetails");
+            int? DeviceId = colection["DeviceId"].Equals("") ? (int?)null : Convert.ToInt32(colection["DeviceId"]);
+            DateTime? DateOfRepair = colection["DateOfRepair"].Equals("") ? (DateTime?)null : Convert.ToDateTime(colection["DateOfRepair"]);
+            string AddressOfRepair = colection["AddressOfRepair"];
+            int? TimeOrder = colection["TimeOrder"].Equals("") ? (int?)null : Convert.ToInt32(colection["TimeOrder"]);
+            int? TypeOfRepair = colection["TypeOfRepair"].Equals("0") ? (int?)null : Convert.ToInt32(colection["TypeOfRepair"]);
+            int? UserId = colection["UserId"].Equals("") ? (int?)null : Convert.ToInt32(colection["UserId"]);
+            string Notes = colection["Notes"];
+            DateTime? NextDateOfRepair = colection["NextDateOfRepair"].Equals("") ? (DateTime?)null : Convert.ToDateTime(colection["NextDateOfRepair"]);
+            Ql.AddRepairDetails(DeviceId, DateOfRepair, NextDateOfRepair, TimeOrder, TypeOfRepair, AddressOfRepair, UserId, Notes);
+            return RedirectToAction("RepairDetails", "RepairDetails");
         }
 
-        public async Task<IActionResult> EditRepairDetails(int id)
+        public ActionResult EditRepairDetails(int Id)
         {
-            var repairDetail = await _repairDetailsService.GetRepairDetailByIdAsync(id);
-            return View(repairDetail);
+            var his = Ql.RepairDetails.Find(Id).DeviceId;
+
+            ViewData["RepairHistory"] = Ql.HistoryRepairDetails(his).Where(x => x.Status == 1).ToList();
+            ViewData["User"] = Ql.Users.Where(x => x.Status != 1 && x.IsDeleted != true).ToList();
+            ViewData["RepairTypes"] = Ql.RepairTypes.ToList();
+            var repair = Ql.RepairDetailsById(Id).Single();
+            return View(repair);
+        }
+        [HttpPost]
+        public ActionResult EditRepairDetails(FormCollection colection, RepairDetail RepairDetail)
+        {
+            int? Id = colection["Id"].Equals("0") ? (int?)null : Convert.ToInt32(colection["Id"]);
+            int? DeviceId = colection["DeviceId"].Equals("") ? (int?)null : Convert.ToInt32(colection["DeviceId"]);
+            DateTime? DateOfRepair = colection["DateOfRepair"].Equals("") ? (DateTime?)null : Convert.ToDateTime(colection["DateOfRepair"]);
+            string AddressOfRepair = colection["AddressOfRepair"];
+            int? TimeOrder = colection["TimeOrder"].Equals("") ? (int?)null : Convert.ToInt32(colection["TimeOrder"]);
+            int? TypeOfRepair = colection["TypeOfRepair"].Equals("") ? (int?)null : Convert.ToInt32(colection["TypeOfRepair"]);
+            int? UserId = colection["UserId"].Equals("0") ? (int?)null : Convert.ToInt32(colection["UserId"]);
+            string NoteRepair = colection["NoteRepair"];
+            DateTime? NextDateOfRepair = colection["NextDateOfRepair"].Equals("") ? (DateTime?)null : Convert.ToDateTime(colection["NextDateOfRepair"]);
+            int? Status = colection["Status"].Equals("") ? (int?)null : Convert.ToInt32(colection["Status"]);
+            double Price = colection["Prices"].Equals("") ? 0 : Convert.ToDouble(colection["Prices"]);
+            Ql.EditRepairDetails(Id, DeviceId, DateOfRepair, NextDateOfRepair, TimeOrder, TypeOfRepair, AddressOfRepair, UserId, NoteRepair, Status, Price);
+            return RedirectToAction("EditRepairDetails", "RepairDetails");
         }
 
-        [HttpPost]
-        public async Task<IActionResult> EditRepairDetails(RepairDetail repairDetail)
+        public JsonResult DeleteRepairDetails(string Id)
         {
-            await _repairDetailsService.UpdateRepairDetailAsync(repairDetail);
-            return RedirectToAction("RepairDetails");
-        }
-
-        [HttpPost]
-        public async Task<JsonResult> DeleteRepairDetails(string id)
-        {
-            var result = await _repairDetailsService.DeleteRepairDetailsAsync(id);
+            string a = "," + Id + ",";
+            bool result = false;
+            int checkdele = Ql.DeleteRepairDetails(a);
+            if (checkdele > 0)
+                result = true;
             return Json(result);
         }
 
-        [HttpPost]
-        public async Task<JsonResult> DeleteRepairDetail(int id)
+        public JsonResult DeleteRepairDetailsOne(int Id)
         {
-            var result = await _repairDetailsService.DeleteRepairDetailAsync(id);
+            bool result = false;
+            var dv = Ql.RepairDetails.Find(Id).Status;
+            if (dv == 1)
+            {
+                result = true;
+                string a = "," + Id + ",";
+                Ql.DeleteRepairDetails(a);
+            }
+            else
+            {
+                result = false;
+            }
+
             return Json(result);
         }
     }

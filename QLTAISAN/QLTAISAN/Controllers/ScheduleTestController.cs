@@ -2,79 +2,87 @@
 {
     public class ScheduleTestController : Controller
     {
-        private readonly IScheduleTestService _scheduleTestService;
         QuanLyTaiSanCtyDATNContext Ql;
 
-        public ScheduleTestController(IScheduleTestService scheduleTestService, QuanLyTaiSanCtyDATNContext ql)
+        public ScheduleTestController(QuanLyTaiSanCtyDATNContext ql)
         {
-            _scheduleTestService = scheduleTestService;
             Ql = ql;
         }
 
-        // Hiển thị danh sách
         public ActionResult ScheduleTest()
         {
             ViewData["User"] = Ql.Users.ToList();
             ViewData["ScheduleTests"] = Ql.ScheduleTests.ToList();
-            var lstScheduleTests = Ql.GetSearchScheduleTest(null, null).ToList();
+            var lstScheduleTests = Ql.GetSearchScheduleTest(null, null).AsEnumerable().ToList();
             return View(lstScheduleTests);
         }
 
-        // Tìm kiếm
         [HttpPost]
-        public async Task<IActionResult> SeachScheduleTest(int? userId, int? status)
+        public ActionResult SeachScheduleTest(FormCollection colection, RepairDetail RepairDetails)
         {
-            var users = await _scheduleTestService.GetAllUsersAsync();
-            var scheduleTests = await _scheduleTestService.SearchScheduleTestAsync(userId, status);
-            ViewData["User"] = users;
-            ViewData["ScheduleTests"] = scheduleTests;
-            return View("ScheduleTest", scheduleTests);
+            ViewData["User"] = Ql.Users.ToList();
+            ViewData["ScheduleTests"] = Ql.ScheduleTests.ToList();
+            int? Users = colection["User"].Equals("0") ? (int?)null : Convert.ToInt32(colection["User"]);
+            int? Status = colection["Status"].Equals("") ? (int?)null : Convert.ToInt32(colection["Status"]);
+            var lstScheduleTest = Ql.GetSearchScheduleTest(Users, Status).AsEnumerable().ToList();
+            var ViewScheduleTest = lstScheduleTest;
+            ViewBag.Users = Users;
+            ViewBag.Status = Status;
+            return View("ScheduleTest", lstScheduleTest);
         }
 
-        // Trang thêm mới
-        public async Task<IActionResult> AddScheduleTest()
+        public ActionResult AddScheduleTest()
         {
-            ViewData["Devices"] = await _scheduleTestService.GetAllDevicesAsync();
-            ViewData["User"] = await _scheduleTestService.GetAllUsersAsync();
+            ViewData["Devices"] = Ql.Devices.Where(x => x.IsDeleted != true).ToList();
+            ViewData["User"] = Ql.Users.Where(x => x.Status != 1 && x.IsDeleted != true).ToList();
             return View();
         }
-
-        // Xử lý thêm mới
         [HttpPost]
-        public async Task<IActionResult> AddScheduleTest(ScheduleTest scheduleTest)
+        public ActionResult AddScheduleTest(FormCollection colection, ScheduleTest ScheduleTest)
         {
-            await _scheduleTestService.AddScheduleTestAsync(scheduleTest);
-            return RedirectToAction("ScheduleTest");
+            int? DeviceId = colection["DeviceId"].Equals("") ? (int?)null : Convert.ToInt32(colection["DeviceId"]);
+            DateTime? DateOfTest = colection["DateOfTest"].Equals("") ? (DateTime?)null : Convert.ToDateTime(colection["DateOfTest"]);
+            DateTime? NextDateOfTest = colection["NextDateOfTest"].Equals("") ? (DateTime?)null : Convert.ToDateTime(colection["NextDateOfTest"]);
+            String CategoryTest = colection["CategoryTest"];
+            int? UserTest = colection["UserTest"].Equals("0") ? (int?)null : Convert.ToInt32(colection["UserTest"]);
+            String Notes = colection["Notes"];
+            Ql.AddScheduleTest(DeviceId, DateOfTest, NextDateOfTest, CategoryTest, UserTest, Notes);
+            return RedirectToAction("ScheduleTest", "ScheduleTest");
         }
-
-        // Trang chỉnh sửa
-        public async Task<IActionResult> EditScheduleTest(int id)
+        //  [AuthorizationViewHandler]
+        public ActionResult EditScheduleTest(int Id)
         {
-            var scheduleTest = await _scheduleTestService.GetScheduleTestByIdAsync(id);
-            if (scheduleTest == null) return NotFound();
-
-            ViewData["Devices"] = await _scheduleTestService.GetAllDevicesAsync();
-            ViewData["User"] = await _scheduleTestService.GetAllUsersAsync();
-            return View(scheduleTest);
+            var dvId = Ql.ScheduleTests.Find(Id).DeviceId;
+            ViewData["historyScheduleTests"] = Ql.HistoryScheduleTestById(dvId).AsEnumerable().Where(x => x.Status == 1).ToList();
+            ViewData["User"] = Ql.Users.Where(x => x.Status != 1 && x.IsDeleted != true).ToList();
+            var lstSchedule = Ql.ScheduleTestById(Id).ToString().Single();
+            return View(lstSchedule);
         }
-
-        // Xử lý chỉnh sửa
         [HttpPost]
-        public async Task<IActionResult> EditScheduleTest(ScheduleTest scheduleTest)
+        public ActionResult EditScheduleTest(FormCollection colection, ScheduleTest ScheduleTest)
         {
-            var result = await _scheduleTestService.UpdateScheduleTestAsync(scheduleTest);
-            if (result)
-            {
-                return RedirectToAction("ScheduleTest");
-            }
-            return View(scheduleTest);
+            int? Id = colection["Id"].Equals("") ? (int?)null : Convert.ToInt32(colection["Id"]);
+            int? DeviceId = colection["DeviceId"].Equals("") ? (int?)null : Convert.ToInt32(colection["DeviceId"]);
+            //var dateot = colection["DateOfTest"];
+            DateTime? DateOfTest = colection["DateOfTest"].Equals("") ? (DateTime?)null : Convert.ToDateTime(colection["DateOfTest"]);
+            DateTime? NextDateOfTest = colection["NextDateOfTest"].Equals("") ? (DateTime?)null : Convert.ToDateTime(colection["NextDateOfTest"]);
+            String CategoryTest = colection["CategoryTest"];
+            int? UserTest = colection["UserTest"].Equals("0") ? (int?)null : Convert.ToInt32(colection["UserTest"]);
+            String Notes = colection["Notes"];
+            int? Status = colection["Status"].Equals("") ? (int?)null : Convert.ToInt32(colection["Status"]);
+            Ql.UpdateScheduleTest(Id, DeviceId, DateOfTest, NextDateOfTest, CategoryTest, UserTest, Notes, Status);
+            return RedirectToAction("EditScheduleTest", "ScheduleTest");
+
         }
 
-        // Xóa lịch kiểm tra
-        public async Task<JsonResult> DeleteScheduleTest(int id)
+        public JsonResult DeleteScheduleTest(string Id)
         {
-            var result = await _scheduleTestService.DeleteScheduleTestAsync(id);
-            return Json(new { success = result });
+            string a = "," + Id + ",";
+            bool result = false;
+            int checkdele = Ql.DeleteScheduleTest(a);
+            if (checkdele > 0)
+                result = true;
+            return Json(result);
         }
     }
 }

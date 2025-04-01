@@ -24,6 +24,11 @@
         public virtual DbSet<SearchRequestDeviceNew_Result> SearchRequestDeviceNew_Results { get; set; }
         public virtual DbSet<DeviceOfProjectAll_Result> DeviceOfProjectAll_Results { get; set; }
         public virtual DbSet<StatisticProject_Result> StatisticProject_Results { get; set; }
+        public virtual DbSet<SearchUser_Result> SearchUser_Results { get; set; }
+        public virtual DbSet<SearchRepairDevice_Result> SearchRepairDevice_Results { get; set; }
+        public virtual DbSet<HistoryRepairDetails_Result> HistoryRepairDetails_Results { get; set; }
+        public virtual DbSet<RepairDetailsById_Result> RepairDetailsById_Results { get; set; }
+        public virtual DbSet<HistoryScheduleTestById_Result> HistoryScheduleTestById_Results { get; set; }
         //
         public virtual DbSet<Credential> Credentials { get; set; } = null!;
         public virtual DbSet<DestructiveType> DestructiveTypes { get; set; } = null!;
@@ -178,6 +183,26 @@
         {
             return SearchRequestDeviceNew_Results.FromSqlInterpolated($"EXEC dbo.SearchRequestDeviceNew {status}, {approved}");
         }
+        public IQueryable<SearchUser_Result> SearchUser(Nullable<int> status)
+        {
+            return SearchUser_Results.FromSqlInterpolated($"EXEC dbo.SearchUser {status}");
+        }
+        public IQueryable<SearchRepairDevice_Result> SearchRepairDevice(Nullable<int> id)
+        {
+            return SearchRepairDevice_Results.FromSqlInterpolated($"EXEC dbo.SearchRepairDevice {id}");
+        }
+        public IQueryable<HistoryScheduleTestById_Result> HistoryScheduleTestById(Nullable<int> id)
+        {
+            return HistoryScheduleTestById_Results.FromSqlInterpolated($"EXEC dbo.HistoryScheduleTestById {id}");
+        }
+        public IQueryable<HistoryRepairDetails_Result> HistoryRepairDetails(Nullable<int> id)
+        {
+            return HistoryRepairDetails_Results.FromSqlInterpolated($"EXEC dbo.HistoryRepairDetails {id}");
+        }
+        public IQueryable<RepairDetailsById_Result> RepairDetailsById(Nullable<int> id)
+        {
+            return RepairDetailsById_Results.FromSqlInterpolated($"EXEC dbo.RepairDetailsById {id}");
+        }
         public int UpdateUser(Nullable<int> id, string userName, string passWord, string fullName, string email, string phoneNumber, string address, string department, string position, Nullable<int> roleId, Nullable<int> status)
         {
             return Database.ExecuteSqlInterpolated($"EXEC dbo.UpdateUser {id}, {userName}, {passWord}, {fullName}, {email}, {phoneNumber}, {address}, {department}, {position}, {roleId}, {status}");
@@ -214,6 +239,87 @@
         {
             return Database.ExecuteSqlInterpolated($"EXEC dbo.DeleteProject {id}");
         }
+        public int DeleteDeviceType(Nullable<int> id)
+        {
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.DeleteDeviceType {id}");
+        }
+        public int DeleteUser(Nullable<int> id)
+        {
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.DeleteUser {id}");
+        }
+        public int DeleteSupplier(Nullable<int> id)
+        {
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.DeleteSupplier {id}");
+        }
+        public int DeleteRole(Nullable<int> id)
+        {
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.DeleteRole {id}");
+        }
+        public int ScheduleTestById(Nullable<int> id)
+        {
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.ScheduleTestById {id}");
+        }
+        public int DeleteRepairDetails(string id)
+        {
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.DeleteRepairDetails {id}");
+        }
+        public int DeleteRepairType(string id)
+        {
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.DeleteRepairType {id}");
+        }
+        public int DeleteAllRole(string id)
+        {
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.DeleteAllRole {id}");
+        }
+        public int DeleteScheduleTest(string id)
+        {
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.DeleteScheduleTest {id}");
+        }
+        public int DeleteRequestDevice(string id)
+        {
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.DeleteRequestDevice {id}");
+        }
+        public int AddRole(string roleName, string notes)
+        {
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.AddRole {roleName}, {notes}");
+        }
+        public int UpdateRole(Nullable<int> id, string roleName, string notes)
+        {
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.UpdateRole {id}, {roleName}, {notes}");
+        }
+        public int EditRepairType(Nullable<int> id, string typeName, string notes)
+        {
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.EditRepairType {id}, {typeName}, {notes}");
+        }
+        public int UpdateDeviceType(Nullable<int> id, string typeName, string typeSymbol, string notes)
+        {
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.UpdateDeviceType {id}, {typeName}, {typeSymbol}, {notes}");
+        }
+        public int UpdateSupplier(Nullable<int> id, string name, string email, string phone, string address, string support, Nullable<int> status)
+        {
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.UpdateSupplier {id}, {name}, {email}, {phone}, {address}, {support}, {status}");
+        }
+        public int AddScheduleTest(Nullable<int> deviceId, Nullable<System.DateTime> dateOfTest, Nullable<System.DateTime> nextDateOfTest, string categoryTest, Nullable<int> userTest, string notes)
+        {
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.AddScheduleTest {deviceId}, {dateOfTest}, {nextDateOfTest}, {categoryTest}, {userTest}, {notes}");
+        }
+        public int UpdateScheduleTest(Nullable<int> id, Nullable<int> deviceId, Nullable<System.DateTime> dateOfTest, Nullable<System.DateTime> nextDateOfTest, string categoryTest, Nullable<int> userTest, string notes, Nullable<int> status)
+        {
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.UpdateScheduleTest {id}, {deviceId}, {dateOfTest}, {nextDateOfTest}, {categoryTest}, {userTest}, {notes}, {status}");
+        }
+        public int EditRepairDetails(Nullable<int> id, Nullable<int> deviceId, Nullable<System.DateTime> dateOfRepair, Nullable<System.DateTime> nextDateOfRepair, Nullable<int> timeOrder, Nullable<int> typeOfRepair,
+                                                                string addressOfRepair, Nullable<int> userId, string notes, Nullable<int> status, Nullable<double> price)
+        {
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.EditRepairDetails {id}, {deviceId}, {dateOfRepair}, {nextDateOfRepair}, {timeOrder}, {typeOfRepair}, {addressOfRepair}, {userId}, {notes}, {status}, {price}");
+        }
+        public int AddRequestDevice(Nullable<int> userRequest, Nullable<System.DateTime> dateOfRequest, Nullable<System.DateTime> dateOfUse, string deviceName, Nullable<int> typeOfDevice, string configuration, string notes, Nullable<int> status, Nullable<int> numDevice, Nullable<int> userApproved)
+        {
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.AddRequestDevice {userRequest}, {dateOfRequest}, {dateOfUse}, {deviceName}, {typeOfDevice}, {configuration}, {notes}, {status}, {numDevice}, {userApproved}");
+        }
+        public int UpdateRequestDevice(Nullable<int> id, Nullable<int> userRequest, Nullable<System.DateTime> dateOfRequest, Nullable<System.DateTime> dateOfUse, string deviceName, Nullable<int> typeOfDevice, string configuration, string notes, Nullable<bool> approved, Nullable<int> userApproved, Nullable<int> status, Nullable<int> numDevice, string noteProcess, string noteReasonRefuse, string nameUserApproved)
+        {
+            return Database.ExecuteSqlInterpolated($"EXEC dbo.UpdateRequestDevice {id}, {userRequest}, {dateOfRequest}, {dateOfUse}, {deviceName}, {typeOfDevice}, {configuration}, {notes}, {approved}, {userApproved}, {status}, {numDevice}, {noteProcess}, {noteReasonRefuse}, {nameUserApproved}");
+        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<SearchDevice_Result>().HasNoKey();
@@ -228,7 +334,12 @@
             modelBuilder.Entity<StatisticalDevice_Result>().HasNoKey();
             modelBuilder.Entity<DeviceOfProjectAll_Result>().HasNoKey();
             modelBuilder.Entity<StatisticProject_Result>().HasNoKey();
+            modelBuilder.Entity<SearchUser_Result>().HasNoKey();
             modelBuilder.Entity<OderCode>().HasNoKey();
+            modelBuilder.Entity<SearchRepairDevice_Result>().HasNoKey();
+            modelBuilder.Entity<HistoryRepairDetails_Result>().HasNoKey();
+            modelBuilder.Entity<RepairDetailsById_Result>().HasNoKey();
+            modelBuilder.Entity<HistoryScheduleTestById_Result>().HasNoKey();
             modelBuilder.Entity<Credential>(entity =>
             {
                 entity.HasKey(e => new { e.UserGroupId, e.RoleId });
