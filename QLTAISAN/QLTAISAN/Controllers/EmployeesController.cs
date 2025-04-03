@@ -2,11 +2,15 @@
 {
     public class EmployeesController : Controller
     {
-        QuanLyTaiSanCtyDATNContext data = new QuanLyTaiSanCtyDATNContext();
+        QuanLyTaiSanCtyDATNContext data;
 
+        public EmployeesController(QuanLyTaiSanCtyDATNContext _data)
+        {
+            data = _data;
+        }
         public ActionResult UserManagement()
         {
-            var lstUser = data.SearchUser(null).AsEnumerable().ToList();
+            var lstUser = data.SearchUser(0).AsEnumerable().ToList();
             return View(lstUser);
         }
         [HttpPost]
@@ -25,7 +29,7 @@
             return View();
         }
         [HttpPost]
-        public ActionResult CreateUser(FormCollection collection)
+        public ActionResult CreateUser(IFormCollection collection)
         {
             string UserName = collection["UserName"];
             string FullName = collection["FullName"];
@@ -34,7 +38,8 @@
             string Address = collection["Address"];
             string Department = collection["Department"];
             string Position = collection["Position"];
-            data.AddUser(UserName, null, FullName, Email, PhoneNumber, Address, Department, Position, null, 0);
+            string hashedPassword = Encryptor.MD5Hash("12345");
+            data.AddUser(UserName, hashedPassword, FullName, Email, PhoneNumber, Address, Department, Position, 0 , 0);
             return RedirectToAction("UserManagement", "Employees");
         }
 

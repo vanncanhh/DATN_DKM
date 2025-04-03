@@ -36,7 +36,7 @@
                                             @item.TypeName
                                         </td>
                                         <td>@item.TypeSymbol</td>
-                                        <td class="center">@data.SearchDevice(null, item.Id, null, null, null).Where(x => x.Status != 2).Count()</td>
+                                        <td class="center">@data.SearchDevice(null, item.Id, null, null, null).AsEnumerable().Where(x => x.Status != 2).Count()</td>
                                         <td>@item.Notes</td>
                                         <td class="center"><a class="edit icon-eye-open" onclick="GetDetail(@item.Id)"></a></td>
                                         <td class="center">

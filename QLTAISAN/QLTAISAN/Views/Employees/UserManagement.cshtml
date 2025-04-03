@@ -42,7 +42,6 @@
                                 <th>Email</th>
                                 <th>Số điện thoại</th>
                                 <th>Địa Chỉ</th>
-                                <th>Phòng</th>
                                 <th>Trạng Thái</th>
                                 <th class="center">Xem</th>
                                 <th class="center">Xóa</th>
@@ -56,7 +55,6 @@
                                     <td>@item.Email</td>
                                     <td>@item.PhoneNumber</td>
                                     <td>@item.Address</td>
-                                    <td>@item.ProjectName</td>
                                     <td>@Html.Raw(Convert.ToInt32(item.Status).GetEnumDescription(typeof(eStatus.UserStatus)))</td>
                                     <td class="center"><a class="edit icon-eye-open" href="@Url.Action("DetailUser", "Employees", new { id = item.Id })"></a></td>
                                     <td class="center">

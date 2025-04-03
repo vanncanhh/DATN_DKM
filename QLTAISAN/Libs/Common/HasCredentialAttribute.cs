@@ -15,18 +15,22 @@
                 return;
             }
 
-            var userSession = JsonConvert.DeserializeObject<UserLoginSec>(session);
-            if (userSession == null)
+            Console.WriteLine("Session Data: " + session);
+            try
             {
-                // Nếu không có phiên làm việc
-                context.Result = new RedirectToActionResult("Unauthorized", "Home", null);
-                return;
+                var userSession = JsonConvert.DeserializeObject<UserLoginSec>(session);
+                if (userSession == null)
+                {
+                    // Nếu không có phiên làm việc
+                    context.Result = new RedirectToActionResult("Unauthorized", "Home", null);
+                    return;
+                }
             }
-
-            var privilegeLevels = GetCredentialByLoggedInUser(userSession.UserName.Trim());
-
-            if (privilegeLevels.Contains(this.RoleID) || userSession.GroupID == CommonConstants1.ADMIN_GROUP)
+            catch (JsonReaderException ex)
             {
+                // Handle the exception and provide more information about the invalid JSON
+                Console.WriteLine("Error parsing JSON: " + ex.Message);
+                context.Result = new RedirectToActionResult("Unauthorized", "Home", null);
                 return;
             }
 

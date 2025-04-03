@@ -107,7 +107,7 @@
 
 
         [HttpPost]
-        public ActionResult SearchTypeDevice(FormCollection collection)
+        public ActionResult SearchTypeDevice(IFormCollection collection)
         {
             ViewData["ProjectDKC"] = data.ProjectDkcs.Where(x => x.TypeProject == 1 && x.IsDeleted == false).ToList();
             ViewData["sProjectDKC"] = data.SearchProject(null, 1, 1, null).ToList();
@@ -169,7 +169,7 @@
             return View();
         }
         [HttpPost]
-        public ActionResult Create(FormCollection collection)
+        public ActionResult Create(IFormCollection collection)
         {
             // Helper: chuyển đổi giá trị sang int? (trả về null nếu rỗng hoặc bằng "0")
             int? GetNullableInt(string key)
@@ -247,10 +247,9 @@
             // Map dữ liệu từ deviceResult sang view model
             var viewModel = new DeviceById_Result
             {
-                Id = deviceResult.Id,
-                DeviceCode = deviceResult.DeviceCode,
-                NewCode = deviceResult.NewCode,
-                DeviceName = deviceResult.DeviceName,
+                Id = deviceResult.Id,  // Đảm bảo Id là đúng từ DB
+                DeviceCode = deviceResult.DeviceCode,  // Đảm bảo DeviceCode được lấy từ DB
+                DeviceName = deviceResult.DeviceName,  // Đảm bảo DeviceName đúng
                 TypeOfDevice = deviceResult.TypeOfDevice,
                 ParentId = deviceResult.ParentId,
                 Configuration = deviceResult.Configuration,
@@ -262,7 +261,13 @@
                 Notes = deviceResult.Notes,
                 UserId = deviceResult.UserId,
                 Status = deviceResult.Status,
-                CreatedDate = deviceResult.CreatedDate
+                CreatedDate = deviceResult.CreatedDate,
+                ModifiedDate = deviceResult.ModifiedDate,
+                ProjectName = deviceResult.ProjectName,
+                IdProject = deviceResult.IdProject,
+                StatusRepair = deviceResult.StatusRepair,
+                NewCode = deviceResult.NewCode,
+                PriceOne = deviceResult.PriceOne
             };
 
             // Lấy các thông tin bổ sung từ các SP khác và bảng thông thường
@@ -271,6 +276,7 @@
                 .Where(x => x.DeviceCodeChildren == id || x.DeviceCodeParents == id)
                 .CountAsync();
 
+            // Kiểm tra và gán giá trị cho ViewData
             ViewData["TypeOfDevice"] = await data.DeviceTypes.ToListAsync();
             ViewData["User"] = await data.Users.Where(x => x.IsDeleted == false && x.Status == 0).ToListAsync();
             ViewData["Supplier"] = await data.Suppliers.ToListAsync();
@@ -279,9 +285,16 @@
                 .Where(x => x.Status == 1 && x.TypeProject == 1 && x.IsDeleted == false)
                 .ToListAsync();
             ViewData["sProjectDKC"] = await data.SearchProject(null, 1, 1, null).ToListAsync();
-            ViewData["RepairDetail"] = await data.SearchRepairDetails(null, null, id, null).ToListAsync();
+
+            // Kiểm tra dữ liệu sửa chữa
+            var repairDetails = await data.SearchRepairDetails(null, null, id, null).ToListAsync();
+            ViewData["RepairDetail"] = repairDetails ?? new List<SearchRepairDetails_Result>();  // Gán danh sách trống nếu không có dữ liệu
+
+            // Lịch sử thiết bị
             var deviceHistoryData = await data.DeviceHistory().ToListAsync();
             ViewData["DeviceHistory"] = deviceHistoryData.Where(x => x.DeviceId == id).ToList();
+
+            // Các dữ liệu khác
             ViewData["UsageDevice"] = await data.SearchUseDevice(id).ToListAsync();
             ViewData["SearchDeviceComponant"] = await data.SearchDevice(null, null, null, null, null).ToListAsync();
 
@@ -308,6 +321,7 @@
         [HttpPost]
         public async Task<IActionResult> EditDevice(DeviceById_Result model)
         {
+            // Kiểm tra dữ liệu đầu vào
             if (!ModelState.IsValid)
             {
                 ViewData["TypeOfDevice"] = await data.DeviceTypes.ToListAsync();
@@ -316,7 +330,23 @@
                 ViewData["ProjectDKC"] = await data.ProjectDkcs
                     .Where(x => x.Status == 1 && x.TypeProject == 1 && x.IsDeleted == false)
                     .ToListAsync();
-                ViewData["sProjectDKC"] = await data.SearchProject(null, 1, 1, null).ToListAsync();
+                ViewData["sProjectDKC"] = data.SearchProject(null, 1, 1, null).AsEnumerable().ToList();
+                return View(model);
+            }
+
+            // Kiểm tra xem SupplierId có tồn tại trong bảng Supplier không
+            var supplierExists = await data.Suppliers.AnyAsync(x => x.Id == model.SupplierId);
+            if (!supplierExists)
+            {
+                ModelState.AddModelError("", "Supplier ID không hợp lệ.");
+                // Reload necessary data if validation fails
+                ViewData["TypeOfDevice"] = await data.DeviceTypes.ToListAsync();
+                ViewData["User"] = await data.Users.Where(x => x.IsDeleted == false && x.Status == 0).ToListAsync();
+                ViewData["Supplier"] = await data.Suppliers.ToListAsync();
+                ViewData["ProjectDKC"] = await data.ProjectDkcs
+                    .Where(x => x.Status == 1 && x.TypeProject == 1 && x.IsDeleted == false)
+                    .ToListAsync();
+                ViewData["sProjectDKC"] = data.SearchProject(null, 1, 1, null).AsEnumerable().ToList();
                 return View(model);
             }
 
@@ -484,21 +514,45 @@
         public JsonResult AddDeviceCode(int TypeOfDevice)
         {
             data.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
-            var type = data.OderCode(TypeOfDevice).Single().Code;
-            var TypeSymbol = data.DeviceTypes.Where(x => x.Id == TypeOfDevice).Single().TypeSymbol.Trim() + type.ToString().PadLeft(5, '0');
-            var charts = data.Devices.Where(x => x.DeviceCode == TypeSymbol).FirstOrDefault();
-            if (charts == null)
+
+            // Lấy mã loại thiết bị
+            var type = data.OderCode(TypeOfDevice).AsEnumerable().Single().Code;
+
+            // Lấy TypeSymbol từ bảng DeviceTypes
+            var typeSymbol = data.DeviceTypes
+                .Where(x => x.Id == TypeOfDevice)
+                .SingleOrDefault()?.TypeSymbol.Trim();
+
+            if (typeSymbol != null)
             {
+                // Thêm code và padding cho TypeSymbol
+                var TypeSymbol = typeSymbol + type.ToString().PadLeft(5, '0');
+
+                // Truy vấn bảng Devices để kiểm tra DeviceCode đã tồn tại chưa
+                var charts = data.Devices
+                    .Where(x => x.DeviceCode == TypeSymbol)
+                    .FirstOrDefault();
+
+                // Nếu thiết bị không tồn tại, trả về mã TypeSymbol
+                if (charts == null)
+                {
+                    return Json(new { data = TypeSymbol });
+                }
+                else
+                {
+                    // Nếu đã tồn tại, thực hiện lại truy vấn để cập nhật giá trị mới
+                    type = data.OderCode(TypeOfDevice).AsEnumerable().Single().Code;
+                    typeSymbol = data.DeviceTypes
+                        .Where(x => x.Id == TypeOfDevice)
+                        .SingleOrDefault()?.TypeSymbol.Trim();
+
+                    TypeSymbol = typeSymbol + type.ToString().PadLeft(5, '0');
+
+                    return Json(new { data = TypeSymbol });
+                }
             }
-            else
-            {
-                type = data.OderCode(TypeOfDevice).Single().Code;
-                TypeSymbol = data.DeviceTypes.Where(x => x.Id == TypeOfDevice).Single().TypeSymbol.Trim() + type.ToString().PadLeft(5, '0');
-            }
-            return Json(new
-            {
-                data = TypeSymbol,
-            });
+
+            return Json(new { data = "Invalid TypeOfDevice" });
         }
         public JsonResult AddDeviceProject(int Iddv, int Idpj)
         {
@@ -731,78 +785,79 @@
             text = stripFormattingRegex.Replace(text, string.Empty);
             return text;
         }
-        public IActionResult ExportToExcel(int? TypeOfDevice, int Status, int Guarantee, int? Project, string DeviceCode)
+        [HttpGet("ExportToExcel")]
+        public async Task<IActionResult> ExportToExcel(int? TypeOfDevice, int Status, int Guarantee, int? Project, string DeviceCode)
         {
-            if (Project == 0) { Project = null; }
-            if (TypeOfDevice == 0) { TypeOfDevice = null; }
-
-            // Lấy dữ liệu từ cơ sở dữ liệu
+            // Lấy dữ liệu từ service
             var charts = data.SearchDevice(Status, TypeOfDevice, Guarantee, Project, DeviceCode)
-                .AsEnumerable() // Chuyển sang client-side để có thể thực hiện các thao tác LINQ trên bộ nhớ
-                .Where(x => x.Status != 2) // Thực hiện lọc ở client-side
-                .Select(i => new { i.DeviceCode, i.DeviceName, i.TypeName, i.Configuration, i.PriceOne, i.FullName, i.Name, i.ProjectSymbol, i.Status })
-                .ToList(); // Chuyển đổi thành danh sách sau khi lọc
+                .Where(x => x.Status != 2)
+                .ToList();
 
-            var model = charts.ToList();
-
-            // Chuyển đổi HTML thành văn bản thuần túy
-            List<NewConfig> numbers = new List<NewConfig>();
-            foreach (var item in model)
+            // Chuyển dữ liệu thành danh sách NewConfig
+            var model = charts.Select(i => new NewConfig
             {
-                string plainTextConfig = HtmlToPlainText(item.Configuration);
-                numbers.Add(new NewConfig
-                {
-                    DeviceCode = item.DeviceCode,
-                    DeviceName = item.DeviceName,
-                    TypeName = item.TypeName,
-                    Configuration = plainTextConfig,
-                    PriceOne = item.PriceOne,
-                    FullName = item.FullName,
-                    Name = item.Name,
-                    ProjectSymbol = item.ProjectSymbol,
-                    Status = item.Status
-                });
-            }
+                DeviceCode = i.DeviceCode,
+                DeviceName = i.DeviceName,
+                TypeName = i.TypeName,
+                Configuration = HtmlToPlainText(i.Configuration),
+                PriceOne = i.PriceOne,
+                FullName = i.FullName,
+                Name = i.Name,
+                ProjectSymbol = i.ProjectSymbol,
+                Status = i.Status
+            }).ToList();
 
-            // Tạo file Excel bằng EPPlus
+            // Tạo file Excel với EPPlus
+            var fileName = $"Devices_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+            var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "exports");
+
+            if (!Directory.Exists(folderPath))
+                Directory.CreateDirectory(folderPath);
+
+            var filePath = Path.Combine(folderPath, fileName);
+
+            // Tạo file Excel
             using (var package = new ExcelPackage())
             {
-                // Tạo worksheet
-                var worksheet = package.Workbook.Worksheets.Add("DeviceDetails");
+                var ws = package.Workbook.Worksheets.Add("Devices");
 
-                // Tạo tiêu đề cột
-                worksheet.Cells[1, 1].Value = "Device Code";
-                worksheet.Cells[1, 2].Value = "Device Name";
-                worksheet.Cells[1, 3].Value = "Type Name";
-                worksheet.Cells[1, 4].Value = "Configuration";
-                worksheet.Cells[1, 5].Value = "Price One";
-                worksheet.Cells[1, 6].Value = "Full Name";
-                worksheet.Cells[1, 7].Value = "Name";
-                worksheet.Cells[1, 8].Value = "Project Symbol";
-                worksheet.Cells[1, 9].Value = "Status";
+                // Tạo các tiêu đề cột
+                ws.Cells[1, 1].Value = "Mã";
+                ws.Cells[1, 2].Value = "Tên thiết bị";
+                ws.Cells[1, 3].Value = "Loại";
+                ws.Cells[1, 4].Value = "Cấu hình";
+                ws.Cells[1, 5].Value = "Giá";
+                ws.Cells[1, 6].Value = "Họ và tên";
+                ws.Cells[1, 7].Value = "Tên dự án";
+                ws.Cells[1, 8].Value = "Trạng thái";
 
-                // Điền dữ liệu vào các hàng
-                for (int i = 0; i < numbers.Count; i++)
+                // Thêm dữ liệu vào các ô
+                for (int i = 0; i < model.Count; i++)
                 {
-                    var item = numbers[i];
-                    worksheet.Cells[i + 2, 1].Value = item.DeviceCode;
-                    worksheet.Cells[i + 2, 2].Value = item.DeviceName;
-                    worksheet.Cells[i + 2, 3].Value = item.TypeName;
-                    worksheet.Cells[i + 2, 4].Value = item.Configuration;
-                    worksheet.Cells[i + 2, 5].Value = item.PriceOne;
-                    worksheet.Cells[i + 2, 6].Value = item.FullName;
-                    worksheet.Cells[i + 2, 7].Value = item.Name;
-                    worksheet.Cells[i + 2, 8].Value = item.ProjectSymbol;
-                    worksheet.Cells[i + 2, 9].Value = item.Status;
+                    var row = i + 2; // Dữ liệu bắt đầu từ dòng 2 (dòng 1 là tiêu đề)
+                    ws.Cells[row, 1].Value = model[i].DeviceCode;
+                    ws.Cells[row, 2].Value = model[i].DeviceName;
+                    ws.Cells[row, 3].Value = model[i].TypeName;
+                    ws.Cells[row, 4].Value = model[i].Configuration;
+                    ws.Cells[row, 5].Value = model[i].PriceOne;
+                    ws.Cells[row, 6].Value = model[i].FullName;
+                    ws.Cells[row, 7].Value = model[i].ProjectSymbol;
+                    ws.Cells[row, 8].Value = model[i].Status;
                 }
 
-                // Thiết lập kiểu file Excel và trả về file
-                var fileName = $"DeviceDetails_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
-                var fileBytes = package.GetAsByteArray();
-
-                // Trả về file Excel cho client tải về
-                return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+                // Lưu file Excel vào thư mục exports
+                await package.SaveAsAsync(new FileInfo(filePath));
             }
+
+            // Trả về URL của tệp vừa tạo
+            var fileUrl = Url.Content($"~/exports/{fileName}");
+
+            return Ok(new
+            {
+                success = true,
+                message = "Xuất Excel thành công",
+                fileUrl = fileUrl
+            });
         }
         public ActionResult StatisticalDevice()
         {
@@ -811,7 +866,7 @@
             return View(lstdv);
         }
         // [HttpPost]
-        public ActionResult SearchStatisticalDevice(FormCollection collection)
+        public ActionResult SearchStatisticalDevice(IFormCollection collection)
         {
             ViewData["TypeOfDevice"] = data.DeviceTypes.ToList();
             int? Status = Convert.ToInt32(collection["Status"]);

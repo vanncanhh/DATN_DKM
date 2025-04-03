@@ -35,68 +35,75 @@
 </div>
 @*Danh sach thanh phan*@
 <div class="col-md-12" id="DsChildType" name="DsChildType">
-    @foreach (var item in ViewData["TypeComponantOfDevice"] as IList<ChildrenOfDevice_Result>)
-
+    @if (ViewData["TypeComponantOfDevice"] != null)
     {
-        <div class="row">
-            <h5 class="text">
-                <span class="text" style="font-size:larger; font-weight: bold;">- @item.TypeName </span>
-                <span class="icon-search btn btn-success btn-small" style="background-color:white; color:black;margin-right:10px" onclick="SearchDeviceComponant1(@item.TypeSymbolChildren)">
-                </span>
-                <span class="icon-plus btn btn-success btn-small" style="background-color:white; color:black" onclick="CreateDeviceComponant(@item.TypeSymbolChildren)">
-                </span>
-            </h5>
-
-        </div>
-        <div class="tcssMarT tcsspadtop">
-            <div class="panel-body tcssMarT ">
-                <div class="adv-table">
-                    <table class="display  table table-bordered table-striped table-hover table-responsive" id="example_Dv">
-                        <thead>
-                            <tr>
-                                @*<th class="center"><input type="checkbox" id="checkAll" name="check" /></th>*@
-                                <th style="text-align:center">Mã thiết bị  </th>
-                                <th style="text-align:center">Tên thiết bị  </th>
-                                <th style="text-align:center">Giá</th>
-                                <th style="text-align:center">Cấu hình</th>
-                                <th style="text-align:center"> Trạng thái</th>
-                                <th style="text-align:center">Kiểu thiết bị</th>
-                                <th style="text-align:center">Xem</th>
-                                <th style="text-align:center">Gỡ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item1 in @item.numbers as IList<ChildrenOfDevice_Result>)
-                            {
-                                <tr class="gradeA" id="row_@item1.Id">
-                                    @*<td class="center" style="width:2%"><input type="checkbox" class="chkCheckBoxId checkbox check" name="check" value="@item.Id" /></td>*@
-                                    <td style="width:10%">@item1.DeviceCode</td>
-                                    <td style="width:25%">@item1.DeviceName</td>
-                                    <td style="width:10%; text-align:right" class="hidden-phone">@item1.Price</td>
-                                    <td style="width:24%" class="hidden-phone">@Html.Raw(item1.Configuration)</td>
-                                    <td style="width:15%" class="hidden-phone">@Html.Raw(Convert.ToInt32(item1.StatusRepair).GetEnumDescription(typeof(eStatus.RepairStatus)))</td>
-                                    <td style="width:10%" class="center">@Html.Raw(Convert.ToInt32(item1.TypeComponant).GetEnumDescription(typeof(eStatus.Type_TypeCom))) </td>
-                                    <td style="width:3%" class="center">
-                                        @*@if (Session["AuthenticationFeature"] != null && (Session["AuthenticationFeature"] as List<SystemFeature>).Any(k => k.ControllerName.Equals("Project") && k.ActionName.Equals("EditProject")))
-                                            {*@
-                                        <a class="edit" href="@Url.Action("EditDevice", "Device", new { Id = @item1.DeviceCodeChildren })"><i class="icon-eye-open"></i></a>
-                                        @*}*@
-                                    </td>
-                                    <td style="width:3%" class="center">
-                                        @*@if (Session["AuthenticationFeature"] != null && (Session["AuthenticationFeature"] as List<SystemFeature>).Any(k => k.ControllerName.Equals("Project") && k.ActionName.Equals("DeleteProject1")))
-                                            {*@
-                                        <a class="edit" href="javascript:void(0)" id="DeleteItem" onclick="ConfirmDeleteDv(@item1.DeviceCodeChildren)"><i class="icon-trash"></i></a>
-                                        @*}*@
-                                    </td>
+        foreach (var item in ViewData["TypeComponantOfDevice"] as IList<ChildrenOfDevice_Result>)
+        {
+            <div class="row">
+                <h5 class="text">
+                    <span class="text" style="font-size:larger; font-weight: bold;">- @item.TypeName </span>
+                    <span class="icon-search btn btn-success btn-small" style="background-color:white; color:black;margin-right:10px" onclick="SearchDeviceComponant1(@item.TypeSymbolChildren)">
+                    </span>
+                    <span class="icon-plus btn btn-success btn-small" style="background-color:white; color:black" onclick="CreateDeviceComponant(@item.TypeSymbolChildren)">
+                    </span>
+                </h5>
+            </div>
+            <div class="tcssMarT tcsspadtop">
+                <div class="panel-body tcssMarT ">
+                    <div class="adv-table">
+                        <table class="display  table table-bordered table-striped table-hover table-responsive" id="example_Dv">
+                            <thead>
+                                <tr>
+                                    <th style="text-align:center">Mã thiết bị</th>
+                                    <th style="text-align:center">Tên thiết bị</th>
+                                    <th style="text-align:center">Giá</th>
+                                    <th style="text-align:center">Cấu hình</th>
+                                    <th style="text-align:center">Trạng thái</th>
+                                    <th style="text-align:center">Kiểu thiết bị</th>
+                                    <th style="text-align:center">Xem</th>
+                                    <th style="text-align:center">Gỡ</th>
                                 </tr>
-                            }
-                    </table>
+                            </thead>
+                            <tbody>
+                                @if (item.numbers != null)
+                                {
+                                    foreach (var item1 in item.numbers as IList<ChildrenOfDevice_Result>)
+                                    {
+                                        <tr class="gradeA" id="row_@item1.Id">
+                                            <td style="width:10%">@item1.DeviceCode</td>
+                                            <td style="width:25%">@item1.DeviceName</td>
+                                            <td style="width:10%; text-align:right" class="hidden-phone">@item1.Price</td>
+                                            <td style="width:24%" class="hidden-phone">@Html.Raw(item1.Configuration)</td>
+                                            <td style="width:15%" class="hidden-phone">@Html.Raw(Convert.ToInt32(item1.StatusRepair).GetEnumDescription(typeof(eStatus.RepairStatus)))</td>
+                                            <td style="width:10%" class="center">@Html.Raw(Convert.ToInt32(item1.TypeComponant).GetEnumDescription(typeof(eStatus.Type_TypeCom))) </td>
+                                            <td style="width:3%" class="center">
+                                                <a class="edit" href="@Url.Action("EditDevice", "Device", new { Id = item1.DeviceCodeChildren })"><i class="icon-eye-open"></i></a>
+                                            </td>
+                                            <td style="width:3%" class="center">
+                                                <a class="edit" href="javascript:void(0)" id="DeleteItem" onclick="ConfirmDeleteDv(@item1.DeviceCodeChildren)"><i class="icon-trash"></i></a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="8">Không có thiết bị con nào.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
-
+        }
+    }
+    else
+    {
+        <p>Không có dữ liệu thành phần thiết bị.</p>
     }
 </div>
+
 
 @*Thêm loại thiết bị mới*@
 <div class="modal fade" id="AddType1" tabindex="1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

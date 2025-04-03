@@ -363,6 +363,7 @@
             Ql.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 
             var charts = Ql.DeviceOfProjectAll(IdProject)
+                .AsEnumerable()
                 .Select(i => new
                 {
                     i.DeviceCode,
@@ -460,7 +461,7 @@
                 }
                 else
                 {
-                    ViewBag.Scaner = Ql.SearchDevice(null, null, null, null, dvc).First();
+                    ViewBag.Scaner = Ql.SearchDevice(null, null, null, null, dvc).AsEnumerable().First();
                 }
             }
             else

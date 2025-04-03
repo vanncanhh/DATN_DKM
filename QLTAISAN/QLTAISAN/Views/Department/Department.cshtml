@@ -112,7 +112,7 @@
                                 <td style="width:10%">@item.FullName</td>
                                 <td style="width:22%" class="hidden-phone">@item.Address</td>
                                 <td style="width:12%" class="center">@item.NumDevice</td>
-                                    <td style="width:9%" class="center ">@Html.Raw((eStatus.ProjectStatus)item.Status.GetEnumDescription())</td>
+                                <td style="width:9%" class="center ">@Html.Raw(item.Status.GetEnumDescription(typeof(eStatus.ProjectStatus)))</td>
                                 <td style="width:3%" class="center">
                                         <a class="edit" href="@Url.Action("EditDepartment", "Department", new { Id = @item.Id })"><i class="icon-eye-open"></i></a>
                                 </td>

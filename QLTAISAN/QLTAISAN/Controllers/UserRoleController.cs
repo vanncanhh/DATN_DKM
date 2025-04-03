@@ -4,7 +4,7 @@
     {
         QuanLyTaiSanCtyDATNContext data = new QuanLyTaiSanCtyDATNContext();
 
-        [HasCredential(RoleID = "VIEW_USER")]
+        //[HasCredential(RoleID = "VIEW_USER")]
         public ActionResult UserIndex()
         {
             var dao = new UserDao();
