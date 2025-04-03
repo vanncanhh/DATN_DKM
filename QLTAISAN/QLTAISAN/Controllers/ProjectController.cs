@@ -1,12 +1,14 @@
-﻿using Libs.Models;
-
-namespace QLTAISAN.Controllers
+﻿namespace QLTAISAN.Controllers
 {
-    [HasCredential(RoleID = "")]
+    //[HasCredential(RoleID = "")]
     public class ProjectController : Controller
     {
-        QuanLyTaiSanCtyDATNContext Ql = new QuanLyTaiSanCtyDATNContext();
+        private readonly QuanLyTaiSanCtyDATNContext Ql;
 
+        public ProjectController(QuanLyTaiSanCtyDATNContext context)
+        {
+            Ql = context;
+        }
         public ActionResult Project()
         {
             ViewBag.ProjectNb = Ql.SearchProject(null, null, 0, null).AsEnumerable().Count();

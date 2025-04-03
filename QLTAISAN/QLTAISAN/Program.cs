@@ -1,7 +1,4 @@
-var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-    .AddEntityFrameworkStores<QuanLyTaiSanCtyDATNContext>()
-    .AddDefaultTokenProviders();
+﻿var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<QuanLyTaiSanCtyDATNContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -11,20 +8,6 @@ builder.Services.AddDbContext<QuanLyTaiSanCtyDATNContext>(options =>
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
-builder.Services.AddTransient<IDepartmentService, DepartmentService>();
-builder.Services.AddScoped(typeof(IRepository<>), typeof(RepositoryBase<>));
-builder.Services.AddScoped<ISupplierService, SupplierService>();
-builder.Services.AddScoped<IScheduleTestService , ScheduleTestService>();
-builder.Services.AddScoped<IRoleService , RoleService>();
-builder.Services.AddScoped<IRequestDeviceService , RequestDeviceService>();
-builder.Services.AddScoped<IRepairTypeService, RepairTypeService>();
-builder.Services.AddScoped<IRepairDetailsService, RepairDetailsService>();
-builder.Services.AddScoped<IProjectService, ProjectService>();
-builder.Services.AddScoped<IHomeService, HomeService>();
-builder.Services.AddScoped<IEmployeeService, EmployeeService>();
-builder.Services.AddScoped<IDeviceTypeService, DeviceTypeService>();
-builder.Services.AddScoped<IUserRoleService, UserRoleService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -52,10 +35,11 @@ app.UseStaticFiles();
 
 app.UseRouting();
 app.UseSession();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Device}/{action=Device}/{id?}");
+    pattern: "{controller=Account_App_New}/{action=Login_New}/{id?}");
 
 app.Run();

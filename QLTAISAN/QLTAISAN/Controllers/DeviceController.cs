@@ -33,31 +33,40 @@
             return View();
         }
         [HttpPost]
-        public ActionResult SearchDevice(FormCollection collection)
+        public ActionResult SearchDevice(IFormCollection collection)
         {
             var d = data.DeviceTypes.ToList();
             ViewData["TypeOfDevice"] = data.DeviceTypes.ToList();
-            ViewData["ProjectDKC"] = data.ProjectDkcs.Where(x => x.Status != 3 & x.TypeProject == 1 & x.IsDeleted == false).ToList();
+            ViewData["ProjectDKC"] = data.ProjectDkcs.Where(x => x.Status != 3 && x.TypeProject == 1 && x.IsDeleted == false).ToList();
             ViewData["sProjectDKC"] = data.SearchProject(null, 1, 1, null).ToList();
+
+            // Lấy dữ liệu từ form sử dụng IFormCollection
             int Status = Convert.ToInt32(collection["Status"]);
             int? TypeOfDevice = collection["TypeOfDevice"].Equals("0") ? (int?)null : Convert.ToInt32(collection["TypeOfDevice"]);
             int Guarantee = Convert.ToInt32(collection["Guarantee"]);
             int? Project = collection["ProjectDKC"].Equals("0") ? (int?)null : Convert.ToInt32(collection["ProjectDKC"]);
             string DeviceCode = collection["DeviceCode"];
+
+            // Tìm kiếm thiết bị theo các thông số đã nhập
             var charts = data.SearchDevice(Status, TypeOfDevice, Guarantee, Project, DeviceCode.Trim())
                              .AsEnumerable()
                              .Where(x => x.Status != 2)
                              .ToList();
 
+            // Đếm số lượng thiết bị
             ViewBag.CountDevice = data.SearchDevice(Status, TypeOfDevice, Guarantee, Project, DeviceCode.Trim())
                                       .AsEnumerable()
                                       .Where(x => x.Status != 2)
                                       .Count();
+
+            // Lưu trữ thông tin tìm kiếm vào ViewBag để truyền qua View
             ViewBag.status = Status;
             ViewBag.deviceCode = DeviceCode;
             ViewBag.type = TypeOfDevice;
             ViewBag.guarantee = Guarantee;
             ViewBag.poject = Project;
+
+            // Trả về kết quả tìm kiếm qua View
             var model = charts.ToList();
             return View("Device", model);
         }
@@ -729,9 +738,10 @@
 
             // Lấy dữ liệu từ cơ sở dữ liệu
             var charts = data.SearchDevice(Status, TypeOfDevice, Guarantee, Project, DeviceCode)
+                .AsEnumerable() // Chuyển sang client-side để có thể thực hiện các thao tác LINQ trên bộ nhớ
+                .Where(x => x.Status != 2) // Thực hiện lọc ở client-side
                 .Select(i => new { i.DeviceCode, i.DeviceName, i.TypeName, i.Configuration, i.PriceOne, i.FullName, i.Name, i.ProjectSymbol, i.Status })
-                .Where(x => x.Status != 2)
-                .ToList();
+                .ToList(); // Chuyển đổi thành danh sách sau khi lọc
 
             var model = charts.ToList();
 

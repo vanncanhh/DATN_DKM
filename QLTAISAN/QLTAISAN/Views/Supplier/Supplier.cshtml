@@ -1,7 +1,6 @@
 ﻿@{
-    ViewData["Title"] = "Supplier";
+    ViewBag.Title = "Nhà Cung Cấp";
 }
-
 <div class="row">
     <div class="col-lg-12">
         <section class="panel">
@@ -10,9 +9,9 @@
                 <div class="btn-group pull-right">
                     @*@if (Session["AuthenticationFeature"] != null && (Session["AuthenticationFeature"] as List<SystemFeature>).Any(k => k.ControllerName.Equals("Supplier") && k.ActionName.Equals("AddSupplier")))
                     {*@
-                        <button class="btn green btn-success" data-toggle="modal" href="#myModals">
-                            Thêm mới<i class="icon-plus"></i>
-                        </button>
+                    <button class="btn green btn-success" data-toggle="modal" href="#myModals">
+                        Thêm mới<i class="icon-plus"></i>
+                    </button>
                     @*}*@
                 </div>
             </header>
@@ -47,8 +46,8 @@
                                         <td class="center"><a class="edit icon-eye-open" href="@Url.Action("EditSupplier", "Supplier",new { Id = item.Id })"></a></td>
                                         <td class="center">
                                             @*@if (Session["AuthenticationFeature"] != null && (Session["AuthenticationFeature"] as List<SystemFeature>).Any(k => k.ControllerName.Equals("Supplier") && k.ActionName.Equals("DeleteSupplier")))
-                                            {*@
-                                                <a class="icon-trash" onclick="ConfirmDelete(@item.Id)"></a>
+                                        {*@
+                                            <a class="icon-trash" onclick="ConfirmDelete(@item.Id)"></a>
                                             @*}*@
                                         </td>
                                     </tr>
@@ -59,7 +58,7 @@
                     </div>
                 </div>
             </div>
-            <partial name="~/Views/Supplier/CreateSupplier.cshtml" />
+            @await Html.PartialAsync("~/Views/Supplier/CreateSupplier.cshtml")
             <div class="modal fade" id="supplierdelete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
@@ -83,43 +82,32 @@
         </section>
     </div>
 </div>
-@section Scripts {
-    <script>
-        $('.Tool').addClass('active');
-        $('.Supplier').addClass('active');
-
-        function ConfirmDelete(Id) {
-            $("#hiddenId").val(Id);
-            $("#supplierdelete").modal('show');
-        }
-
-        function DeleteSupplier() {
-            $("#loaderDiv").show();
-            var dvId = $("#hiddenId").val();
-            $.ajax({
-                type: "POST",
-                url: "@Url.Action("DeleteSupplier", "Supplier")",
-                data: { Id: dvId },
-                success: function (result) {
-                    if (result) {
-                        $("#loaderDiv").hide();
-                        $("#supplierdelete").modal("hide");
-                        window.location = '@Url.Action("Supplier", "Supplier")';
-                    } else {
-                        $("#loaderDiv").hide();
-                        $("#supplierdelete").modal("hide");
-                        alert("Xóa nhà cung cấp bị lỗi");
-                    }
+<script>
+    $('.Tool').addClass('active');
+    $('.Supplier').addClass('active');
+    var ConfirmDelete = function (Id) {
+        $("#hiddenId").val(Id);
+        $("#supplierdelete").modal('show')
+    }
+    var DeleteSupplier = function () {
+        $("#loaderDiv").show();
+        var dvId = $("#hiddenId").val();
+        $.ajax({
+            type: "POST",
+            url: "/Supplier/DeleteSupplier",
+            data: { Id: dvId },
+            success: function (result) {
+                if (result) {
+                    $("#loaderDiv").hide();
+                    $("#supplierdelete").modal("hide");
+                    window.location = '@Url.Action("Supplier", "Supplier")';
+                } else {
+                    $("#loaderDiv").hide();
+                    $("#supplierdelete").modal("hide");
+                    alert("Xóa nhà cung cấp bị lỗi");
                 }
-            });
-        }
-
-        $(document).ready(function () {
-            $('#example').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/vi.json'
-                }
-            });
+            }
         });
-    </script>
-}
+    }
+</script>
+

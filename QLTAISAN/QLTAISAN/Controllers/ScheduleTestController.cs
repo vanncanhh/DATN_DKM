@@ -25,7 +25,6 @@
             int? Users = colection["User"].Equals("0") ? (int?)null : Convert.ToInt32(colection["User"]);
             int? Status = colection["Status"].Equals("") ? (int?)null : Convert.ToInt32(colection["Status"]);
             var lstScheduleTest = Ql.GetSearchScheduleTest(Users, Status).AsEnumerable().ToList();
-            var ViewScheduleTest = lstScheduleTest;
             ViewBag.Users = Users;
             ViewBag.Status = Status;
             return View("ScheduleTest", lstScheduleTest);

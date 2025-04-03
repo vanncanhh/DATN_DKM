@@ -2,6 +2,9 @@
 @{
     ViewBag.Title = "Danh sách lịch kiểm tra thiết bị";
 }
+<link href="~/css/TcssProject.css" rel="stylesheet" />
+<link href="~/css/select2.min.css" rel="stylesheet" />
+<script src="~/Scripts/select2.min.js"></script>
 <!-- page start-->
 <section class="panel">
     <!--Header-->
@@ -25,43 +28,15 @@
                     <option value="0">Người kiểm tra</option>
                     @foreach (var item in ViewData["User"] as IList<User>)
                     {
-                        if (ViewBag.Users == item.Id)
-                        {
-                            <option value="@item.Id"selected> @item.FullName </option>
-                        }
-                        else
-                        {
-                            <option value="@item.Id" > @item.FullName </option>
-                        }
+                        <option value="@item.Id" selected="@((ViewBag.Users == @item.Id) ? "selected" : "")"> @item.FullName </option>
                     }
                 </select>
             </div>
             <div class="col-md-2 TcssMar">
                 <select class="input-sm form-control  myctr " name="Status">
-                    @if (ViewBag.Status == null)
-                    {
-                        <option value="" selected> Trạng thái </option>
-                    }
-                    else
-                    {
-                        <option value="" > Trạng thái </option>
-                    }
-                    @if (ViewBag.Status == 0)
-                    {
-                        <option value="" selected> Chưa kiểm tra </option>
-                    }
-                    else
-                    {
-                        <option value=""> Chưa kiểm tra </option>
-                    }
-                    @if (ViewBag.Status == 1)
-                    {
-                        <option value="" selected> Đã kiểm tra </option>
-                    }
-                    else
-                    {
-                        <option value=""> Đã kiểm tra </option>
-                    }
+                    <option value="" selected="@((ViewBag.Status == null) ? "selected" : "")"> Trạng thái </option>
+                    <option value="0" selected="@((ViewBag.Status == 0) ? "selected" : "")"> Chưa kiểm tra </option>
+                    <option value="1" selected="@((ViewBag.Status == 1) ? "selected" : "")"> Đã kiểm tra</option>
                 </select>
             </div>
             <div class="col-md-2 ">
@@ -125,7 +100,11 @@
         </div>
     </div>
 </section>
-@* @Html.Partial("DeleteScheduleTestPartial") *@
+<partial name="DeleteScheduleTestPartial" />
+
+
+<!-- page end-->
+<!--Start Scrip-->
 <script>
     $(document).ready(function () {
         $('#exampleMT').dataTable({

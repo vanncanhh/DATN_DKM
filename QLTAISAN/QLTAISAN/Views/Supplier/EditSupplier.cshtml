@@ -1,5 +1,14 @@
-﻿@model Libs.Models.Supplier
+﻿@using Newtonsoft.Json
+@using Microsoft.AspNetCore.Http
+@model Libs.Models.Supplier
 @{
+    var authenticationFeatureJson = Context.Session.GetString("AuthenticationFeature");
+    List<SystemFeature> features = null;
+
+    if (!string.IsNullOrEmpty(authenticationFeatureJson))
+    {
+        features = JsonConvert.DeserializeObject<List<SystemFeature>>(authenticationFeatureJson);
+    }
     ViewBag.Title = Model.Name;
 }
 <div class="row">
@@ -10,15 +19,16 @@
                 @Html.AntiForgeryToken()
                 <header class="panel-heading mypanel">
                     @Model.Name
-                    @* <div class="pull-right">
-                        @if (Session["AuthenticationFeature"] != null && (Session["AuthenticationFeature"] as List<SystemFeature>).Any(k => k.ControllerName.Equals("Supplier") && k.ActionName.Equals("EditSupplier1")))
+                    <div class="pull-right">
+                        @if (features != null && features.Any(k => k.ControllerName.Equals("Supplier") && k.ActionName.Equals("EditSupplier1")))
                         {
                             <button type="submit" class="btn btn-primary"> Lưu </button>
                         }
-                        @if (Session["AuthenticationFeature"] != null && (Session["AuthenticationFeature"] as List<SystemFeature>).Any(k => k.ControllerName.Equals("Supplier") && k.ActionName.Equals("DeleteSupplier")))
+                        @if (features != null && features.Any(k => k.ControllerName.Equals("Supplier") && k.ActionName.Equals("DeleteSupplier")))
                         {
-                            <button type="button" class="btn btn-danger" onclick="ConfirmDelete(@Model.Id)">Xóa</button>}
-                    </div> *@
+                            <button type="button" class="btn btn-danger" onclick="ConfirmDelete(@Model.Id)">Xóa</button>
+                        }
+                    </div>
                 </header>
                 <div class="panel-body">
                     <div class="form-group m-bot15 clearfix ">
@@ -61,10 +71,9 @@
                         <label class="control-label col-md-3 ">Trạng Thái</label>
                         <div class="col-md-7">
                             <select class="form-control myctr" name="Status">
-                                <option value="-1" selected="@(Model.Status == -1)">Chọn Trạng Thái</option>
-                                <option value="0" selected="@(Model.Status == 0)">Đang Hoạt Động</option>
-                                <option value="1" selected="@(Model.Status == 1)">Đã Đóng Cửa</option>
-
+                                <option value="-1" selected="@((Model.Status == -1) ? "selected" : "")">Chọn Trạng Thái </option>
+                                <option value="0" selected="@((Model.Status == 0) ? "selected" : "")">Đang Hoạt Động </option>
+                                <option value="1" selected="@((Model.Status == 1) ? "selected" : "")">Đã Đóng Cửa</option>
                             </select>
                         </div>
                     </div>
@@ -121,7 +130,7 @@
                         <div class="modal-body">
                             Bạn có muốn xóa nhà cung cấp ?
                             <div style="text-align:center;display:none" id="loaderDiv">
-                                <img src="~/Content/img/Spinner-1s-200px.gif" width="150" />
+                                <img src="~/img/Spinner-1s-200px.gif" width="150" />
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -131,7 +140,7 @@
                     </div>
                 </div>
             </div>
-            @Html.Partial("~/Views/Supplier/CreateSupplier.cshtml")
+            @await Html.PartialAsync("~/Views/Supplier/CreateSupplier.cshtml")
         </section>
     </div>
 </div>
@@ -179,5 +188,3 @@
         });
     }
 </script>
-
-

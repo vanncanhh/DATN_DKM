@@ -191,8 +191,8 @@
                                             <td style="width:15%">@Html.Raw(item.Configuration)</td>
                                             <td style="width:5%">@item.ProjectSymbol</td>
                                             <td style="width:10%">
-                                                @Html.Raw(Convert.ToInt32(item.Status).GetEnumDescription(typeof(eStatus.DeviceStatus)))<br />
-                                                @Html.Raw(Convert.ToInt32(item.StatusRepair).GetEnumDescription(typeof(eStatus.RepairStatus)))
+                                                @Html.Raw(((eStatus.DeviceStatus)Convert.ToInt32(item.Status)).GetEnumDescription())<br />
+                                                @Html.Raw(((eStatus.DeviceStatus)Convert.ToInt32(item.StatusRepair)).GetEnumDescription())
                                             </td>
                                             <td style="width:15%">@item.NameTypeComponant</td>
                                             <td class="center" style="width:3%">
@@ -217,7 +217,7 @@
 
                 </div>
             </div>
-            @Html.Partial("DevicePartial")
+            <partial name="DevicePartial" />
             <div class="modal fade" id="myModaldelete1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">

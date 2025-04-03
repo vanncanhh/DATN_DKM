@@ -18,14 +18,19 @@
     ViewBag.CountRequestDevice = data.SearchRequestDeviceNew(null, null).AsEnumerable().Count();
     ViewBag.CountScheduleTest = data.GetSearchScheduleTest(null, null).AsEnumerable().Count();
     var sessionString = HttpContextAccessor.HttpContext.Session.GetString(CommonConstants.USER_SESSION);
-    var session = sessionString != null ? JsonSerializer.Deserialize<UserLoginSec>(sessionString) : null;
-    ViewBag.SecName = session == null
-    ? "Khách"
-    : data.UserLogins
-          .AsEnumerable()
-          .Where(x => x.UserName == session.UserName)
-          .Select(x => x.FullName)
-          .FirstOrDefault() ?? "Khách";
+    ViewBag.SecName = sessionString == null ? "Khách" : data.UserLogins
+            .AsEnumerable()
+            .Where(x => x.UserName == sessionString)
+            .Select(x => x.FullName)
+            .FirstOrDefault() ?? "Khách";
+}
+@functions {
+    private bool IsValidJson(string str)
+    {
+        if (string.IsNullOrWhiteSpace(str)) return false;
+        str = str.Trim();
+        return str.StartsWith("{") && str.EndsWith("}");
+    }
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -219,6 +224,7 @@
     <!--common script for all pages-->
     <script type="text/javascript" src="~/js/advanced-form-components.js"></script>
     <script src="~/js/common-scripts.js"></script>
+    @RenderSection("scripts", required: false)
     <script>
         $(document).ready(function () {
             $("#checkAll").click(function () {

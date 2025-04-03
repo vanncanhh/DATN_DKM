@@ -1,6 +1,6 @@
 ﻿@model IEnumerable<Libs.DTOs.SearchProject_Result>
 @{
-    ViewBag.Title = "Danh sách phòng ban";
+    ViewBag.Title = "Danh sách dự án";
 }
 
 <link href="~/css/select2.min.css" rel="stylesheet" />
@@ -13,14 +13,19 @@
     <!--Header-->
     <header class="panel-heading m-bot15 ">
         <div class="tcssPadb">
-            Danh sách phòng ban
+            Dự án
+            @*@if (Session["AuthenticationFeature"] != null && (Session["AuthenticationFeature"] as List<SystemFeature>).Any(k => k.ControllerName.Equals("Project") && k.ActionName.Equals("AddProject")))
+            {*@
                 <div class="btn btn-success" style="float:right">
-                    <a href="@Url.Action("AddDepartment", "Department")"> Thêm </a> <i class="icon-plus"></i>
+                    <a href="@Url.Action("AddProject", "Project")"> Thêm </a> <i class="icon-plus"></i>
                 </div>
+            @*}*@
         </div>
     </header>
+    <!--The end header-->
+    <!--Seach-->
     <div class="row">
-        @using (Html.BeginForm("SeachDepartment", "Department", FormMethod.Post, new { @enctype = "multipart/form-data", @class = "form-horizontal  editcontent" }))
+        @using (Html.BeginForm("SeachProject", "Project", FormMethod.Post, new { @enctype = "multipart/form-data", @class = "form-horizontal  editcontent" }))
             {
             @Html.AntiForgeryToken()
             <div class="col-md-10 ">
@@ -29,29 +34,36 @@
                         <option value="0">Người quản lí</option>
                         @foreach (var item in ViewData["User"] as IList<User>)
                         {
-                            if (ViewBag.ManagerProject == @item.Id)
-                            {
-                                <option value="@item.Id" selected> @item.FullName </option>
-                            }
-                            else
-                            {
-                                <option value="@item.Id"> @item.FullName </option>
-                            }
+                            <option value="@item.Id" selected=" @((ViewBag.ManagerProject == @item.Id) ? "selected" : "")"> @item.FullName </option>
                         }
                     </select>
                 </div>
                 <div class="col-md-2 TcssMarg">
-                    <input class="form-control myctr input-sm" type="text" name="ProjectSymbol" id="ProjectSymbol" value="@ViewBag.ProjectSymbol" autocomplete="off" placeholder="Nhập mã phòng"  />
+                    <select class="m-bot15 input-sm  form-control  myctr " name="Status" id="Status">
+                        <option value="0" selected="@((ViewBag.Status == 0) ? "selected" : "")">Trạng thái</option>
+                        <option value="1" selected="@((ViewBag.Status == 1) ? "selected" : "")">Đang hoạt động</option>
+                        <option value="2" selected="@((ViewBag.Status == 2) ? "selected" : "")">Tạm dừng</option>
+                        <option value="3" selected="@((ViewBag.Status == 3) ? "selected" : "")">Kết thúc</option>
+                    </select>
+                </div>
+                <div class="col-md-2 TcssMarg">
+                    <input class="form-control myctr input-sm" type="text" name="ProjectSymbol" id="ProjectSymbol" value="@ViewBag.ProjectSymbol" autocomplete="off" placeholder="Nhập mã dự án"  />
                 </div>
                 <div class="col-md-2 TcssMarg ">
                     <div class="btn-group">
+                        @*@if (Session["AuthenticationFeature"] != null && (Session["AuthenticationFeature"] as List<SystemFeature>).Any(k => k.ControllerName.Equals("Project") && k.ActionName.Equals("SeachProject")))
+                            {*@
                         <button class="btn btn-primary btn-sm" type="submit">Tìm kiếm <i class="icon-search"></i></button>
+                        @*}*@
                     </div>
                 </div>
             </div>
         }
         <div class="col-md-2 row" style="text-align:right">
+            @*@if (Session["AuthenticationFeature"] != null && (Session["AuthenticationFeature"] as List<SystemFeature>).Any(k => k.ControllerName.Equals("Project") && k.ActionName.Equals("DeleteProject")))
+            {*@
                 <a class="btn btn-primary  btn-sm" href="javascript:void(0)" id="deleteItem1" onclick="ConfirmDelete1()">Xóa tất cả mục đã chọn <i class="icon-trash"></i></a>
+            @*}*@
         </div>
     </div>
     <!--Finish seach-->
@@ -61,11 +73,11 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Xóa phòng</h4>
+                    <h4 class="modal-title">Xóa dự án</h4>
                 </div>
                 <div class="modal-body">
                     <!--Containt-->
-                    <p>Bạn chắc chắn muốn xóa phòng</p>
+                    <p>Bạn chắc chắn muốn xóa dự án</p>
                     <div style="text-align:center;display:none" id="loaderDiv">
                         <img src="~/img/Spinner-1s-200px.gif" width="150" />
                     </div>
@@ -81,7 +93,7 @@
     <!--The end popup-->
     <div class="tcsspadtop ">
         <div class="col-md-12">
-            <p id="ShowNumber" style="color:#00aaff; font:bold"><b>Tìm thấy @ViewBag.ProjectNb phòng</b></p>
+            <p id="ShowNumber" style="color:#00aaff; font:bold"><b>Tìm thấy @ViewBag.ProjectNb dự án</b></p>
         </div>
     </div>
 
@@ -92,10 +104,12 @@
                     <thead>
                         <tr>
                             <th class="center"><input type="checkbox" id="checkAll" name="check" /></th>
-                            <th>Mã phòng </th>
-                            <th>Tên phòng </th>
+                            <th>Mã dự án </th>
+                            <th>Tên dự án </th>
                             <th style="width:auto;">Người quản lí</th>
                             <th>Địa chỉ</th>
+                            <th class="hidden-phone">Ngày bắt đầu </th>
+                            <th class="hidden-phone">Ngày kết thúc</th>
                             <th>Số lượng thiết bị </th>
                             <th>Trạng thái</th>
                             <th class="center">Xem</th>
@@ -111,13 +125,21 @@
                                 <td style="width:12%">@item.ProjectName</td>
                                 <td style="width:10%">@item.FullName</td>
                                 <td style="width:22%" class="hidden-phone">@item.Address</td>
+                                <td style="width:9%" class="center hidden-phone">@String.Format("{0:dd/MM/yyyy}", item.FromDate)</td>
+                                <td style="width:10%" class="center hidden-phone">@String.Format("{0:dd/MM/yyyy}", item.ToDate)</td>
                                 <td style="width:12%" class="center">@item.NumDevice</td>
-                                    <td style="width:9%" class="center ">@Html.Raw((eStatus.ProjectStatus)item.Status.GetEnumDescription())</td>
+                                <td style="width:9%" class="center ">@Html.Raw(item.Status.GetEnumDescription(typeof(eStatus.ProjectStatus)))</td>
                                 <td style="width:3%" class="center">
-                                        <a class="edit" href="@Url.Action("EditDepartment", "Department", new { Id = @item.Id })"><i class="icon-eye-open"></i></a>
+                                    @*@if (Session["AuthenticationFeature"] != null && (Session["AuthenticationFeature"] as List<SystemFeature>).Any(k => k.ControllerName.Equals("Project") && k.ActionName.Equals("EditProject")))
+                                    {*@
+                                        <a class="edit" href="@Url.Action("EditProject", "Project", new { Id = @item.Id })"><i class="icon-eye-open"></i></a>
+                                    @*}*@
                                 </td>
                                 <td  style="width:3%" class="center">
+                                    @*@if (Session["AuthenticationFeature"] != null && (Session["AuthenticationFeature"] as List<SystemFeature>).Any(k => k.ControllerName.Equals("Project") && k.ActionName.Equals("DeleteProject1")))
+                                    {*@
                                         <a class="edit" href="javascript:void(0)" id="DeleteItem" onclick="ConfirmDelete(@item.Id)"><i class="icon-trash"></i></a>
+                                    @*}*@
                                 </td>
                             </tr>
                         }
@@ -127,14 +149,8 @@
             </div>
         </div>
     </div>
-
-
-
-
-
 </section>
-
-<partial name="DeleteDepartmentPartial" />
+<partial name="DeleteProjectPartial" />
 <!-- page end-->
 <!--Scrip-->
 <!--The end Scrip-->
@@ -154,8 +170,8 @@
             "bFilter": false,
             "aoColumnDefs": [
             {  "aTargets": [0], bSortable: false },         
-            {  "aTargets": [6], bSortable: false },
-            { "aTargets": [7], bSortable: false },
+            {  "aTargets": [9], bSortable: false },
+            { "aTargets": [10], bSortable: false },
             ]
         });
 
@@ -186,19 +202,19 @@
                         if (result) {
                             $("#loaderDiv").hide();
                             $("#myModaldelete1").modal("hide");
-                            window.location = '@Url.Action("Department", "Department")';
+                            window.location = '@Url.Action("Project", "Project")';
                         } else {
                             $("#loaderDiv").hide();
                             $("#myModaldelete1").modal("hide");
-                            alert("Xóa phòng lỗi. Có phòng chưa trả hết thiết bị ");
+                            alert("Xóa dự án lỗi. Có dự án chưa trả hết thiết bị ");
                         }
                     }
                 })
             });
         }
     }
-    $('.Department').addClass('active');
-    $('.DepartmentTable').addClass('active');
+    $('.Project').addClass('active');
+    $('.ProjectTable').addClass('active');
     $('#ManagerProject').select2();
 </script>
 <!--end scrip-->

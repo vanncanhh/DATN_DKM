@@ -34,18 +34,15 @@
         }
         public int Login(string userName, string passWord/*, bool isLoginAdmin = false*/)
         {
-            var result = db.UserLogins.SingleOrDefault(x => x.UserName.Trim() == userName.Trim());
+            var result = db.UserLogins.SingleOrDefault(x => x.UserName.Trim() == userName && x.IsDeleted == false);
             if (result == null)
             {
                 return 0;
             }
             else
             {
-                if (result.PassWord.Trim() == passWord.Trim())
-                {
-                    return 1;
-                }
-                if (result.PassWord.Trim() == passWord.Trim())
+                string hashedPassword = Encryptor.MD5Hash(passWord.Trim());
+                if (result.PassWord.Trim() == hashedPassword)
                 {
                     return 1;
                 }
