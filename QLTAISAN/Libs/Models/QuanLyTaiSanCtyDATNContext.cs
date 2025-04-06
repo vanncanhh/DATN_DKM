@@ -29,6 +29,8 @@
         public virtual DbSet<HistoryRepairDetails_Result> HistoryRepairDetails_Results { get; set; }
         public virtual DbSet<RepairDetailsById_Result> RepairDetailsById_Results { get; set; }
         public virtual DbSet<HistoryScheduleTestById_Result> HistoryScheduleTestById_Results { get; set; }
+        public virtual DbSet<GetData_PieChart_Result> GetData_PieCharts { get; set; }
+        public virtual DbSet<GetData_HorizontalChart_Result> GetData_HorizontalCharts { get; set; }
         //
         public virtual DbSet<Credential> Credentials { get; set; } = null!;
         public virtual DbSet<DestructiveType> DestructiveTypes { get; set; } = null!;
@@ -87,6 +89,14 @@
         public IQueryable<DeviceHistory_Result> DeviceHistory()
         {
             return DeviceHistory_Results.FromSqlInterpolated($"EXEC dbo.DeviceHistory");
+        }
+        public IQueryable<GetData_PieChart_Result> GetData_PieChart()
+        {
+            return GetData_PieCharts.FromSqlInterpolated($"EXEC dbo.GetData_PieChart");
+        }
+        public IQueryable<GetData_HorizontalChart_Result> GetData_HorizontalChart()
+        {
+            return GetData_HorizontalCharts.FromSqlInterpolated($"EXEC dbo.GetData_HorizontalChart");
         }
 
         // SP SearchRepairDetails
@@ -340,6 +350,8 @@
             modelBuilder.Entity<HistoryRepairDetails_Result>().HasNoKey();
             modelBuilder.Entity<RepairDetailsById_Result>().HasNoKey();
             modelBuilder.Entity<HistoryScheduleTestById_Result>().HasNoKey();
+            modelBuilder.Entity<GetData_PieChart_Result>().HasNoKey();
+            modelBuilder.Entity<GetData_HorizontalChart_Result>().HasNoKey();
             modelBuilder.Entity<Credential>(entity =>
             {
                 entity.HasKey(e => new { e.UserGroupId, e.RoleId });

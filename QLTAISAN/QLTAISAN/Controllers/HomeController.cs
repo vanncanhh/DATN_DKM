@@ -46,5 +46,22 @@
         {
             return View();
         }
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult GetData_PieChart()
+        {
+            var result_lst = data.GetData_PieChart();
+            var _result = new { result = true, result_con = result_lst };
+            return Json(_result);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult GetData_HorizontalChart()
+        {
+            var result_lst = data.GetData_HorizontalChart();
+            var _result = new { result = true, result_con = result_lst };
+            return Json(_result);
+        }
     }
 }

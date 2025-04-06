@@ -4,7 +4,8 @@
     {
         public ActionResult Login_New()
         {
-            return View();
+            var model = new LoginModel(); // Đảm bảo model được khởi tạo
+            return View(model);
         }
 
         [HttpPost]

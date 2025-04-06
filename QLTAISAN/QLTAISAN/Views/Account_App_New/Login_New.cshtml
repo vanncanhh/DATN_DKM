@@ -3,14 +3,14 @@
     ViewBag.Title = "Quản Lý Tài Sản DKC";
     Layout = "_Layout_Login";
 }
-<link href="~/css/bootstrap.min.css" rel="stylesheet" />
-<link href="~/css/bootstrap-reset.css" rel="stylesheet" />
+<link href="~/Content/css/bootstrap.min.css" rel="stylesheet" />
+<link href="~/Content/css/bootstrap-reset.css" rel="stylesheet" />
 <!--external css-->
-<link href="~/assets/font-awesome/css/font-awesome.css" rel="stylesheet" />
+<link href="~/Content/assets/font-awesome/css/font-awesome.css" rel="stylesheet" />
 <!-- Custom styles for this template -->
-<link href="~/css/style.css" rel="stylesheet" />
-<link href="~/css/style-responsive.css" rel="stylesheet" />
-<link href="~/css/mytcsss.css" rel="stylesheet" />
+<link href="~/Content/css/style.css" rel="stylesheet" />
+<link href="~/Content/css/style-responsive.css" rel="stylesheet" />
+<link href="~/Content/css/mytcsss.css" rel="stylesheet" />
 <style>
     .control-label {
         font-weight: bold !important;
@@ -25,14 +25,25 @@
 
     .btn-login {
         box-shadow: 0 4px #afd3e0 !important;
-        background-color: #56abd4 !important;
+        background-color: #E88B00 !important;
     }
 
     .form-signin {
         height: 330px !important;
     }
+
+    .bg {
+        /* The image used */
+        background-image: url("/Content/td3.png");
+        /* Full height */
+        height: 100%;
+        /* Center and scale the image nicely */
+        background-position: center;
+        background-repeat: no-repeat;
+        /* background-size: cover;*/
+    }
 </style>
-<body class="login-body">
+<body class="login-body bg">
     <div class="container">
         @using (Html.BeginForm("Login_New", "Account_App_New", FormMethod.Post, new { @class = "form-horizontal form-signin", role = "form" }))
         {
