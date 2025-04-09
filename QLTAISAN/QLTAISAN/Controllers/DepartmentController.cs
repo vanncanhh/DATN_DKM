@@ -20,18 +20,18 @@
         }
 
         [HttpPost]
-        public ActionResult SeachDepartment(FormCollection colection, ProjectDkc Project)
+        public ActionResult SeachDepartment(IFormCollection colection, ProjectDkc Project)
         {
             ViewData["User"] = Ql.Users.Where(x => x.Status != 1 && x.IsDeleted == false).ToList();
             String ProjectSymbol = colection["ProjectSymbol"].ToString().Trim();
             //   int? Status = colection["Status"].Equals("0") ? (int?)null : Convert.ToInt32(colection["Status"]);
             int? ManagerProject = colection["ManagerProject"].Equals("0") ? (int?)null : Convert.ToInt32(colection["ManagerProject"]);
-            var lstProject = Ql.SearchProject(ManagerProject, null, 1, ProjectSymbol).ToList();
+            var lstProject = Ql.SearchProject(ManagerProject, null, 1, ProjectSymbol).AsEnumerable().ToList();
             var ViewProject = lstProject;
             // ViewBag.Status = Status;
             ViewBag.ManagerProject = ManagerProject;
             ViewBag.ProjectSymbol = ProjectSymbol;
-            ViewBag.ProjectNb = Ql.SearchProject(ManagerProject, null, 1, ProjectSymbol).Count();
+            ViewBag.ProjectNb = Ql.SearchProject(ManagerProject, null, 1, ProjectSymbol).AsEnumerable().Count();
             return View("Department", ViewProject);
         }
 
@@ -52,15 +52,13 @@
 
         [HttpPost]
         //[HasCredential(RoleID = "ADD_DEPARTMENT")]
-        public ActionResult AddDepartment(FormCollection colection, ProjectDkc Project)
+        public ActionResult AddDepartment(IFormCollection colection, ProjectDkc Project)
         {
 
             String ProjectSymbol = colection["ProjectSymbol"];
             String ProjectName = colection["ProjectName"];
             int? ManagerProject = colection["ManagerProject"].Equals("0") ? (int?)null : Convert.ToInt32(colection["ManagerProject"]);
             String Address = colection["Address"];
-            // DateTime? FromDate = colection["FromDate"].Equals("") ? (DateTime?)null : Convert.ToDateTime(colection["FromDate"]);
-            // DateTime? ToDate = colection["ToDate"].Equals("") ? (DateTime?)null : Convert.ToDateTime(colection["ToDate"]);
             int? Status = colection["Status"].Equals("0") ? (int?)null : Convert.ToInt32(colection["Status"]);
             var lstProjectSymbol = Ql.ProjectDkcs.Where(x => x.ProjectSymbol.Trim() == ProjectSymbol.Trim()).ToList();
             var CountPr = lstProjectSymbol.Count();
@@ -71,9 +69,6 @@
                 ViewBag.ProjectName = ProjectName;
                 ViewBag.ManagerProject = ManagerProject;
                 ViewBag.Address = Address;
-                // ViewBag.FromDate = @String.Format("{0:yyyy-MM-dd}", FromDate);
-                //  ViewBag.ToDate = @String.Format("{0:yyyy-MM-dd}", ToDate);
-                //  ViewBag.Status = Status;
                 ViewData["User"] = Ql.Users.Where(x => x.Status != 1 && x.IsDeleted == false).ToList();
                 return View();
             }
@@ -104,7 +99,7 @@
 
         [HttpPost]
         //[HasCredential(RoleID = "EDIT_DEPARTMENT")]
-        public ActionResult EditDepartment(FormCollection colection, ProjectDkc Project)
+        public ActionResult EditDepartment(IFormCollection colection, ProjectDkc Project)
         {
             int? Id = colection["Id"].Equals("0") ? (int?)null : Convert.ToInt32(colection["Id"]);
             String ProjectSymbol = colection["ProjectSymbol"];
@@ -173,16 +168,16 @@
             ViewData["DeviceType"] = Ql.DeviceTypes.ToList();
             if (DeviceType != 0)
             {
-                ViewData["Device"] = Ql.SearchDevice(0, DeviceType, null, null, null).Where(x => x.StatusRepair != 1).ToList();
+                ViewData["Device"] = Ql.SearchDevice(0, DeviceType, null, null, null).AsEnumerable().Where(x => x.StatusRepair != 1).ToList();
             }
             else
             {
-                ViewData["Device"] = Ql.SearchDevice(0, null, null, null, null).Where(x => x.StatusRepair != 1).ToList();
+                ViewData["Device"] = Ql.SearchDevice(0, null, null, null, null).AsEnumerable().Where(x => x.StatusRepair != 1).ToList();
             }
 
-            ViewData["DeviceOfProjectAll"] = Ql.DeviceOfProjectAll(Id).ToList();
+            ViewData["DeviceOfProjectAll"] = Ql.DeviceOfProjectAll(Id).AsEnumerable().ToList();
             var lstType = Ql.DeviceTypes.ToList();
-            var lstDeviceInProject = Ql.DeviceOfProjectAll(Id).ToList();
+            var lstDeviceInProject = Ql.DeviceOfProjectAll(Id).AsEnumerable().ToList();
             var tempList = lstDeviceInProject.GroupBy(k => k.TypeOfDevice).ToList();
             var map = new Dictionary<string, int>();
             foreach (var i in tempList)
@@ -482,7 +477,7 @@
         {
             Ql.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
             int Result = 0;
-            if (Ql.SearchDevice(null, null, null, pjId, null).Where(x => x.DeviceCode.Trim() == dvc).Count() == 1)
+            if (Ql.SearchDevice(null, null, null, pjId, null).AsEnumerable().Where(x => x.DeviceCode.Trim() == dvc).Count() == 1)
             {
                 var findDvCode = Ql.Devices.Where(x => x.DeviceCode.Trim() == dvc).Select(x => x.Id).First();
                 var check = Ql.DeviceDevices.Where(x => x.DeviceCodeChildren == findDvCode & x.IsDeleted == false).Count();
@@ -492,7 +487,7 @@
                 }
                 else
                 {
-                    ViewBag.Scaner = Ql.SearchDevice(null, null, null, pjId, dvc).First();
+                    ViewBag.Scaner = Ql.SearchDevice(null, null, null, pjId, dvc).AsEnumerable().First();
                     Result = 3;
                 }
             }
@@ -508,7 +503,7 @@
         //[HasCredential(RoleID = "VIEW_STATISTICAL_DEPARTMENT")]
         public ActionResult StatisticDepartment()
         {
-            ViewData["StatisticProject"] = Ql.StatisticProject().ToList();
+            ViewData["StatisticProject"] = Ql.StatisticProject().AsEnumerable().ToList();
             return View();
         }
     }
