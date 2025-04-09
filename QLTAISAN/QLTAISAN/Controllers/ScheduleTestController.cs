@@ -1,4 +1,6 @@
-﻿namespace QLTAISAN.Controllers
+﻿using Libs.Models;
+
+namespace QLTAISAN.Controllers
 {
     public class ScheduleTestController : Controller
     {
@@ -54,7 +56,7 @@
             var dvId = Ql.ScheduleTests.Find(Id).DeviceId;
             ViewData["historyScheduleTests"] = Ql.HistoryScheduleTestById(dvId).AsEnumerable().Where(x => x.Status == 1).ToList();
             ViewData["User"] = Ql.Users.Where(x => x.Status != 1 && x.IsDeleted != true).ToList();
-            var lstSchedule = Ql.ScheduleTestById(Id).ToString().Single();
+            var lstSchedule = Ql.ScheduleTestById(Id).AsEnumerable().Single();
             return View(lstSchedule);
         }
         [HttpPost]

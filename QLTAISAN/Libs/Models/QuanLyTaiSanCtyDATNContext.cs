@@ -29,6 +29,7 @@
         public virtual DbSet<HistoryRepairDetails_Result> HistoryRepairDetails_Results { get; set; }
         public virtual DbSet<RepairDetailsById_Result> RepairDetailsById_Results { get; set; }
         public virtual DbSet<HistoryScheduleTestById_Result> HistoryScheduleTestById_Results { get; set; }
+        public virtual DbSet<ScheduleTestById_Result> ScheduleTestById_Results { get; set; }
         public virtual DbSet<GetData_PieChart_Result> GetData_PieCharts { get; set; }
         public virtual DbSet<GetData_HorizontalChart_Result> GetData_HorizontalCharts { get; set; }
         //
@@ -265,9 +266,9 @@
         {
             return Database.ExecuteSqlInterpolated($"EXEC dbo.DeleteRole {id}");
         }
-        public int ScheduleTestById(Nullable<int> id)
+        public IQueryable<ScheduleTestById_Result> ScheduleTestById(Nullable<int> id)
         {
-            return Database.ExecuteSqlInterpolated($"EXEC dbo.ScheduleTestById {id}");
+            return ScheduleTestById_Results.FromSqlInterpolated($"EXEC dbo.ScheduleTestById {id}");
         }
         public int DeleteRepairDetails(string id)
         {
@@ -352,6 +353,7 @@
             modelBuilder.Entity<HistoryScheduleTestById_Result>().HasNoKey();
             modelBuilder.Entity<GetData_PieChart_Result>().HasNoKey();
             modelBuilder.Entity<GetData_HorizontalChart_Result>().HasNoKey();
+            modelBuilder.Entity<ScheduleTestById_Result>().HasNoKey();
             modelBuilder.Entity<Credential>(entity =>
             {
                 entity.HasKey(e => new { e.UserGroupId, e.RoleId });
