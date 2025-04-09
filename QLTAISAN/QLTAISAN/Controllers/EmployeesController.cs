@@ -70,9 +70,9 @@
         public JsonResult DeleteUser(int Id)
         {
             bool result = false;
-            var charts = data.SearchDevice(null, null, null, null, null).Where(x => x.UserId == Id).ToList().Count();
-            charts += data.SearchProject(Id, null, 0, null).ToList().Count();
-            charts += data.SearchRepairDetails(null, Id, null, null).ToList().Count();
+            var charts = data.SearchDevice(null, null, null, null, null).AsEnumerable().Where(x => x.UserId == Id).ToList().Count();
+            charts += data.SearchProject(Id, null, 0, null).AsEnumerable().ToList().Count();
+            charts += data.SearchRepairDetails(null, Id, null, null).AsEnumerable().ToList().Count();
             charts += data.RequestDevices.Where(x => x.UserApproved == Id).ToList().Count();
             charts += data.RequestDevices.Where(x => x.UserRequest == Id).ToList().Count();
             charts += data.ScheduleTests.Where(x => x.UserTest == Id).ToList().Count();

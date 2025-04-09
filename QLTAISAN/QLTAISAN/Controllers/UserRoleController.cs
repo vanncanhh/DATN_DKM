@@ -46,7 +46,7 @@
         }
         [HttpPost]
         //[ValidateAntiForgeryToken]
-        [HasCredential(RoleID = "ADD_USER")]
+        //[HasCredential(RoleID = "ADD_USER")]
         public ActionResult RegisterUser(string FullName, string Role, string Username, string Password)
         {
             var dao = new UserDao();
