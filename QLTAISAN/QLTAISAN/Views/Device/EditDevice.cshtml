@@ -61,13 +61,24 @@
                                             <label class="control-label col-md-4 ">Loại Thiết bị</label>
                                             <div class="col-md-8 input-group">
                                                 <select class="form-control myctr TypeOfDevice" required name="TypeOfDevice" id="TypeOfDevice" onchange="ChangeType()">
-                                                    <option value="" selected="@(Model.TypeOfDevice == null ? "selected" : "")" disabled="@(Model.TypeOfDevice == null ? "disabled" : "")">Chọn loại thiết bị</option>
+                                                    @if (Model.TypeOfDevice == null)
+                                                    {
+                                                        <option value="" selected>Chọn loại thiết bị</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="" >Chọn loại thiết bị</option>
+                                                    }
                                                     @foreach (var item in ViewData["TypeOfDevice"] as IList<DeviceType>)
                                                     {
-                                                        <option value="@item.Id"
-                                                                selected="@(Model.TypeOfDevice != null && Model.TypeOfDevice == @item.Id ? "selected" : "")">
-                                                            @item.TypeName
-                                                        </option>
+                                                        if (Model.TypeOfDevice == @item.Id)
+                                                        {
+                                                            <option value="@item.Id" selected>@item.TypeName</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@item.Id" >@item.TypeName</option>
+                                                        }                                                        
                                                     }
                                                 </select>
                                                 <span class="input-group-btn">
@@ -99,10 +110,24 @@
                                             <label class="control-label col-md-4 ">Là Thiết bị con của</label>
                                             <div class="col-md-8">
                                                 <select class="form-control myctr " name="ParentId" id="ParentId">
-                                                    <option value="0" selected="@(Model.ParentId == 0 ? "selected" : "")">Không phải thiết bị con</option>
+                                                    @if (Model.ParentId == 0)
+                                                    {
+                                                        <option value="0" selected>Không phải thiết bị con</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="0" >Không phải thiết bị con</option>
+                                                    }                                                    
                                                     @foreach (var item in ViewData["Device"] as IList<Device>)
                                                     {
-                                                        <option value="@item.Id" selected="@(Model.ParentId == @item.Id ? "selected" : "")">@item.DeviceCode-@item.DeviceName</option>
+                                                        if (Model.ParentId == @item.Id)
+                                                        {
+                                                            <option value="@item.Id" selected>@item.DeviceCode-@item.DeviceName</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@item.Id" >@item.DeviceCode-@item.DeviceName</option>
+                                                        }
                                                     }
                                                 </select>
                                             </div>
@@ -118,10 +143,24 @@
                                             <label class="control-label col-md-4 ">Người sử dụng</label>
                                             <div class="col-md-8 input-group">
                                                 <select class="form-control myctr userid" name="UserId" id="UserId" onchange="ChangeEmployees()">
-                                                    <option value="0" selected="@(Model.UserId == 0 ? "selected" : "")">Chọn người sử dụng</option>
+                                                    @if (Model.UserId == 0)
+                                                    {
+                                                        <option value="0" selected>Chọn người sử dụng</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="0">Chọn người sử dụng</option>
+                                                    }
                                                     @foreach (var item in ViewData["User"] as IList<User>)
                                                     {
-                                                        <option value="@item.Id" selected="@(Model.UserId == @item.Id ? "selected" : "")">@item.UserName-@item.FullName</option>
+                                                        if (Model.UserId == @item.Id)
+                                                        {
+                                                            <option value="@item.Id" selected>@item.UserName-@item.FullName</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@item.Id">@item.UserName-@item.FullName</option>
+                                                        }
                                                     }
                                                 </select>
                                                 <span class="input-group-btn" style="display:none" id="edituser">
@@ -136,10 +175,45 @@
                                             <label class="control-label col-md-4 ">Trạng Thái</label>
                                             <div class="col-md-8 input-group">
                                                 <select class="form-control myctr" name="Status">
-                                                    <option value="3" selected="@(Model.Status == 3 ? "selected" : "")">Đang Bị Hỏng</option>
-                                                    <option value="0" selected="@(Model.Status == 0 ? "selected" : Model.Status == 3 ? "" : "disabled")">Rảnh</option>
-                                                    <option value="1" selected="@(Model.Status == 1 ? "selected" : "disabled")">Đang trong dự án</option>
-                                                    <option value="2" selected="@(Model.Status == 2 ? "selected" : "disabled")">Đã Thanh Lý</option>
+                                                    @if (Model.Status == 3)
+                                                    {
+                                                        <option value="3" selected="selected">Đang Bị Hỏng</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="3">Đang Bị Hỏng</option>
+                                                    }
+
+                                                    @if (Model.Status == 0)
+                                                    {
+                                                        <option value="0" selected="selected">Rảnh</option>
+                                                    }
+                                                    else if (Model.Status == 3)
+                                                    {
+                                                        <option value="0">Rảnh</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="0" disabled="disabled">Rảnh</option>
+                                                    }
+
+                                                    @if (Model.Status == 1)
+                                                    {
+                                                        <option value="1" selected="selected">Đang trong dự án</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="1" disabled="disabled">Đang trong dự án</option>
+                                                    }
+
+                                                    @if (Model.Status == 2)
+                                                    {
+                                                        <option value="2" selected="selected">Đã Thanh Lý</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="2" disabled="disabled">Đã Thanh Lý</option>
+                                                    }
                                                 </select>
                                             </div>
                                         </div>

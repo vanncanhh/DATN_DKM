@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Libs.DTOs.SearchDevice_Result>
+﻿@model  IEnumerable<Libs.DTOs.SearchDevice_Result>
 @{
     ViewBag.Title = "Thiết Bị";
 }
@@ -15,7 +15,7 @@
             </header>
             <div class="panel-body">
                 <div class="adv-table">
-                    <div class="clearfix">
+                    <div class="clearfix ">
                         @using (Html.BeginForm("SearchDevice", "Device", FormMethod.Post, new { @enctype = "multipart/form-data", @class = "form-horizontal kh" }))
                         {
                             <div class="pull-left row col-md-12 nopadding">
@@ -167,32 +167,32 @@
                                 </tr>
                             </thead>
                             <tbody id="tabledvdiv">
-                                @foreach (var item in Model)
-                                {
-                                    <tr class="gradeA" id="row_@item.Id">
-                                        <td class="center" style="width:2%">
-                                            <input type="checkbox" name="check" class="form-c check" value="@item.Id" data-status="@item.Status" data-code="@item.DeviceCode" />
-                                        </td>
-                                        <td style="width:9%">@item.DeviceCode</td>
-                                        <td style="width:11%">@item.DeviceName</td>
-                                        <td style="width:10%">@item.TypeName</td>
-                                        <td style="text-align:right; width:8%">@item.PriceOne</td>
-                                        <td style="width:10%">@item.FullName</td>
-                                        <td style="width:13%">@Html.Raw(item.Configuration)</td>
-                                        <td style="width:5%">@item.ProjectSymbol</td>
-                                        <td style="width:10%">
-                                            @Html.Raw(Convert.ToInt32(item.Status).GetEnumDescription(typeof(eStatus.DeviceStatus)))<br />
-                                            @Html.Raw(Convert.ToInt32(item.StatusRepair).GetEnumDescription(typeof(eStatus.RepairStatus)))
-                                        </td>
-                                        <td style="width:15%">@item.NameTypeComponant</td>
-                                        <td class="center" style="width:3%">
-                                            <a class="edit icon-eye-open" href="@Url.Action("EditDevice", "Device", new { Id = item.Id })"></a>
-                                        </td>
-                                        <td class="center" style="width:3%">
-                                            <a class="icon-trash" id="deleteItem" href="#" onclick="ConfirmDelete(@item.Id, @item.Status)"></a>
-                                        </td>
-                                    </tr>
-                                }
+                                @{foreach (var item in Model)
+                                    {
+                                        <tr class="gradeA" id="row_@item.">
+                                            <td class="center" style="width:2%"><input type="checkbox" name="check" class="form-c check" value="@item.Id" data-status="@item.Status" data-code="@item.DeviceCode" /></td>
+                                            <td style="width:9%">@item.DeviceCode</td>
+                                            <td style="width:11%">
+                                                @item.DeviceName
+                                            </td>
+                                            <td style="width:10%">@item.TypeName</td>
+                                            <td style="text-align:right; width:8%">@item.PriceOne</td>
+                                            <td style="width:10%">@item.FullName</td>
+                                            <td style="width:13%">@Html.Raw(item.Configuration)</td>
+                                            <td style="width:5%">@item.ProjectSymbol</td>
+                                            <td style="width:10%">
+                                                @Html.Raw(Convert.ToInt32(item.Status).GetEnumDescription(typeof(eStatus.DeviceStatus)))<br />
+                                                @Html.Raw(Convert.ToInt32(item.StatusRepair).GetEnumDescription(typeof(eStatus.RepairStatus)))
+                                            </td>
+                                            <td style="width:15%">@item.NameTypeComponant</td>
+                                            <td class="center" style="width:3%">
+                                                <a class="edit  icon-eye-open" href="@Url.Action("EditDevice", "Device", new { Id = item.Id })"></a>
+                                            </td>
+                                            <td class="center" style="width:3%">
+                                                <a class="icon-trash" id="deleteItem" href="#" onclick="ConfirmDelete(@item.Id,@item.Status)"></a>
+                                            </td>
+                                        </tr>
+                                    }}
                             </tbody>
                         </table>
                         <input type="hidden" id="hiddenId" />
@@ -203,19 +203,98 @@
                     </div>
                 </div>
             </div>
+            <partial name="DevicePartial" />
+            <div class="modal fade" id="myModaldelete1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title">DELETE</h4>
+                        </div>
+                        <div class="modal-body">
+                            Bạn có muốn xóa thiết bị đã chọn?
+                            <div style="text-align:center;display:none" id="loaderDiv">
+                                <img src="~/Content/img/Spinner-1s-200px.gif" width="150" />
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button data-dismiss="modal" class="btn btn-default" type="button">Hủy</button>
+                            <a id="btnContinueDelete1" class="btn btn-warning"> Xoá</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="Liquidation" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title">Xác nhận</h4>
+                        </div>
+                        <div class="modal-body">
+                            Bạn có muốn thanh lý thiết bị đã chọn?
+                            <div style="text-align:center;display:none" id="loaderDiv">
+                                <img src="~/Content/img/Spinner-1s-200px.gif" width="150" />
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button data-dismiss="modal" class="btn btn-default" type="button">Hủy</button>
+                            <a id="btnLiquidation" class="btn btn-warning">Thanh Lý</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="Returnproject" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title">Trả Về Kho</h4>
+                        </div>
+                        <div class="modal-body">
+                            Bạn có muốn trả các thiết bị đã chọn về kho ?
+                            <div style="text-align:center;display:none" id="loaderDiv">
+                                <img src="~/Content/img/Spinner-1s-200px.gif" width="150" />
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button data-dismiss="modal" class="btn btn-default" type="button">Hủy</button>
+                            <a id="btnreturndevice" class="btn btn-warning">Trả Về Kho</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title">Mã Vạch</h4>
+                        </div>
+                        <div class="modal-body">
+                            <img class="center" id="BarCodeDevice" alt="" />
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-success" onclick="printImg()">Print</button>
+                            <button data-dismiss="modal" class="btn btn-default" type="button">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
     </div>
 </div>
-<script src="~/Content/js/DeviceScripts.js"></script>
+<!-- page end-->
+<script src="~/Scripts/DeviceScripts.js"></script>
 <link href="~/Content/css/select2.min.css" rel="stylesheet" />
-<script src="~/Content/js/select2.min.js"></script>
+<script src="~/Scripts/select2.min.js"></script>
 <script>
     $('.Device').addClass('active');
     $('.Devicetable').addClass('active');
     $('.seachRoom').select2();
     $('.searchType').select2();
 
-    // Export to Excel
+    // Export to exel
     function fnExcelReport() {
         var TypeOfDevice = $('#TypeOfDevice').val();
         var Status = $('#Status').val();
@@ -244,18 +323,21 @@
 
                 var ua = window.navigator.userAgent;
                 var msie = ua.indexOf("MSIE ");
-                if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:s11\./)) {
+                if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:s11\./))      // If Internet Explorer
+                {
                     txtArea1.document.open("txt/html", "replace");
                     txtArea1.document.write(response);
                     txtArea1.document.close();
                     txtArea1.focus();
                     sa = txtArea1.document.execCommand("SaveAs", true, "Say Thanks to Sumit.xls");
                 }
-                else {
+                else                 //other browser not tested on IE 11
+                {
                     console.log(response);
+                    var a = 1;
                     sa = window.open('data:application/vnd.ms-excel,' + encodeURIComponent(response));
                 }
             }
-        });
+        })
     }
 </script>
