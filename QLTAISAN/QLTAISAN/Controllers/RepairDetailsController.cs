@@ -66,10 +66,10 @@
         {
             var his = Ql.RepairDetails.Find(Id).DeviceId;
 
-            ViewData["RepairHistory"] = Ql.HistoryRepairDetails(his).Where(x => x.Status == 1).ToList();
+            ViewData["RepairHistory"] = Ql.HistoryRepairDetails(his).AsEnumerable().Where(x => x.Status == 1).ToList();
             ViewData["User"] = Ql.Users.Where(x => x.Status != 1 && x.IsDeleted != true).ToList();
             ViewData["RepairTypes"] = Ql.RepairTypes.ToList();
-            var repair = Ql.RepairDetailsById(Id).Single();
+            var repair = Ql.RepairDetailsById(Id).AsEnumerable().Single();
             return View(repair);
         }
         [HttpPost]

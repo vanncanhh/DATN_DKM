@@ -5,7 +5,7 @@
         QuanLyTaiSanCtyDATNContext data = new QuanLyTaiSanCtyDATNContext();
         // GET: Role
 
-        [HasCredential(RoleID = "VIEW_GROUP_ROLE")]
+        //[HasCredential(RoleID = "VIEW_GROUP_ROLE")]
         public ActionResult RoleIndex()
         {
             ViewData["ListUserGroup"] = data.UserGroups.ToList();
@@ -13,9 +13,8 @@
             return View();
         }
 
-        [HttpPost]
-        
-        [HasCredential(RoleID = "ADD_GROUP_ROLE")]
+        [HttpPost]        
+        //[HasCredential(RoleID = "ADD_GROUP_ROLE")]
         public ActionResult AddUserGroup(string ID, string Name)
         {
             var dao = new UserDao();
@@ -24,7 +23,7 @@
         }
 
         [HttpPost]
-        [HasCredential(RoleID = "DELETE_GROUP_ROLE")]
+        //[HasCredential(RoleID = "DELETE_GROUP_ROLE")]
         public ActionResult ConfirmDelete(string ID)
         {
             var dao = new UserDao();
@@ -33,8 +32,7 @@
         }
 
         [HttpPost]
-        [HasCredential(RoleID = "ADD_ROLE_FOR_GROUP")]
-        
+        //[HasCredential(RoleID = "ADD_ROLE_FOR_GROUP")]        
         public ActionResult GetRoleForeGroup(string GroupID)
         {
             //  var dao = new UserDao();
@@ -45,9 +43,8 @@
             return Json(result );
         }
 
-        [HttpPost]
-        
-        [HasCredential(RoleID = "ADD_ROLE_FOR_GROUP")]
+        [HttpPost]        
+        //[HasCredential(RoleID = "ADD_ROLE_FOR_GROUP")]
         public ActionResult AddRoleForGroup(string RoleId, string GroupId)
         {
             data.DeleteAllRole(GroupId);

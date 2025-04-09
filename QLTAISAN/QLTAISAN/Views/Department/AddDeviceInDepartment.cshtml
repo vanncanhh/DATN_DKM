@@ -2,7 +2,7 @@
 @{
     ViewBag.Title = "Thêm thiết bị vào Phòng ban " + Model.ProjectSymbol;
 }
-<link href="~/css/tcssproject.css" rel="stylesheet" />
+<link href="~/Content/css/tcssproject.css" rel="stylesheet" />
 <section class="panel">
     <header class="panel-heading " style="padding-bottom:20px">
         <a class="edit panel-default" style="margin-right:10px" href="@Url.Action("EditDepartment", "Department", new { id = Model.Id })">
@@ -118,6 +118,8 @@
             </div>
         </div>
     </div>
+
+    <!--The End DesigneTable-->
     <partial name="AddDeviceInDepartmentPartial" />
     <partial name="AddDeviceInDepartmentAllPartial" />
 

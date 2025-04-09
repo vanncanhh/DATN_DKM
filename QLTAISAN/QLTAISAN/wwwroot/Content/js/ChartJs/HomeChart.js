@@ -12,15 +12,15 @@ function GetData_PieChart() {
                 arrValue_PieChart = [['Trạng thái', 'Số lượng thiết bị']];
                 var data = response.result_con;
                 for (var i = 0; i < data.length; i++) {
-                    arrValue_PieChart.push([data[i].Status_type, data[i].num]);
+                    arrValue_PieChart.push([data[i].status_type, data[i].num]);
                 }
-               
+
                 google.charts.setOnLoadCallback(drawChart);
             }
             else { }
         }
     });
-   /* setTimeout(GetData_PieChart, 500000);*/
+    /* setTimeout(GetData_PieChart, 500000);*/
 };
 GetData_PieChart();
 function drawChart() {
@@ -58,7 +58,7 @@ function GetData_HorizontalChart() {
             else { }
         }
     });
-   /* setTimeout(GetData_HorizontalChart, 100000);*/
+    /* setTimeout(GetData_HorizontalChart, 100000);*/
 };
 GetData_HorizontalChart();
 function drawTitleSubtitle() {
@@ -68,7 +68,7 @@ function drawTitleSubtitle() {
             title: 'Số lượng thiết bị theo đơn vị',
             subtitle: ''
         },
-       // width: auto ,
+        // width: auto ,
         height: 400,
         hAxis: {
             title: 'Total Population',

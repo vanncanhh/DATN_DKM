@@ -44,7 +44,6 @@
             ViewData["Roles"] = data.UserGroups.ToList();
             return View();
         }
-
         [HttpPost]
         //[ValidateAntiForgeryToken]
         [HasCredential(RoleID = "ADD_USER")]
@@ -54,9 +53,8 @@
             var result = dao.UpdateRoleUser(FullName, Username, Role, Encryptor.MD5Hash(Password));
             return Json(result);
         }
-
         [HttpGet]
-        [HasCredential(RoleID = "CHANGE_INFO_USER")]
+        //[HasCredential(RoleID = "CHANGE_INFO_USER")]
         public JsonResult GetInfoAccount(string userId)
         {
             data.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
@@ -65,9 +63,8 @@
             var lstInfo = data.UserLogins.Where(x => x.UserName == u).FirstOrDefault();
             return Json(new { lstInfo });
         }
-
         [HttpPost]
-        [HasCredential(RoleID = "CHANGE_USER_GROUP")]
+        //[HasCredential(RoleID = "CHANGE_USER_GROUP")]
         public JsonResult ChangeRoleByUserId(int ID, string FullName, string Username, string Role, string Password)
         {
             // bool result = true;
@@ -75,10 +72,8 @@
             var result = dao.UpdateRole(ID, FullName, Username, Role, Password);
             return Json(result);
         }
-
-
         [HttpPost]
-        [HasCredential(RoleID = "DELETE_USER")]
+        //[HasCredential(RoleID = "DELETE_USER")]
         public JsonResult DeleteUser(int userId)
         {
             var dao = new UserDao();

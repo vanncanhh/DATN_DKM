@@ -35,11 +35,11 @@
                                     <tr>
                                         <td>@item.TypeName</td>
                                         <td>@item.TypeSymbol</td>
-                                        <td>@data.SearchDevice(null, item.Id, null, null, null).Count()</td>
-                                        <td>@data.SearchDevice(null, item.Id, null, null, null).Where(x => x.Status == 1 & x.IsDeleted == false).Count()</td>
-                                        <td>@data.SearchDevice(null, item.Id, null, null, null).Where(x => x.Status == 0 & x.IsDeleted == false).Count()</td>
-                                        <td>@data.SearchDevice(null, item.Id, null, null, null).Where(x => x.Status == 3 & x.IsDeleted == false).Count()</td>
-                                        <td>@data.SearchDevice(null, item.Id, null, null, null).Where(x => x.Status == 2 & x.IsDeleted == false).Count()</td>
+                                        <td>@data.SearchDevice(null, item.Id, null, null, null).AsEnumerable().Count()</td>
+                                        <td>@data.SearchDevice(null, item.Id, null, null, null).AsEnumerable().Where(x => x.Status == 1 & x.IsDeleted == false).Count()</td>
+                                        <td>@data.SearchDevice(null, item.Id, null, null, null).AsEnumerable().Where(x => x.Status == 0 & x.IsDeleted == false).Count()</td>
+                                        <td>@data.SearchDevice(null, item.Id, null, null, null).AsEnumerable().Where(x => x.Status == 3 & x.IsDeleted == false).Count()</td>
+                                        <td>@data.SearchDevice(null, item.Id, null, null, null).AsEnumerable().Where(x => x.Status == 2 & x.IsDeleted == false).Count()</td>
                                     </tr>
                                 }
                             </tbody>

@@ -13,7 +13,7 @@
         {
             ViewData["TypeOfDevice"] = data.DeviceTypes.ToList();
             ViewData["ProjectDKC"] = data.ProjectDkcs.Where(x => x.TypeProject == 1 & x.IsDeleted == false).ToList();
-            ViewData["sProjectDKC"] = data.SearchProject(null, 1, 1, null).ToList();
+            ViewData["sProjectDKC"] = data.SearchProject(null, 1, 1, null).AsEnumerable().ToList();
             var lstDevice = data.SearchDevice(null, null, null, null, null)
                      .AsEnumerable()
                      .Where(x => x.Status != 2)
@@ -29,7 +29,7 @@
         {
             ViewData["TypeOfDevice"] = data.DeviceTypes.ToList();
             ViewData["ProjectDKC"] = data.ProjectDkcs.Where(x => x.Status != 3 & x.TypeProject == 1 & x.IsDeleted == false).ToList();
-            ViewData["sProjectDKC"] = data.SearchProject(null, 1, 1, null).ToList();
+            ViewData["sProjectDKC"] = data.SearchProject(null, 1, 1, null).AsEnumerable().ToList();
             return View();
         }
         [HttpPost]
@@ -38,7 +38,7 @@
             var d = data.DeviceTypes.ToList();
             ViewData["TypeOfDevice"] = data.DeviceTypes.ToList();
             ViewData["ProjectDKC"] = data.ProjectDkcs.Where(x => x.Status != 3 && x.TypeProject == 1 && x.IsDeleted == false).ToList();
-            ViewData["sProjectDKC"] = data.SearchProject(null, 1, 1, null).ToList();
+            ViewData["sProjectDKC"] = data.SearchProject(null, 1, 1, null).AsEnumerable().ToList();
 
             // Lấy dữ liệu từ form sử dụng IFormCollection
             int Status = Convert.ToInt32(collection["Status"]);
@@ -73,7 +73,7 @@
         //  [AuthorizationViewHandler]
         public ActionResult Deviceliquidation()
         {
-            ViewData["sProjectDKC"] = data.SearchProject(null, 1, 0, null).ToList();
+            ViewData["sProjectDKC"] = data.SearchProject(null, 1, 0, null).AsEnumerable().ToList();
             ViewData["TypeOfDevice"] = data.DeviceTypes.ToList();
             ViewData["ProjectDKC"] = data.ProjectDkcs.Where(x => x.Status != 3 & x.IsDeleted == false).ToList();
             var lstDevice = data.SearchDevice(null, null, null, null, null)
@@ -90,7 +90,7 @@
 
             ViewData["TypeOfDevice"] = data.DeviceTypes.Where(x => x.Id == Id).ToList();
             ViewData["ProjectDKC"] = data.ProjectDkcs.Where(x => x.IsDeleted == false && x.TypeProject == 1).ToList();
-            ViewData["sProjectDKC"] = data.SearchProject(null, 1, 1, null).ToList();
+            ViewData["sProjectDKC"] = data.SearchProject(null, 1, 1, null).AsEnumerable().ToList();
 
             ViewBag.CountDevice = data.SearchDevice(null, Id, null, null, null)
                                       .AsEnumerable()
@@ -110,7 +110,7 @@
         public ActionResult SearchTypeDevice(IFormCollection collection)
         {
             ViewData["ProjectDKC"] = data.ProjectDkcs.Where(x => x.TypeProject == 1 && x.IsDeleted == false).ToList();
-            ViewData["sProjectDKC"] = data.SearchProject(null, 1, 1, null).ToList();
+            ViewData["sProjectDKC"] = data.SearchProject(null, 1, 1, null).AsEnumerable().ToList();
 
             int Status = Convert.ToInt32(collection["Status"]);
             int? TypeOfDevice = collection["TypeOfDevice"].Equals("0") ? (int?)null : Convert.ToInt32(collection["TypeOfDevice"]);
@@ -237,135 +237,85 @@
             return RedirectToAction("EditDevice", "Device", new { Id = device.Id });
         }
         [HttpGet]
-        public async Task<IActionResult> EditDevice(int id)
+        public ActionResult EditDevice(int Id)
         {
-            // Lấy thông tin thiết bị thông qua stored procedure DeviceById
-            var deviceResult = (await data.DeviceById(id).ToListAsync()).SingleOrDefault();
-            if (deviceResult == null)
-                return NotFound();
+            ViewBag.CheckDv = data.DeviceOfProjects.Where(x => x.DeviceId == Id).Count();
+            ViewBag.CheckDvDv = data.DeviceDevices.Where(x => x.DeviceCodeChildren == Id || x.DeviceCodeParents == Id).Count();
 
-            // Map dữ liệu từ deviceResult sang view model
-            var viewModel = new DeviceById_Result
-            {
-                Id = deviceResult.Id,  // Đảm bảo Id là đúng từ DB
-                DeviceCode = deviceResult.DeviceCode,  // Đảm bảo DeviceCode được lấy từ DB
-                DeviceName = deviceResult.DeviceName,  // Đảm bảo DeviceName đúng
-                TypeOfDevice = deviceResult.TypeOfDevice,
-                ParentId = deviceResult.ParentId,
-                Configuration = deviceResult.Configuration,
-                Price = deviceResult.Price,
-                PurchaseContract = deviceResult.PurchaseContract,
-                DateOfPurchase = deviceResult.DateOfPurchase,
-                SupplierId = deviceResult.SupplierId,
-                Guarantee = deviceResult.Guarantee,
-                Notes = deviceResult.Notes,
-                UserId = deviceResult.UserId,
-                Status = deviceResult.Status,
-                CreatedDate = deviceResult.CreatedDate,
-                ModifiedDate = deviceResult.ModifiedDate,
-                ProjectName = deviceResult.ProjectName,
-                IdProject = deviceResult.IdProject,
-                StatusRepair = deviceResult.StatusRepair,
-                NewCode = deviceResult.NewCode,
-                PriceOne = deviceResult.PriceOne
-            };
-
-            // Lấy các thông tin bổ sung từ các SP khác và bảng thông thường
-            ViewBag.CheckDv = await data.DeviceOfProjects.Where(x => x.DeviceId == id).CountAsync();
-            ViewBag.CheckDvDv = await data.DeviceDevices
-                .Where(x => x.DeviceCodeChildren == id || x.DeviceCodeParents == id)
-                .CountAsync();
-
-            // Kiểm tra và gán giá trị cho ViewData
-            ViewData["TypeOfDevice"] = await data.DeviceTypes.ToListAsync();
-            ViewData["User"] = await data.Users.Where(x => x.IsDeleted == false && x.Status == 0).ToListAsync();
-            ViewData["Supplier"] = await data.Suppliers.ToListAsync();
-            ViewData["Device"] = await data.Devices.Where(x => x.IsDeleted == false).ToListAsync();
-            ViewData["ProjectDKC"] = await data.ProjectDkcs
-                .Where(x => x.Status == 1 && x.TypeProject == 1 && x.IsDeleted == false)
-                .ToListAsync();
-            ViewData["sProjectDKC"] = await data.SearchProject(null, 1, 1, null).ToListAsync();
-
-            // Kiểm tra dữ liệu sửa chữa
-            var repairDetails = await data.SearchRepairDetails(null, null, id, null).ToListAsync();
-            ViewData["RepairDetail"] = repairDetails ?? new List<SearchRepairDetails_Result>();  // Gán danh sách trống nếu không có dữ liệu
-
-            // Lịch sử thiết bị
-            var deviceHistoryData = await data.DeviceHistory().ToListAsync();
-            ViewData["DeviceHistory"] = deviceHistoryData.Where(x => x.DeviceId == id).ToList();
-
-            // Các dữ liệu khác
-            ViewData["UsageDevice"] = await data.SearchUseDevice(id).ToListAsync();
-            ViewData["SearchDeviceComponant"] = await data.SearchDevice(null, null, null, null, null).ToListAsync();
-
-            // Lấy danh sách các thành phần con (TypeComponant) dựa vào TypeOfDevice
+            // ViewData EditDevice
+            var DvType = data.DeviceById(Id).AsEnumerable().Select(x => x.TypeOfDevice).SingleOrDefault();
+            int a = Convert.ToInt32(DvType);
+            ViewData["TypeOfProject"] = data.DeviceOfProjects.Where(x => x.DeviceId == Id);
+            ViewData["TypeOfDevice"] = data.DeviceTypes.ToList();
+            ViewData["User"] = data.Users.Where(x => x.IsDeleted == false & x.Status == 0).ToList();
+            ViewData["Supplier"] = data.Suppliers.ToList();
+            ViewData["Device"] = data.Devices.Where(x => x.IsDeleted == false).ToList();
+            ViewData["ProjectDKC"] = data.ProjectDkcs.Where(x => x.Status == 1 & x.TypeProject == 1 & x.IsDeleted == false).ToList();
+            ViewData["sProjectDKC"] = data.SearchProject(null, 1, 1, null).AsEnumerable().ToList();
+            ViewData["RepairDetail"] = data.SearchRepairDetails(null, null, Id, null).AsEnumerable().ToList();
+            ViewData["DeviceHistory"] = data.DeviceHistory().AsEnumerable().Where(x => x.DeviceId == Id).ToList();
+            ViewData["UsageDevice"] = data.SearchUseDevice(Id).AsEnumerable().ToList();
+            ViewData["SearchDeviceComponant"] = data.SearchDevice(null, null, null, null, null).AsEnumerable().ToList();
             List<ChildrenOfDevice_Result> numbers = new List<ChildrenOfDevice_Result>();
-            int deviceType = deviceResult.TypeOfDevice ?? 0;
-            var typeComponantList = await data.TypeComponantOfDevice(deviceType).ToListAsync();
-            var lstTypeDevice = typeComponantList.Where(x => x.IsDeleted == false).ToList();
+            var lstTypeDevice = data.TypeComponantOfDevice(a).AsEnumerable().Where(x => x.IsDeleted == false).ToList();
+
             foreach (var item in lstTypeDevice)
             {
-                var lstTag = await data.ChildrenOfDevice(id, item.TypeSymbolChildren).ToListAsync();
-                numbers.Add(new ChildrenOfDevice_Result
-                {
-                    TypeName = item.NameTypeChildren,
-                    TypeSymbolChildren = item.TypeSymbolChildren,
-                    numbers = lstTag.ToArray()
-                });
+                var lstTag = data.ChildrenOfDevice(Id, item.TypeSymbolChildren).AsEnumerable().ToList();
+                Array a2 = lstTag.ToArray();
+                numbers.Add(new ChildrenOfDevice_Result { TypeName = item.NameTypeChildren, TypeSymbolChildren = item.TypeSymbolChildren, numbers = a2 });
             }
             ViewData["TypeComponantOfDevice"] = numbers;
+            //    public Array numbers { get; set; }   
 
-            return View(viewModel);
+            // Danh sách thiết bị con theo loại của thiết bị cha 
+            var chart = data.DeviceById(Id).AsEnumerable().Single();
+            return View(chart);
         }
 
         [HttpPost]
-        public async Task<IActionResult> EditDevice(DeviceById_Result model)
+        public ActionResult EditDevice(IFormCollection collection)
         {
-            // Kiểm tra dữ liệu đầu vào
-            if (!ModelState.IsValid)
+            int? TypeOfDevice = 0;
+            var check = collection["TypeOfDevice"];
+            if (check == 0)
             {
-                ViewData["TypeOfDevice"] = await data.DeviceTypes.ToListAsync();
-                ViewData["User"] = await data.Users.Where(x => x.IsDeleted == false && x.Status == 0).ToListAsync();
-                ViewData["Supplier"] = await data.Suppliers.ToListAsync();
-                ViewData["ProjectDKC"] = await data.ProjectDkcs
-                    .Where(x => x.Status == 1 && x.TypeProject == 1 && x.IsDeleted == false)
-                    .ToListAsync();
-                ViewData["sProjectDKC"] = data.SearchProject(null, 1, 1, null).AsEnumerable().ToList();
-                return View(model);
+                TypeOfDevice = Convert.ToInt32(collection["hiddenTypeId"]);
+            }
+            else
+            {
+                TypeOfDevice = collection["TypeOfDevice"].Equals("0") ? (int?)null : Convert.ToInt32(collection["TypeOfDevice"]);
+
+            }
+            var b = collection["hiddenParentID"];
+            var a = Convert.ToInt32(collection["UserId"]);
+            int DeviceId = Convert.ToInt32(collection["hiddenIddv"]);
+            //int? TypeOfDevice = collection["TypeOfDevice"].Equals("0") ? (int?)null : Convert.ToInt32(collection["TypeOfDevice"]);
+            string DeviceCode = collection["DeviceCode"];
+            string NewCode = collection["NewCode"];
+            string DeviceName = collection["DeviceName"];
+            double Price = collection["Price"].Equals("") ? 0 : Convert.ToDouble(collection["Price"]);
+            string Configuration = collection["Configuration"];
+            int? SupplierId = collection["SupplierId"].Equals("0") ? (int?)null : Convert.ToInt32(collection["SupplierId"]);
+            string PurchaseContract = collection["PurchaseContract"];
+            string Notes = collection["Notesdv"];
+            DateTime? DateOfPurchase = collection["DateOfPurchase"].Equals("") ? (DateTime?)null : Convert.ToDateTime(collection["DateOfPurchase"]);
+            DateTime? Guarantee = collection["Guarantee"].Equals("") ? (DateTime?)null : Convert.ToDateTime(collection["Guarantee"]);
+            int? UserId = collection["UserId"].Equals("0") ? (int?)null : Convert.ToInt32(collection["UserId"]);
+            int? ParentId = collection["hiddenParentID"].Equals("") ? (int?)null : Convert.ToInt32(collection["hiddenParentID"]);
+            int Status = Convert.ToInt32(collection["Status"]);
+            DateTime? CreatedDate = collection["CreatedDate"].Equals("") ? (DateTime?)null : Convert.ToDateTime(collection["CreatedDate"]);
+            data.UpdateDevice(DeviceId, DeviceCode, null, DeviceName, TypeOfDevice, ParentId, Configuration, Price, PurchaseContract, DateOfPurchase, SupplierId, Guarantee, UserId, Notes, CreatedDate, Status);
+
+
+            var lstComponant = data.DeviceDevices.Where(x => x.DeviceCodeParents == DeviceId & x.IsDeleted == false & x.TypeComponant == 1).Select(x => x.DeviceCodeChildren).ToList();
+            foreach (var item in lstComponant)
+            {
+                // update người dùng của thiết bị con khi thiết bị cha thay đổi ng dùng
+                data.UpdateUserDevice(item.Value, UserId);
             }
 
-            // Kiểm tra xem SupplierId có tồn tại trong bảng Supplier không
-            var supplierExists = await data.Suppliers.AnyAsync(x => x.Id == model.SupplierId);
-            if (!supplierExists)
-            {
-                ModelState.AddModelError("", "Supplier ID không hợp lệ.");
-                // Reload necessary data if validation fails
-                ViewData["TypeOfDevice"] = await data.DeviceTypes.ToListAsync();
-                ViewData["User"] = await data.Users.Where(x => x.IsDeleted == false && x.Status == 0).ToListAsync();
-                ViewData["Supplier"] = await data.Suppliers.ToListAsync();
-                ViewData["ProjectDKC"] = await data.ProjectDkcs
-                    .Where(x => x.Status == 1 && x.TypeProject == 1 && x.IsDeleted == false)
-                    .ToListAsync();
-                ViewData["sProjectDKC"] = data.SearchProject(null, 1, 1, null).AsEnumerable().ToList();
-                return View(model);
-            }
-
-            // Cập nhật thiết bị thông qua stored procedure UpdateDevice
-            await data.Database.ExecuteSqlInterpolatedAsync(
-                $"EXEC dbo.UpdateDevice {model.Id}, {model.DeviceCode}, {model.NewCode}, {model.DeviceName}, {model.TypeOfDevice}, {model.ParentId}, {model.Configuration}, {model.Price}, {model.PurchaseContract}, {model.DateOfPurchase}, {model.SupplierId}, {model.Guarantee}, {model.UserId}, {model.Notes}, {model.CreatedDate}, {model.Status}");
-
-            // Cập nhật thông tin người dùng của các thiết bị con (nếu có)
-            var lstComponant = await data.DeviceDevices
-                .Where(x => x.DeviceCodeParents == model.Id && x.IsDeleted == false && x.TypeComponant == 1)
-                .Select(x => x.DeviceCodeChildren)
-                .ToListAsync();
-            foreach (var childId in lstComponant)
-            {
-                await data.Database.ExecuteSqlInterpolatedAsync(
-                    $"EXEC dbo.UpdateUserDevice {childId.Value}, {model.UserId}");
-            }
-
-            return RedirectToAction("EditDevice", new { id = model.Id });
+            return RedirectToAction("EditDevice", "Device", DeviceId);
         }
         public ActionResult ReturnDeviceInProject(int Idpr, int Iddv)
         {
@@ -503,7 +453,7 @@
         public JsonResult Searchdv(int TypeOfDevice, int Status, int Guarantee, int Project, string DeviceCode)
         {
             data.ChangeTracker.QueryTrackingBehavior = Microsoft.EntityFrameworkCore.QueryTrackingBehavior.NoTracking;
-            var charts = data.SearchDevice(Status, TypeOfDevice, Guarantee, Project, DeviceCode).ToList();
+            var charts = data.SearchDevice(Status, TypeOfDevice, Guarantee, Project, DeviceCode).AsEnumerable().ToList();
             var model = charts.ToList();
             return Json(new
             {
@@ -723,7 +673,7 @@
                 .Where(id => !string.IsNullOrEmpty(id))
                 .Select(id => Convert.ToInt32(id))
                 .ToList();
-            var Listdv = data.SearchDevice(null, null, null, null, null)
+            var Listdv = data.SearchDevice(null, null, null, null, null).AsEnumerable()
                 .Where(t => idList.Contains(t.Id))
                 .ToList();
             List<string> list = new List<string>();
@@ -789,7 +739,7 @@
         public async Task<IActionResult> ExportToExcel(int? TypeOfDevice, int Status, int Guarantee, int? Project, string DeviceCode)
         {
             // Lấy dữ liệu từ service
-            var charts = data.SearchDevice(Status, TypeOfDevice, Guarantee, Project, DeviceCode)
+            var charts = data.SearchDevice(Status, TypeOfDevice, Guarantee, Project, DeviceCode).AsEnumerable()
                 .Where(x => x.Status != 2)
                 .ToList();
 
@@ -966,7 +916,7 @@
         [HttpPost]
         public JsonResult SearchDeviceComponant(int TypeChidren)
         {
-            var lst = data.SearchDevice(null, TypeChidren, null, null, null).Where(x => (x.Status == 0 || x.Status == 1) & x.StatusRepair != 1 & x.ParentId == null).ToList();
+            var lst = data.SearchDevice(null, TypeChidren, null, null, null).AsEnumerable().Where(x => (x.Status == 0 || x.Status == 1) & x.StatusRepair != 1 & x.ParentId == null).ToList();
             var result = new { lst };
             return Json(result);
         }
@@ -1021,11 +971,11 @@
             {
                 if (item.HasValue)
                 {
-                    var Name_Parent = data.TypeComponantOfDevice(item.Value).Select(i => new { i.TypeSymbolParents, i.NameTypeParents }).FirstOrDefault();
+                    var Name_Parent = data.TypeComponantOfDevice(item.Value).AsEnumerable().Select(i => new { i.TypeSymbolParents, i.NameTypeParents }).FirstOrDefault();
 
                     if (Name_Parent != null)
                     {
-                        var lstChild = data.TypeComponantOfDevice(item.Value).Where(x => x.IsDeleted == false).ToList();
+                        var lstChild = data.TypeComponantOfDevice(item.Value).AsEnumerable().Where(x => x.IsDeleted == false).ToList();
                         Array a2 = lstChild.ToArray();
                         numbers.Add(new Libs.DTOs.TypeComponantOfDevice_Result
                         {

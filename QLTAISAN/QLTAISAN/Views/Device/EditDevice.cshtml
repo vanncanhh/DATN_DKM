@@ -2,8 +2,8 @@
 @{
     ViewBag.Title = Model.DeviceCode;
 }
-<link href="~/css/select2.min.css" rel="stylesheet" />
-<script src="~/ckeditor/ckeditor.js"></script>
+<link href="~/Content/css/select2.min.css" rel="stylesheet" />
+<script src="~/Content/ckeditor/ckeditor.js"></script>
 <script src="~/Scripts/select2.min.js"></script>
 <div class="row">
     <div class="col-lg-12">
@@ -61,10 +61,13 @@
                                             <label class="control-label col-md-4 ">Loại Thiết bị</label>
                                             <div class="col-md-8 input-group">
                                                 <select class="form-control myctr TypeOfDevice" required name="TypeOfDevice" id="TypeOfDevice" onchange="ChangeType()">
-                                                    <option value="" selected="@(Model.TypeOfDevice == null ? "selected" : "")">"Chọn loại thiết bị</option>
+                                                    <option value="" selected="@(Model.TypeOfDevice == null ? "selected" : "")" disabled="@(Model.TypeOfDevice == null ? "disabled" : "")">Chọn loại thiết bị</option>
                                                     @foreach (var item in ViewData["TypeOfDevice"] as IList<DeviceType>)
                                                     {
-                                                        <option value="@item.Id" selected="@(Model.TypeOfDevice == @item.Id ? "selected" : "")">@item.TypeName</option>
+                                                        <option value="@item.Id"
+                                                                selected="@(Model.TypeOfDevice != null && Model.TypeOfDevice == @item.Id ? "selected" : "")">
+                                                            @item.TypeName
+                                                        </option>
                                                     }
                                                 </select>
                                                 <span class="input-group-btn">
@@ -75,7 +78,7 @@
                                         <div class="form-group m-bot15 clearfix ">
                                             <label class="control-label col-md-4 ">Mã Thiết Bị </label>
                                             <div class="col-md-8 input-group ">
-                                                <input class="form-control myctr form-control-inline" type="text" value="@Model.DeviceCode" name="DeviceCode" id="DeviceCode" readonly>
+                                                <input class="form-control myctr form-control-inline" type="text" size="16" value="@Model.DeviceCode" name="DeviceCode" id="DeviceCode" autocomplete="off" readonly>
                                                 <span class="input-group-btn">
                                                     <button class="btn btn-success icon-barcode" type="button" onclick="CreateDeviceCode()" id="btnodercode" style="line-height:inherit" disabled="disabled"></button>
                                                 </span>
@@ -97,16 +100,9 @@
                                             <div class="col-md-8">
                                                 <select class="form-control myctr " name="ParentId" id="ParentId">
                                                     <option value="0" selected="@(Model.ParentId == 0 ? "selected" : "")">Không phải thiết bị con</option>
-                                                    @if (ViewData["Device"] != null)
+                                                    @foreach (var item in ViewData["Device"] as IList<Device>)
                                                     {
-                                                        var devices = ViewData["Device"] as IList<Device>;
-                                                        if (devices != null)
-                                                        {
-                                                            foreach (var item in devices)
-                                                            {
-                                                                <option value="@item.Id" selected="@(Model.ParentId == item.Id ? "selected" : "")">@item.DeviceCode - @item.DeviceName</option>
-                                                            }
-                                                        }
+                                                        <option value="@item.Id" selected="@(Model.ParentId == @item.Id ? "selected" : "")">@item.DeviceCode-@item.DeviceName</option>
                                                     }
                                                 </select>
                                             </div>
@@ -115,7 +111,7 @@
                                         <div class="form-group m-bot15 clearfix ">
                                             <label class="control-label  col-md-4 ">Giá</label>
                                             <div class="col-md-8 ">
-                                                <input type="text" class="form-control myctr form" value="@Model.PriceOne" name="Price" id="Price" autocomplete="off" onkeyup="FormatNumber(this)">
+                                                <input type="text" style="text-align: right;" class="form-control myctr form" value="@Model.PriceOne" name="Price" id="Price" autocomplete="off" onkeyup="FormatNumber(this)">
                                             </div>
                                         </div>
                                         <div class="form-group m-bot15 clearfix" id="Employees">
@@ -158,7 +154,7 @@
                                         <div class="form-group m-bot15 clearfix">
                                             <label class="control-label col-md-4">Ngày mua</label>
                                             <div class="col-md-8 input-group">
-                                                <input class="form-control form-control-inline input-medium default-date-picker myctr" type="text" value="@String.Format("{0:yyyy-MM-dd}", Model.DateOfPurchase)" name="DateOfPurchase" autocomplete="off" />
+                                                <input class="form-control form-control-inline input-medium default-date-picker myctr" type="text" size="16" value="@String.Format("{0:yyyy-MM-dd}",Model.DateOfPurchase)" name="DateOfPurchase" autocomplete="off" />
                                                 <span class="input-group-btn">
                                                     <button class="btn btn-warning icon-calendar" type="button" style="line-height:inherit"></button>
                                                 </span>
@@ -242,35 +238,16 @@
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        @if (ViewData["DeviceHistory"] != null)
-                                                        {
-                                                            var deviceHistory = ViewData["DeviceHistory"] as IList<DeviceHistory_Result>;
-                                                            if (deviceHistory != null && deviceHistory.Any())
-                                                            {
-                                                                foreach (var item in deviceHistory)
-                                                                {
-                                                                    <tr>
-                                                                        <td>
-                                                                            @String.Format("{0:dd/MM/yyyy}", item.DateOfDelivery)
-                                                                        </td>
-                                                                        <td>
-                                                                            @String.Format("{0:dd/MM/yyyy}", item.DateOfReturn)
-                                                                        </td>
-                                                                        <td>@item.ProjectName</td>
-                                                                    </tr>
-                                                                }
-                                                            }
-                                                            else
-                                                            {
-                                                                <tr>
-                                                                    <td colspan="3">Không tìm thấy lịch sử thiết bị.</td>
-                                                                </tr>
-                                                            }
-                                                        }
-                                                        else
+                                                        @foreach (var item in ViewData["DeviceHistory"] as IList<DeviceHistory_Result>)
                                                         {
                                                             <tr>
-                                                                <td colspan="3">Không tìm thấy lịch sử thiết bị.</td>
+                                                                <td>
+                                                                    @String.Format("{0:dd/MM/yyyy}", item.DateOfDelivery)
+                                                                </td>
+                                                                <td>
+                                                                    @String.Format("{0:dd/MM/yyyy}", item.DateOfReturn)
+                                                                </td>
+                                                                <td>@item.ProjectName</td>
                                                             </tr>
                                                         }
                                                     </tbody>
@@ -282,9 +259,6 @@
                                         <section class="panel panel-down">
                                             <header class="panel-heading">
                                                 Lịch sử sửa chữa
-                                                @*<span class="tools pull-right">
-                                                        <a href="javascript:;" class="icon-chevron-down"></a>
-                                                    </span>*@
                                             </header>
                                             <div class="panel-body">
                                                 <table class="table table-bordered table-hover table-striped" style="margin-bottom:0px">
@@ -297,35 +271,15 @@
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        @if (ViewData["RepairDetail"] != null)
-                                                        {
-                                                            var repairDetails = ViewData["RepairDetail"] as IList<SearchRepairDetails_Result>;
-
-                                                            if (repairDetails != null)
-                                                            {
-                                                                foreach (var item in repairDetails)
-                                                                {
-                                                                    <tr>
-                                                                        <td>
-                                                                            @String.Format("{0:dd/MM/yyyy}", item.DateOfRepair)
-                                                                        </td>
-                                                                        <td>@item.TypeName</td>
-                                                                        <td>@item.PriceOne</td>
-                                                                        <td>@Html.Raw(item.Notes)</td>
-                                                                    </tr>
-                                                                }
-                                                            }
-                                                            else
-                                                            {
-                                                                <tr>
-                                                                    <td colspan="4">Không có thông tin sửa chữa.</td>
-                                                                </tr>
-                                                            }
-                                                        }
-                                                        else
+                                                        @foreach (var item in ViewData["RepairDetail"] as IList<SearchRepairDetails_Result>)
                                                         {
                                                             <tr>
-                                                                <td colspan="4">Không có thông tin sửa chữa.</td>
+                                                                <td>
+                                                                    @String.Format("{0:dd/MM/yyyy}", item.DateOfRepair)
+                                                                </td>
+                                                                <td>@item.TypeName</td>
+                                                                <td>@item.PriceOne</td>
+                                                                <td>@Html.Raw(item.Notes)</td>
                                                             </tr>
                                                         }
                                                     </tbody>
@@ -456,7 +410,7 @@
                                         <div class="modal-body">
                                             Bạn có muốn xóa thiết bị đã chọn?
                                             <div style="text-align:center;display:none" id="loaderDiv">
-                                                <img src="~/img/Spinner-1s-200px.gif" width="150" />
+                                                <img src="~/Content/img/Spinner-1s-200px.gif" width="150" />
                                             </div>
                                         </div>
                                         <div class="modal-footer">
@@ -486,7 +440,7 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    @foreach (var item in ViewData["sProjectDKC"] as IList<SearchProject_Result>)
+                                                    @foreach (var item in ViewData["sProjectDKC"] as IList<Libs.DTOs.SearchProject_Result>)
                                                     {
                                                         <tr class="gradeA" id="tr-id-2">
                                                             <td class="center">
@@ -519,7 +473,7 @@
                                         <div class="modal-body">
                                             Bạn có muốn thanh lý thiết bị đã chọn?
                                             <div style="text-align:center;display:none" id="loaderDiv">
-                                                <img src="~/img/Spinner-1s-200px.gif" width="150" />
+                                                <img src="~/Content/img/Spinner-1s-200px.gif" width="150" />
                                             </div>
                                         </div>
                                         <div class="modal-footer">
@@ -734,18 +688,15 @@
         </section>
     </div>
 </div>
-<script src="~/ScriptCommon.js"></script>
+<script src="~/Common/ScriptCommon.js"></script>
 <script>
     $(document).ready(function () {
-    // Initialize CKEditor
-        CKEDITOR.replace('PurchaseContract');
+        CKEDITOR.replace('PurchaseContract')
         CKEDITOR.replace('Configuration');
         CKEDITOR.replace('Notesdv');
         CKEDITOR.instances.Notesdv.config.readOnly = true;
         CKEDITOR.instances.Configuration.config.readOnly = true;
         CKEDITOR.instances.PurchaseContract.config.readOnly = true;
-    
-        // Initialize DataTable for history
         $('#history').DataTable({
             "bScrollInfinite": true,
             "bScrollCollapse": true,
@@ -754,44 +705,42 @@
             "bFilter": false,
             "bInfo": false,
         });
-    
         var statusrepair = $("#Statusrepair").val();
         var user = $("#UserId").val();
-        if (user != 0) { $("#edituser").show(); }
-    
+        if (user != 0) { $("#edituser").show() }
         var sta = $("#Statushd").val();
-        if (statusrepair == 1) { $("#repairdevice").hide(); }
-        else if (statusrepair == 0) { $("#repairdevice").show(); }
-        if (sta == 0) { $("#addproject").show(); $("#liquidationdevice").show(); $("#deletedevice").show(); $("#Edit").show(); }
-        else if (sta == 1) { $("#prjreturn").show(); $("#Edit").show(); }
-        else if (sta == 2) { $("#deletedevice").show(); $("#repairdevice").hide(); }
-        else if (sta == 3) { $("#deletedevice").show(); $("#liquidationdevice").show(); $("#Edit").show(); }
-    
+        if (statusrepair == 1) { $("#repairdevice").hide() }
+        else if (statusrepair == 0) { $("#repairdevice").show() }
+        if (sta == 0) { $("#addproject").show(); $("#liquidationdevice").show(); $("#deletedevice").show(); $("#Edit").show() }
+        else if (sta == 1) { $("#prjreturn").show(); $("#Edit").show() }
+        else if (sta == 2) { $("#deletedevice").show(); $("#repairdevice").hide() }
+        else if (sta == 3) { $("#deletedevice").show(); $("#liquidationdevice").show(); $("#Edit").show() }
         $('#detaildevice').find('input, button, select').attr('disabled', 'disabled');
-    
-        // Check if device exists in DeviceOfProject or DeviceDevices
+        //Check thiết bị có trong bảng DeviceOfProject or DeviceDevice
         var check = $("#hiddenCheck").val();
         var checkDvDv = $("#hiddenCheckDvDv").val();
         if (check > 0 || checkDvDv > 0) {
             $("#TypeOfDevice option").attr('disabled', 'disabled');
-        }
-    });
 
-    // Enable CKEditor for editing
+        }
+
+    });
     function EnableEditor2() {
         CKEDITOR.instances.Notesdv.setReadOnly(false);
         CKEDITOR.instances.Configuration.setReadOnly(false);
         CKEDITOR.instances.PurchaseContract.setReadOnly(false);
     }
-
-    // Disable CKEditor for editing
     function disableEditor2() {
         CKEDITOR.instances.Notesdv.setReadOnly(true);
         CKEDITOR.instances.Configuration.setReadOnly(true);
         CKEDITOR.instances.PurchaseContract.setReadOnly(true);
     }
-
-    // Edit button click handler
+    $('.TypeOfDevice').select2();
+    $('.parentid').select2();
+    $('.userid').select2();
+    $('.user').select2();
+    $('.Device').addClass('active');
+    $('.Devicetable').addClass('active');
     $("#Edit").click(function () {
         $("#Edit").hide();
         $("#Save").show();
@@ -800,8 +749,6 @@
         $("#ParentId option").attr('disabled', 'disabled');
         EnableEditor2();
     });
-
-    // Cancel button click handler
     $("#Cancel").click(function () {
         $("#Cancel").hide();
         $("#Save").hide();
@@ -809,71 +756,10 @@
         $('#detaildevice').find('input, button,select').attr('disabled', 'disabled');
         disableEditor2();
     });
-
-    // Save button click handler (submit form via AJAX)
     $("#Save").click(function () {
-        var deviceId = $("#hiddenIddv").val(); // Get DeviceId
-        var deviceCode = $("#DeviceCode").val();
-        var deviceName = $("#DeviceName").val();
-        var typeOfDevice = $("#TypeOfDevice").val(); // Get TypeOfDevice
-        var parentId = $("#ParentId").val(); // Get ParentId
-        var configuration = CKEDITOR.instances.Configuration.getData(); // Get CKEditor content
-        var price = $("#Price").val();
-        var purchaseContract = CKEDITOR.instances.PurchaseContract.getData(); // Get CKEditor content
-        var notes = CKEDITOR.instances.Notesdv.getData(); // Get CKEditor content
-        var supplierId = $("#SupplierId").val();
-        var status = $("#Status").val();
-        var dateOfPurchase = $("#DateOfPurchase").val(); // Get DateOfPurchase
-        var guarantee = $("#Guarantee").val(); // Get Guarantee
-        var userId = $("#UserId").val(); // Get UserId
-        var createdDate = $("#CreatedDate").val(); // Get CreatedDate
-        var modifiedDate = $("#ModifiedDate").val(); // Get ModifiedDate
-        var projectName = $("#ProjectName").val(); // Get ProjectName
-        var idProject = $("#IdProject").val(); // Get IdProject
-        var statusRepair = $("#StatusRepair").val(); // Get StatusRepair
-        var newCode = $("#NewCode").val(); // Get NewCode
-        var priceOne = $("#PriceOne").val(); // Get PriceOne
-
-        // Make AJAX request to update the device
-        $.ajax({
-            type: "POST",
-            url: "/Device/EditDevice", // The URL for the action to update the device in your controller
-            data: {
-                Id: deviceId,
-                DeviceCode: deviceCode,
-                DeviceName: deviceName,
-                TypeOfDevice: typeOfDevice,
-                ParentId: parentId,
-                Configuration: configuration,
-                Price: price,
-                PurchaseContract: purchaseContract,
-                DateOfPurchase: dateOfPurchase,
-                SupplierId: supplierId,
-                Guarantee: guarantee,
-                UserId: userId,
-                CreatedDate: createdDate,
-                ModifiedDate: modifiedDate,
-                Status: status,
-                IsDeleted: false, // Assuming IsDeleted is always false
-                ProjectName: projectName,
-                IdProject: idProject,
-                StatusRepair: statusRepair,
-                Notes: notes,
-                NewCode: newCode,
-                PriceOne: priceOne
-            },
-            success: function (response) {
-                if (response.success) {
-                    alert("Cập nhật thiết bị thành công!");
-                    window.location.href = "/Device/Device"; // Redirect to the device list or other page after save
-                } else {
-                    alert("Cập nhật thiết bị thất bại!");
-                }
-            },
-            error: function () {
-                alert("Đã xảy ra lỗi khi cập nhật thiết bị!");
-            }
-        });
+        $("#Save").hide();
+        $("#Save").show();
+        $("#Cancel").hide();
     });
 </script>
 <script>
@@ -1263,9 +1149,8 @@
         { var print = '<div style="overflow:hidden;height:133px;width:220px;margin-top:8px;margin-right:30px;border: 1px solid black;display: inline-block;margin-left:10px"><div style="overflow:hidden;margin-top:1px;margin-left:2px;width: 216px;height:57px"><img src="' + url + '" onload="window.print();window.close()"/></div><div id="DetailBarCode2" style="margin-top:4px;border-top: 1px solid black"><div style="margin-left:3px;margin-top:3px"><label>Mã TB : ' + DeviceCode + '</label><br /><label>Tên TB : ' + DeviceName + '</label><br />' }
         print.replace("null", " ");
         win.document.write('<html><head><title>Print</title><style>#DetailBarCode label {font-family: sans-serif;font-size: x-small;} #DetailBarCode1 label {font-family: sans-serif;font-size: xx-small;}</style>');
-        win.document.write('</head><body >');
+        win.document.write('</head>');
         win.document.write(print);
-        win.document.write('</body></html>');
         win.focus();
     }
     var ChangeType = function () {

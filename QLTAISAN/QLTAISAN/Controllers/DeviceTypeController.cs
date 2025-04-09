@@ -1,4 +1,6 @@
-﻿namespace QLTAISAN.Controllers
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace QLTAISAN.Controllers
 {
     public class DeviceTypeController : Controller
     {
@@ -20,11 +22,10 @@
         [HttpGet]
         public JsonResult GetDetail(int id)
         {
-            data.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
             var DeviceType = data.DeviceTypes.Find(id);
             return Json(new
             {
-                data = DeviceType,
+                data = DeviceType
             });
         }
         [HttpPost]
@@ -37,7 +38,7 @@
         public JsonResult DeleteDeviceType(int Id)
         {
             bool result = false;
-            var charts = data.SearchDevice(null, Id, null, null, null).ToList().Count();
+            var charts = data.SearchDevice(null, Id, null, null, null).AsEnumerable().ToList().Count();
             if (charts == 0)
             {
                 int checkdele = data.DeleteDeviceType(Id);

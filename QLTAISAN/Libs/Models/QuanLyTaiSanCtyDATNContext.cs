@@ -119,13 +119,13 @@
             return ChildrenOfDevice_Results.FromSqlInterpolated($"EXEC dbo.ChildrenOfDevice {deviceCodeParents}, {typeSymbolChildren}");
         }
         public int UpdateDevice(int id, string deviceCode, string newCode, string deviceName, int? typeOfDevice, int? parentId,
-                                string configuration, double price, string purchaseContract, DateTime? dateOfPurchase,
-                                int? supplierId, DateTime? guarantee, int? userId, string notes, DateTime? createdDate, int status)
+                                string configuration, double? price, string purchaseContract, DateTime? dateOfPurchase,
+                                int? supplierId, DateTime? guarantee, int? userId, string notes, DateTime? createdDate, int? status)
         {
             return Database.ExecuteSqlInterpolated(
                 $"EXEC dbo.UpdateDevice {id}, {deviceCode}, {newCode}, {deviceName}, {typeOfDevice}, {parentId}, {configuration}, {price}, {purchaseContract}, {dateOfPurchase}, {supplierId}, {guarantee}, {userId}, {notes}, {createdDate}, {status}");
         }
-        public int UpdateUserDevice(int idDv, int idUser)
+        public int UpdateUserDevice(int? idDv, int? idUser)
         {
             return Database.ExecuteSqlInterpolated($"EXEC dbo.UpdateUserDevice {idDv}, {idUser}");
         }

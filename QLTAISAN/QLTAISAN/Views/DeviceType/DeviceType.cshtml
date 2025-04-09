@@ -49,7 +49,7 @@
                     </div>
                 </div>
             </div>
-            @await Html.PartialAsync("~/Views/DeviceType/CreateDeviceType.cshtml")
+            <partial name="~/Views/DeviceType/CreateDeviceType.cshtml" />
             <div class="modal fade" id="supplierdelete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
@@ -150,10 +150,10 @@
             dataType: 'json',
             success: function (response) {
                 var data = response.data;
-                $('#hidID').val(data.Id);
-                $('#TypeName').val(data.TypeName);
-                $('#TypeSymbol1').val(data.TypeSymbol);
-                $('#Notes').val(data.Notes);
+                $('#hidID').val(data.id);
+                $('#TypeName').val(data.typeName);
+                $('#TypeSymbol1').val(data.typeSymbol);
+                $('#Notes').val(data.notes);
             },
         });
     }
