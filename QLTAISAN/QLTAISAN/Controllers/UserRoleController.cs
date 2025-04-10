@@ -4,7 +4,7 @@
     {
         QuanLyTaiSanCtyDATNContext data = new QuanLyTaiSanCtyDATNContext();
 
-        //[HasCredential(RoleID = "VIEW_USER")]
+        [HasCredential(RoleID = "VIEW_USER")]
         public ActionResult UserIndex()
         {
             var dao = new UserDao();
@@ -46,7 +46,7 @@
         }
         [HttpPost]
         //[ValidateAntiForgeryToken]
-        //[HasCredential(RoleID = "ADD_USER")]
+        [HasCredential(RoleID = "ADD_USER")]
         public ActionResult RegisterUser(string FullName, string Role, string Username, string Password)
         {
             var dao = new UserDao();
@@ -54,7 +54,7 @@
             return Json(result);
         }
         [HttpGet]
-        //[HasCredential(RoleID = "CHANGE_INFO_USER")]
+        [HasCredential(RoleID = "CHANGE_INFO_USER")]
         public JsonResult GetInfoAccount(string userId)
         {
             data.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
@@ -64,7 +64,7 @@
             return Json(new { lstInfo });
         }
         [HttpPost]
-        //[HasCredential(RoleID = "CHANGE_USER_GROUP")]
+        [HasCredential(RoleID = "CHANGE_USER_GROUP")]
         public JsonResult ChangeRoleByUserId(int ID, string FullName, string Username, string Role, string Password)
         {
             // bool result = true;
@@ -73,7 +73,7 @@
             return Json(result);
         }
         [HttpPost]
-        //[HasCredential(RoleID = "DELETE_USER")]
+        [HasCredential(RoleID = "DELETE_USER")]
         public JsonResult DeleteUser(int userId)
         {
             var dao = new UserDao();

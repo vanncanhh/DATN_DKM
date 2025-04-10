@@ -9,6 +9,7 @@
             _webHostEnvironment = webHostEnvironment;
             data = _data;
         }
+        [HasCredential(RoleID = "VIEW_DEVICE")]
         public ActionResult Device()
         {
             ViewData["TypeOfDevice"] = data.DeviceTypes.ToList();
@@ -24,13 +25,28 @@
                             .Count();
             return View(lstDevice);
         }
-
+        [HasCredential(RoleID = "SCAN_DEVICE")]
         public ActionResult ScanerDevice()
         {
             ViewData["TypeOfDevice"] = data.DeviceTypes.ToList();
             ViewData["ProjectDKC"] = data.ProjectDkcs.Where(x => x.Status != 3 & x.TypeProject == 1 & x.IsDeleted == false).ToList();
             ViewData["sProjectDKC"] = data.SearchProject(null, 1, 1, null).AsEnumerable().ToList();
             return View();
+        }
+        [HttpGet]
+        [HasCredential(RoleID = "SCAN_DEVICE")]
+        public JsonResult GetDeviceScaner(string DeviceCode)
+        {
+            bool Result = false;
+            if (data.SearchDevice(null, null, null, null, null).AsEnumerable().Where(x => x.DeviceCode.Trim() == DeviceCode).Count() == 1)
+            {
+                ViewBag.Scaner = data.SearchDevice(null, null, null, null, null).AsEnumerable().Where(x => x.DeviceCode.Trim() == DeviceCode).First();
+                Result = true;
+            }
+            else Result = false;
+            var model = ViewBag.Scaner;
+            var result = new { Result, model };
+            return Json(result);
         }
         [HttpPost]
         public ActionResult SearchDevice(IFormCollection collection)
@@ -82,6 +98,7 @@
                               .ToList();
             return View(lstDevice);
         }
+        [HasCredential(RoleID = "VIEW_DEVICE")]
         public ActionResult TypeDevice(int Id)
         {
             ViewBag.type = Id;
@@ -157,7 +174,7 @@
             return View("TypeDevice", charts);
         }
 
-        //[HasCredential(RoleID = "ADD_DEVICE")]
+        [HasCredential(RoleID = "ADD_DEVICE")]
         public ActionResult Create(int Id)
         {
             ViewBag.TypeDevice = Id;
@@ -169,6 +186,7 @@
             return View();
         }
         [HttpPost]
+        [HasCredential(RoleID = "ADD_DEVICE")]
         public ActionResult Create(IFormCollection collection)
         {
             // Helper: chuyển đổi giá trị sang int? (trả về null nếu rỗng hoặc bằng "0")
@@ -237,6 +255,7 @@
             return RedirectToAction("EditDevice", "Device", new { Id = device.Id });
         }
         [HttpGet]
+        [HasCredential(RoleID = "EDIT_DEVICE")]
         public ActionResult EditDevice(int Id)
         {
             ViewBag.CheckDv = data.DeviceOfProjects.Where(x => x.DeviceId == Id).Count();
@@ -274,6 +293,7 @@
         }
 
         [HttpPost]
+        [HasCredential(RoleID = "EDIT_DEVICE")]
         public ActionResult EditDevice(IFormCollection collection)
         {
             int? TypeOfDevice = 0;
@@ -317,6 +337,7 @@
 
             return RedirectToAction("EditDevice", "Device", DeviceId);
         }
+        [HasCredential(RoleID = "RETURN_DEVICETODEPOT")]
         public ActionResult ReturnDeviceInProject(int Idpr, int Iddv)
         {
             bool result = true;
@@ -336,6 +357,7 @@
             return Json(result);
         }
         [HttpPost]
+        [HasCredential(RoleID = "RETURN_DEVICETODEPOT")]
         public JsonResult ReturnDeviceProject(string Id)
         {
 
@@ -372,6 +394,7 @@
             return Json(result);
         }
         [HttpPost]
+        [HasCredential(RoleID = "ADD_SUPPLIER")]
         public JsonResult AddSupplier(string Name, string Email, string PhoneNumber, string Address, string Support)
         {
             data.AddSupplier(Name, Email, PhoneNumber, Address, Support);
@@ -379,6 +402,7 @@
             return Json(result);
         }
         [HttpPost]
+        [HasCredential(RoleID = "ADD_EMPLOYEE")]
         public JsonResult AddEmployees(string UserName, string FullName, string Email, string PhoneNumber, string Address, string Department, string Position)
         {
             data.AddUser(UserName, null, FullName, Email, PhoneNumber, Address, Department, Position, null, 0);
@@ -386,6 +410,7 @@
             return Json(result);
         }
         [HttpPost]
+        [HasCredential(RoleID = "ADD_REPAIR_DEVICE")]
         public JsonResult AddRepairDevice(int Iddv, int user, string Notesrepair)
         {
             if (user == 0)
@@ -397,6 +422,7 @@
             return Json(result);
         }
         [HttpPost]
+        [HasCredential(RoleID = "ADD_DEVICE_TYPE")]
         public JsonResult AddDeviceType(string TypeName, string TypeSymbol, string Notes)
         {
             bool result = false;
@@ -409,7 +435,7 @@
             }
             return Json(result);
         }
-
+        [HasCredential(RoleID = "ADD_DEVICEINPROJECT")]
         public JsonResult AddDeviceProject1(string Id, int PJ)
         {
             bool result = true;
@@ -504,6 +530,7 @@
 
             return Json(new { data = "Invalid TypeOfDevice" });
         }
+        [HasCredential(RoleID = "ADD_DEVICEINPROJECT")]
         public JsonResult AddDeviceProject(int Iddv, int Idpj)
         {
             bool result = true;
@@ -524,6 +551,7 @@
             }
             return Json(result);
         }
+        [HasCredential(RoleID = "LIQUIDATION_DEVICE")]
         public JsonResult LiquidationDevice(string Id)
         {
             bool result = true;
@@ -577,7 +605,7 @@
             }
             return Json(result);
         }
-
+        [HasCredential(RoleID = "DELETE_DEVICE")]
         public JsonResult DeleteDevice(string Id)
         {
             bool result = true;
@@ -631,6 +659,7 @@
             return Json(result);
         }
         [HttpPost]
+        [HasCredential(RoleID = "PRINTBARCODE_DEVICE")]
         public JsonResult GenerateBarCode(string barcode)
         {
             string src = "";
@@ -667,6 +696,7 @@
             });
         }
         [HttpPost]
+        [HasCredential(RoleID = "PRINTBARCODE_DEVICE")]
         public JsonResult GenerateBarCodeDevice(string dvcode, string dvid)
         {
             List<int> idList = dvid.Split(',')
@@ -735,7 +765,7 @@
             text = stripFormattingRegex.Replace(text, string.Empty);
             return text;
         }
-        [HttpGet("ExportToExcel")]
+        [HasCredential(RoleID = "EXEL_LIST_DDEVICE")]
         public async Task<IActionResult> ExportToExcel(int? TypeOfDevice, int Status, int Guarantee, int? Project, string DeviceCode)
         {
             // Lấy dữ liệu từ service
@@ -809,6 +839,7 @@
                 fileUrl = fileUrl
             });
         }
+        [HasCredential(RoleID = "VIEW_STATISTICAL_DEVICE")]
         public ActionResult StatisticalDevice()
         {
             ViewData["TypeOfDevice"] = data.DeviceTypes.ToList();
@@ -830,10 +861,9 @@
             var model = charts.ToList();
             return View("StatisticalDevice", model);
         }
+        [HasCredential(RoleID = "EXPORT_STATISTICAL_DEVICE")]
         public IActionResult ExportStatisticalDevice()
         {
-            data.ChangeTracker.QueryTrackingBehavior = Microsoft.EntityFrameworkCore.QueryTrackingBehavior.NoTracking;
-
             // Lấy dữ liệu từ cơ sở dữ liệu
             var charts = data.StatisticalDevice()
                 .Select(i => new
@@ -882,6 +912,7 @@
         }
 
         [HttpGet]
+        [HasCredential(RoleID = "VIEW_EMPLOYEE")]
         public JsonResult GetEmployees(int id)
         {
             data.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
@@ -892,12 +923,14 @@
             });
         }
         [HttpPost]
+        [HasCredential(RoleID = "EDIT_EMPLOYEE")]
         public JsonResult EditEmployees(int Id, string UserName, string FullName, string PhoneNumber, string Email, string Department, string Position, string Address)
         {
             bool result = true;
             data.UpdateUser(Id, UserName, null, FullName, Email, PhoneNumber, Address, Department, Position, null, 0);
             return Json(result);
         }
+        [HasCredential(RoleID = "ADD_TYPE_COMPONAN")]
         public JsonResult AddTypeChidren(int TypeChidren, int TypeParent)
         {
             bool result = false;
@@ -921,6 +954,7 @@
             return Json(result);
         }
         [HttpPost]
+        [HasCredential(RoleID = "ADD_DEVICE_DEVICE")]
         public JsonResult AddDeviceOfDevice(string dvChild, int dvParent, int TypeChild, int TypeParent, int Type_TypeCom)
         {
             var lstId = dvChild.Split(',');
@@ -933,6 +967,7 @@
             return Json(result);
         }
         [HttpPost]
+        [HasCredential(RoleID = "DELETE_DEVICE_DEVICE")]
         public JsonResult DeleteDvComponent(int dvChild, int dvParent, string Resons)
         {
             data.DeleteDeviceOfDevice(dvParent, dvChild, Resons);
@@ -940,6 +975,7 @@
             return Json(result);
         }
         [HttpPost]
+        [HasCredential(RoleID = "ADD_DEVICE_DEVICE")]
         public JsonResult AddDeviceComponantNew(Com com)
         {
             // Xét null tránh bị lỗi kiểu dữ liệu
@@ -961,7 +997,7 @@
             data.AddDeviceOfDevice(com.IdParent, IdChild, com.TypeComponant, com.TypeParent, com.Type_TypeCom);
             return Json(result);
         }
-
+        [HasCredential(RoleID = "MANAGER_TYPE_PR_DV")]
         public ActionResult ManagerTypeParent()
         {
             List<Libs.DTOs.TypeComponantOfDevice_Result> numbers = new List<Libs.DTOs.TypeComponantOfDevice_Result>();
@@ -990,6 +1026,7 @@
             return View();
             // public Array numbers { get; set; }
         }
+        [HasCredential(RoleID = "DELETE_TYPE_PR_DV")]
         public ActionResult DeleteTypeChildOfParent(int idChild, int idParent)
         {
             bool result = true;

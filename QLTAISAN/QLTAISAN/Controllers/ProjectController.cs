@@ -1,6 +1,5 @@
 ﻿namespace QLTAISAN.Controllers
 {
-    //[HasCredential(RoleID = "")]
     public class ProjectController : Controller
     {
         private readonly QuanLyTaiSanCtyDATNContext Ql;

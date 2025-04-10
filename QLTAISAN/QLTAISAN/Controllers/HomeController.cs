@@ -8,7 +8,6 @@
         {
             data = _data;
         }
-
         public ActionResult Index()
         {
             var ListCount = new Dictionary<string, int>();
@@ -62,6 +61,16 @@
             var result_lst = data.GetData_HorizontalChart();
             var _result = new { result = true, result_con = result_lst };
             return Json(_result);
+        }
+
+        public IActionResult Error401()
+        {
+            if (TempData["Message"] != null)
+            {
+                ViewBag.Message = TempData["Message"];
+            }
+
+            return View();
         }
     }
 }

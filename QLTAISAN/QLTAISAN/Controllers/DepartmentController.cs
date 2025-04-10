@@ -7,6 +7,7 @@
         {
             Ql = ql;
         }
+        [HasCredential(RoleID = "VIEW_DEPARTMENT")] //phân quyền
         public ActionResult Department()
         {
             ViewBag.ProjectNb = Ql.SearchProject(null, null, 1, null)
@@ -35,14 +36,14 @@
             return View("Department", ViewProject);
         }
 
-        //[HasCredential(RoleID = "ADD_DEPARTMENT")]
+        [HasCredential(RoleID = "ADD_DEPARTMENT")]
         public ActionResult AddDepartment()
         {
             ViewData["User"] = Ql.Users.Where(x => x.Status != 1 && x.IsDeleted == false).ToList();
             return View();
         }
         [HttpPost]
-        //[HasCredential(RoleID = "ADD_REPAIR_DEVICE")]
+        [HasCredential(RoleID = "ADD_REPAIR_DEVICE")]
         public JsonResult AddRepairType(string TypeName, string Notes)
         {
             Ql.AddRepairType(TypeName, Notes);
@@ -51,7 +52,7 @@
         }
 
         [HttpPost]
-        //[HasCredential(RoleID = "ADD_DEPARTMENT")]
+        [HasCredential(RoleID = "ADD_DEPARTMENT")]
         public ActionResult AddDepartment(IFormCollection colection, ProjectDkc Project)
         {
 
@@ -78,7 +79,7 @@
                 return RedirectToAction("Department", "Department");
             }
         }
-        //[HasCredential(RoleID = "EDIT_DEPARTMENT")]
+        [HasCredential(RoleID = "EDIT_DEPARTMENT")]
         public ActionResult EditDepartment(int Id)
         {
             var lstType = Ql.DeviceTypes.ToList();
@@ -98,7 +99,7 @@
         }
 
         [HttpPost]
-        //[HasCredential(RoleID = "EDIT_DEPARTMENT")]
+        [HasCredential(RoleID = "EDIT_DEPARTMENT")]
         public ActionResult EditDepartment(IFormCollection colection, ProjectDkc Project)
         {
             int? Id = colection["Id"].Equals("0") ? (int?)null : Convert.ToInt32(colection["Id"]);
@@ -116,7 +117,7 @@
             return RedirectToAction("EditDepartment", "Department");
         }
 
-        //[HasCredential(RoleID = "DELETE_DEPARTMENT")]
+        [HasCredential(RoleID = "DELETE_DEPARTMENT")]
         public JsonResult DeleteDepartment(string Id)
         {
             bool checkIsset = true;
@@ -145,7 +146,7 @@
             }
             return Json(result);
         }
-        //[HasCredential(RoleID = "DELETE_DEPARTMENT")]
+        [HasCredential(RoleID = "DELETE_DEPARTMENT")]
         public JsonResult DeleteDepartment1(int Id)
         {
             bool result = false;
@@ -162,7 +163,7 @@
 
             return Json(result);
         }
-        //[HasCredential(RoleID = "ADD_DEVICEINPROJECT")]
+        [HasCredential(RoleID = "ADD_DEVICEINPROJECT")]
         public ActionResult AddDeviceInDepartment(int Id, int DeviceType)
         {
             ViewData["DeviceType"] = Ql.DeviceTypes.ToList();
@@ -188,7 +189,7 @@
             ViewData["CountingDeviceType"] = map;
             return View(Ql.ProjectDkcs.Find(Id));
         }
-        //[HasCredential(RoleID = "ADD_DEVICEINPROJECT")]
+        [HasCredential(RoleID = "ADD_DEVICEINPROJECT")]
         public ActionResult AddDeviceInDepartment1(int Idpr, int Iddv, String Notes)
         {
             bool result = true;
@@ -206,7 +207,7 @@
             }
             return Json(result);
         }
-        //[HasCredential(RoleID = "RETURN_DEVICETODEPOT")]
+        [HasCredential(RoleID = "RETURN_DEVICETODEPOT")]
         public ActionResult ReturnDeviceInDepartment(int Idpr, int Iddv, String notes)
         {
             bool result = true;
@@ -225,7 +226,7 @@
             }
             return Json(result);
         }
-        //[HasCredential(RoleID = "ADD_DEVICEINPROJECT")]
+        [HasCredential(RoleID = "ADD_DEVICEINPROJECT")]
         public JsonResult AddDeviceDepartmentAll(string Id, int PJ, String Nt)
         {
             bool result = true;
@@ -265,7 +266,7 @@
             }
             return Json(result);
         }
-        //[HasCredential(RoleID = "RETURN_DEVICETODEPOT")]
+        [HasCredential(RoleID = "RETURN_DEVICETODEPOT")]
         public JsonResult ReturnDeviceDepartmentAll(string Id, int PJ, string notes)
         {
             bool result = true;
@@ -352,7 +353,7 @@
             }
             return st;
         }
-        //[HasCredential(RoleID = "EXPORT_DV_IN_DEPARTMENT")]
+        [HasCredential(RoleID = "EXPORT_DV_IN_DEPARTMENT")]
         public JsonResult ExportToExcel(int? IdProject)
         {
             Ql.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
@@ -434,7 +435,7 @@
             });
         }
 
-        //[HasCredential(RoleID = "ADD_DEVICEINPROJECT")]
+        [HasCredential(RoleID = "ADD_DEVICEINPROJECT")]
         public ActionResult AddDeviceInDepartmentMachine(int Id)
         {
             return View(Ql.ProjectDkcs.Find(Id));
@@ -466,7 +467,7 @@
             return Json(result);
         }
 
-        //[HasCredential(RoleID = "RETURN_DEVICETODEPOT")]
+        [HasCredential(RoleID = "RETURN_DEVICETODEPOT")]
         public ActionResult ReturnDeviceInDepartmentMachine(int Id)
         {
             return View(Ql.ProjectDkcs.Find(Id));
@@ -500,7 +501,7 @@
             return Json(result);
         }
 
-        //[HasCredential(RoleID = "VIEW_STATISTICAL_DEPARTMENT")]
+        [HasCredential(RoleID = "VIEW_STATISTICAL_DEPARTMENT")]
         public ActionResult StatisticDepartment()
         {
             ViewData["StatisticProject"] = Ql.StatisticProject().AsEnumerable().ToList();

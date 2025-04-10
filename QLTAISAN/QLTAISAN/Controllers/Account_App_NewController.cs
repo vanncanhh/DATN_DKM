@@ -1,4 +1,6 @@
-﻿namespace QLTAISAN.Controllers
+﻿using Newtonsoft.Json;
+
+namespace QLTAISAN.Controllers
 {
     public class Account_App_NewController : Controller
     {
@@ -31,7 +33,7 @@
 
                     // Lưu quyền truy cập vào session
                     List<string> privilegeLevelsNew = dao.GetListCredential(user.UserName.Trim());
-                    HttpContext.Session.SetString(CommonConstants.SESSION_CREDENTIALS, string.Join(",", privilegeLevelsNew));
+                    HttpContext.Session.SetString(CommonConstants.SESSION_CREDENTIALS, JsonConvert.SerializeObject(privilegeLevelsNew));
 
                     return RedirectToAction("Index", "Home");
                 }
@@ -57,6 +59,13 @@
                 }
             }
             return View(model);
+        }
+        [HttpPost]
+        public ActionResult Logout()
+        {
+            HttpContext.Session.Remove(CommonConstants.USER_SESSION);
+            HttpContext.Session.Remove(CommonConstants.SESSION_CREDENTIALS);
+            return RedirectToAction("Login_New", "Account_App_New");
         }
     }
 }

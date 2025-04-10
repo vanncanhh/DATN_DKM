@@ -4,7 +4,7 @@
     {
         QuanLyTaiSanCtyDATNContext Ql = new QuanLyTaiSanCtyDATNContext();
 
-        //[HasCredential(RoleID = "VIEW_REQUEST_DEVICE")]
+        [HasCredential(RoleID = "VIEW_REQUEST_DEVICE")]
         public ActionResult RequestDevice()
         {
             ViewData["User"] = Ql.Users.ToList();
@@ -26,7 +26,7 @@
             return View("RequestDevice", ViewRequestDevices);
         }
 
-        //[HasCredential(RoleID = "ADD_REQUEST_DEVICE")]
+        [HasCredential(RoleID = "ADD_REQUEST_DEVICE")]
         public ActionResult AddRequestDevice()
         {
             ViewData["User"] = Ql.Users.Where(x => x.Status != 1 && x.IsDeleted != true).ToList();
@@ -35,7 +35,7 @@
         }
 
         [HttpPost]
-        //[HasCredential(RoleID = "ADD_REQUEST_DEVICE")]
+        [HasCredential(RoleID = "ADD_REQUEST_DEVICE")]
         public ActionResult AddRequestDevice(IFormCollection colection, RequestDevice RequestDevice)
         {
             int? UserRequest = colection["UserRequest"].Equals("") ? (int?)null : Convert.ToInt32(colection["UserRequest"]);
@@ -51,7 +51,7 @@
             return RedirectToAction("RequestDevice", "RequestDevice");
         }
 
-        //[HasCredential(RoleID = "EDIT_REQUEST_DEVICE")]
+        [HasCredential(RoleID = "EDIT_REQUEST_DEVICE")]
         public ActionResult EditRequestDevice(int Id)
         {
             ViewData["DeviceTypes"] = Ql.DeviceTypes.ToList();
@@ -59,7 +59,7 @@
             return View(Ql.RequestDevices.Find(Id));
         }
         [HttpPost]
-        //[HasCredential(RoleID = "EDIT_REQUEST_DEVICE")]
+        [HasCredential(RoleID = "EDIT_REQUEST_DEVICE")]
         public ActionResult EditRequestDevice(IFormCollection colection, RequestDevice RequestDevice)
         {
             int? IdRequest = colection["IdRequest"].Equals("-1") ? (int?)null : Convert.ToInt32(colection["IdRequest"]);
@@ -83,7 +83,7 @@
 
         }
 
-        //[HasCredential(RoleID = "DELETE_REQUEST_DEVICE")]
+        [HasCredential(RoleID = "DELETE_REQUEST_DEVICE")]
         public JsonResult DeleteRequestDevice(string Id)
         {
             string a = "," + Id + ",";
@@ -94,7 +94,7 @@
             return Json(result);
         }
         [HttpPost]
-        //[HasCredential(RoleID = "ADD_DEVICE_TYPE")]
+        [HasCredential(RoleID = "ADD_DEVICE_TYPE")]
         public JsonResult AddDeviceType(string TypeName, string TypeSymbol, string Notes)
         {
             Ql.AddDeviceType(TypeName, TypeSymbol, Notes);
