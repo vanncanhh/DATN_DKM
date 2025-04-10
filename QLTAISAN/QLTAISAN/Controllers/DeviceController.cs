@@ -822,9 +822,9 @@
             int? Status = Convert.ToInt32(collection["Status"]);
             int? TypeOfDevice = Convert.ToInt32(collection["TypeOfDevice"]);
             var charts = data.StatisticalDevice().ToList();
-            if (Status == -1 & TypeOfDevice != 0) { charts = data.StatisticalDevice().Where(x => x.TypeOfDevice == TypeOfDevice).ToList(); }
-            else if (TypeOfDevice == 0 & Status != -1) { charts = data.StatisticalDevice().Where(x => x.Status == Status).ToList(); }
-            else if (Status != -1 & TypeOfDevice != 0) { charts = data.StatisticalDevice().Where(x => x.Status == Status & x.TypeOfDevice == TypeOfDevice).ToList(); }
+            if (Status == -1 & TypeOfDevice != 0) { charts = data.StatisticalDevice().AsEnumerable().Where(x => x.TypeOfDevice == TypeOfDevice).ToList(); }
+            else if (TypeOfDevice == 0 & Status != -1) { charts = data.StatisticalDevice().AsEnumerable().Where(x => x.Status == Status).ToList(); }
+            else if (Status != -1 & TypeOfDevice != 0) { charts = data.StatisticalDevice().AsEnumerable().Where(x => x.Status == Status & x.TypeOfDevice == TypeOfDevice).ToList(); }
             ViewBag.status = Status;
             ViewBag.type = TypeOfDevice;
             var model = charts.ToList();

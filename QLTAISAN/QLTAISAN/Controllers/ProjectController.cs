@@ -17,7 +17,7 @@
             return View(lstProject);
         }
         [HttpPost]
-        public ActionResult SeachProject(FormCollection colection, ProjectDkc Project)
+        public ActionResult SeachProject(IFormCollection colection, ProjectDkc Project)
         {
             ViewData["User"] = Ql.Users.ToList();
             String ProjectSymbol = colection["ProjectSymbol"].ToString().Trim();
@@ -46,7 +46,7 @@
         }
 
         [HttpPost]
-        public ActionResult AddProject(FormCollection colection, ProjectDkc Project)
+        public ActionResult AddProject(IFormCollection colection, ProjectDkc Project)
         {
 
             String ProjectSymbol = colection["ProjectSymbol"];
@@ -97,7 +97,7 @@
         }
 
         [HttpPost]
-        public ActionResult EditProject(FormCollection colection, ProjectDkc Project)
+        public ActionResult EditProject(IFormCollection colection, ProjectDkc Project)
         {
             int? Id = colection["Id"].Equals("0") ? (int?)null : Convert.ToInt32(colection["Id"]);
             String ProjectSymbol = colection["ProjectSymbol"];

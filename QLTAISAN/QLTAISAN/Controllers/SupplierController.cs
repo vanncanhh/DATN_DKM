@@ -15,7 +15,7 @@
             return View(data.Suppliers.Find(Id));
         }
         [HttpPost]
-        public ActionResult EditSupplier(FormCollection collection)
+        public ActionResult EditSupplier(IFormCollection collection)
         {
             int Id = Convert.ToInt32(collection["Id"]);
             string Name = collection["Name"];
@@ -28,7 +28,7 @@
             return RedirectToAction("Supplier", "Supplier");
         }
         [HttpPost]
-        public ActionResult AddSupplier(FormCollection collection)
+        public ActionResult AddSupplier(IFormCollection collection)
         {
             string Name = collection["Name"];
             string Email = collection["Email"];

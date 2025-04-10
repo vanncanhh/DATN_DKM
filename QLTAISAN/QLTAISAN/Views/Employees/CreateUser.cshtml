@@ -11,6 +11,12 @@
                     Thêm Nhân Viên
                 </header>
                 <div class="panel-body">
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger">
+                            <strong>Lỗi!</strong> Có lỗi xảy ra khi bạn nhập thông tin.
+                        </div>
+                    }
                     <div class="col-md-6">
                         <div class="form-group m-bot15 clearfix ">
                             <label class="control-label col-md-4 ">UserName</label>
@@ -51,11 +57,17 @@
                             <div class="col-md-8">
                                 <select class="input-large form-control myctr form-control" name="Department" id="Department">
                                     <option value="0" selected> Chọn  phòng </option>
-                                    @foreach (var item in ViewData["Department"] as IList<ProjectDkc>)
+                                    @if (ViewData["Department"] != null)
                                     {
-                                        <option value="@item.Id"> @item.ProjectName </option>
+                                        @foreach (var item in ViewData["Department"] as IList<ProjectDkc>)
+                                        {
+                                            <option value="@item.Id"> @item.ProjectName </option>
+                                        }
                                     }
-                                    @*@(ViewBag.ManagerProject == @item.Id ? "selected" : "")*@
+                                    else
+                                    {
+                                        <option disabled>No departments available</option>
+                                    }
                                 </select>
                             </div>
                         </div>

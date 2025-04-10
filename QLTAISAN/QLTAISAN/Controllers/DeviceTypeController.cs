@@ -11,7 +11,7 @@ namespace QLTAISAN.Controllers
             return View(data.DeviceTypes.ToList());
         }
         [HttpPost]
-        public ActionResult AddDeviceType(FormCollection collection)
+        public ActionResult AddDeviceType(IFormCollection collection)
         {
             string TypeName = collection["TypeName"];
             string Notes = collection["Notes"];

@@ -15,7 +15,7 @@
         }
 
         [HttpPost]
-        public ActionResult SeachRequestDevices(FormCollection colection, RequestDevice RequestDevice)
+        public ActionResult SeachRequestDevices(IFormCollection colection, RequestDevice RequestDevice)
         {
             ViewData["User"] = Ql.Users.ToList();
             ViewData["RequestDevices"] = Ql.RequestDevices.ToList();
@@ -36,7 +36,7 @@
 
         [HttpPost]
         //[HasCredential(RoleID = "ADD_REQUEST_DEVICE")]
-        public ActionResult AddRequestDevice(FormCollection colection, RequestDevice RequestDevice)
+        public ActionResult AddRequestDevice(IFormCollection colection, RequestDevice RequestDevice)
         {
             int? UserRequest = colection["UserRequest"].Equals("") ? (int?)null : Convert.ToInt32(colection["UserRequest"]);
             DateTime? DateOfRequest = colection["DateOfRequest"].Equals("") ? (DateTime?)null : Convert.ToDateTime(colection["DateOfRequest"]);
@@ -60,7 +60,7 @@
         }
         [HttpPost]
         //[HasCredential(RoleID = "EDIT_REQUEST_DEVICE")]
-        public ActionResult EditRequestDevice(FormCollection colection, RequestDevice RequestDevice)
+        public ActionResult EditRequestDevice(IFormCollection colection, RequestDevice RequestDevice)
         {
             int? IdRequest = colection["IdRequest"].Equals("-1") ? (int?)null : Convert.ToInt32(colection["IdRequest"]);
             int? UserRequest = colection["UserRequest"].Equals("0") ? (int?)null : Convert.ToInt32(colection["UserRequest"]);

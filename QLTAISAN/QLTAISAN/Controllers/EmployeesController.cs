@@ -38,6 +38,12 @@
             string Address = collection["Address"];
             string Department = collection["Department"];
             string Position = collection["Position"];
+            if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(FullName) || string.IsNullOrEmpty(Email))
+            {
+                ModelState.AddModelError("", "Các trường bắt buộc không được để trống.");
+                ViewData["Department"] = data.ProjectDkcs.Where(x => x.Status != 2 && x.IsDeleted == false).ToList();
+                return View();
+            }
             string hashedPassword = Encryptor.MD5Hash("12345");
             data.AddUser(UserName, hashedPassword, FullName, Email, PhoneNumber, Address, Department, Position, 0 , 0);
             return RedirectToAction("UserManagement", "Employees");

@@ -13,7 +13,7 @@
         }
 
         [HttpPost]
-        public ActionResult SeachRepairDetails(FormCollection colection, RepairDetail RepairDetails)
+        public ActionResult SeachRepairDetails(IFormCollection colection, RepairDetail RepairDetails)
         {
             ViewData["User"] = Ql.Users.ToList();
             ViewData["RepairTypes"] = Ql.RepairTypes.ToList();
@@ -48,7 +48,7 @@
             return View();
         }
         [HttpPost]
-        public ActionResult AddRepairDetails(FormCollection colection, RepairDetail RepairDetail)
+        public ActionResult AddRepairDetails(IFormCollection colection, RepairDetail RepairDetail)
         {
             int? DeviceId = colection["DeviceId"].Equals("") ? (int?)null : Convert.ToInt32(colection["DeviceId"]);
             DateTime? DateOfRepair = colection["DateOfRepair"].Equals("") ? (DateTime?)null : Convert.ToDateTime(colection["DateOfRepair"]);
@@ -73,7 +73,7 @@
             return View(repair);
         }
         [HttpPost]
-        public ActionResult EditRepairDetails(FormCollection colection, RepairDetail RepairDetail)
+        public ActionResult EditRepairDetails(IFormCollection colection, RepairDetail RepairDetail)
         {
             int? Id = colection["Id"].Equals("0") ? (int?)null : Convert.ToInt32(colection["Id"]);
             int? DeviceId = colection["DeviceId"].Equals("") ? (int?)null : Convert.ToInt32(colection["DeviceId"]);

@@ -61,14 +61,7 @@
                                             <label class="control-label col-md-4 ">Loại Thiết bị</label>
                                             <div class="col-md-8 input-group">
                                                 <select class="form-control myctr TypeOfDevice" required name="TypeOfDevice" id="TypeOfDevice" onchange="ChangeType()">
-                                                    @if (Model.TypeOfDevice == null)
-                                                    {
-                                                        <option value="" selected>Chọn loại thiết bị</option>
-                                                    }
-                                                    else
-                                                    {
-                                                        <option value="" >Chọn loại thiết bị</option>
-                                                    }
+                                                    <option value="" selected disabled>Chọn loại thiết bị</option>
                                                     @foreach (var item in ViewData["TypeOfDevice"] as IList<DeviceType>)
                                                     {
                                                         if (Model.TypeOfDevice == @item.Id)
@@ -177,7 +170,7 @@
                                                 <select class="form-control myctr" name="Status">
                                                     @if (Model.Status == 3)
                                                     {
-                                                        <option value="3" selected="selected">Đang Bị Hỏng</option>
+                                                        <option value="3" selected>Đang Bị Hỏng</option>
                                                     }
                                                     else
                                                     {
@@ -186,33 +179,33 @@
 
                                                     @if (Model.Status == 0)
                                                     {
-                                                        <option value="0" selected="selected">Rảnh</option>
+                                                        <option value="0" selected>Rảnh</option>
                                                     }
-                                                    else if (Model.Status == 3)
+                                                    else if (Model.Status != 3)
                                                     {
-                                                        <option value="0">Rảnh</option>
+                                                        <option value="0" disabled>Rảnh</option>
                                                     }
                                                     else
                                                     {
-                                                        <option value="0" disabled="disabled">Rảnh</option>
+                                                        <option value="0" disabled>Rảnh</option>
                                                     }
 
                                                     @if (Model.Status == 1)
                                                     {
-                                                        <option value="1" selected="selected">Đang trong dự án</option>
+                                                        <option value="1" selected>Đang sử dụng</option>
                                                     }
                                                     else
                                                     {
-                                                        <option value="1" disabled="disabled">Đang trong dự án</option>
+                                                        <option value="1" disabled>Đang sử dụng</option>
                                                     }
 
                                                     @if (Model.Status == 2)
                                                     {
-                                                        <option value="2" selected="selected">Đã Thanh Lý</option>
+                                                        <option value="2" selected>Đã Thanh Lý</option>
                                                     }
                                                     else
                                                     {
-                                                        <option value="2" disabled="disabled">Đã Thanh Lý</option>
+                                                        <option value="2" disabled>Đã Thanh Lý</option>
                                                     }
                                                 </select>
                                             </div>
@@ -367,7 +360,7 @@
                                 <input type="hidden" id="hiddenId" />
                                 <input type="hidden" id="hiddenIdpr" value="@Model.IdProject" />
                                 <input type="hidden" id="Statusrepair" value="@Model.StatusRepair" />
-                                <input type="hidden" id="hiddenParentID" name="hiddenParentID" value="@Model.ParentId" />
+                                <input type="hidden" id="hiddenParentId" name="hiddenParentId" value="@Model.ParentId" />
                                 <input type="hidden" id="hiddenTypeId" name="hiddenTypeId" value="@Model.TypeOfDevice" />
                                 <select type="hidden" class="hidden" id="UserDevice">
                                     <option value="" selected></option>
@@ -762,7 +755,7 @@
         </section>
     </div>
 </div>
-<script src="~/Common/ScriptCommon.js"></script>
+<script src="~/ScriptCommon.js"></script>
 <script>
     $(document).ready(function () {
         CKEDITOR.replace('PurchaseContract')
@@ -796,6 +789,8 @@
         if (check > 0 || checkDvDv > 0) {
             $("#TypeOfDevice option").attr('disabled', 'disabled');
 
+        } else {
+            $("#TypeOfDevice").removeAttr('disabled');
         }
 
     });

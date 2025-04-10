@@ -31,7 +31,7 @@
             return View();
         }
         [HttpPost]
-        public ActionResult AddRepairType(FormCollection colection, RepairType RepairType)
+        public ActionResult AddRepairType(IFormCollection colection, RepairType RepairType)
         {
             String Notes = colection["Notes"];
             String TypeName = colection["TypeName"];

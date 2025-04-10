@@ -20,7 +20,7 @@ namespace QLTAISAN.Controllers
         }
 
         [HttpPost]
-        public ActionResult SeachScheduleTest(FormCollection colection, RepairDetail RepairDetails)
+        public ActionResult SeachScheduleTest(IFormCollection colection, RepairDetail RepairDetails)
         {
             ViewData["User"] = Ql.Users.ToList();
             ViewData["ScheduleTests"] = Ql.ScheduleTests.ToList();
@@ -39,7 +39,7 @@ namespace QLTAISAN.Controllers
             return View();
         }
         [HttpPost]
-        public ActionResult AddScheduleTest(FormCollection colection, ScheduleTest ScheduleTest)
+        public ActionResult AddScheduleTest(IFormCollection colection, ScheduleTest ScheduleTest)
         {
             int? DeviceId = colection["DeviceId"].Equals("") ? (int?)null : Convert.ToInt32(colection["DeviceId"]);
             DateTime? DateOfTest = colection["DateOfTest"].Equals("") ? (DateTime?)null : Convert.ToDateTime(colection["DateOfTest"]);
@@ -60,7 +60,7 @@ namespace QLTAISAN.Controllers
             return View(lstSchedule);
         }
         [HttpPost]
-        public ActionResult EditScheduleTest(FormCollection colection, ScheduleTest ScheduleTest)
+        public ActionResult EditScheduleTest(IFormCollection colection, ScheduleTest ScheduleTest)
         {
             int? Id = colection["Id"].Equals("") ? (int?)null : Convert.ToInt32(colection["Id"]);
             int? DeviceId = colection["DeviceId"].Equals("") ? (int?)null : Convert.ToInt32(colection["DeviceId"]);
