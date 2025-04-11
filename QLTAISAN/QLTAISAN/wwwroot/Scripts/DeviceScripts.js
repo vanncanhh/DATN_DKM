@@ -254,59 +254,73 @@ function printDiv() {
 
 // Cấu hình Tạo Barcode (In mã vạch cho thiết bị )
 $('#ConfimprintImg').click(function () {
-    var chkArray = []; var IdArray = [];
-    / look for all checkboes that have a class 'chk' attached to it and check if it was checked /
-    var table = $('#example').dataTable()
+    var chkArray = [], IdArray = [];
+    var table = $('#example').dataTable();
+
     table.$('input[type="checkbox"]').each(function () {
         if (this.checked) {
-            var a = $(this).data("code");
-            var iddv = $(this).val();
-            chkArray.push(a.trim());
-            IdArray.push(iddv);
+            chkArray.push($(this).data("code").trim());
+            IdArray.push($(this).val());
         }
     });
-    / we join the array separated by the comma /
+
     if (chkArray.length > 0) {
         $("#hiddenId").val(IdArray);
-        var dvid = $("#hiddenId").val();
         $("#DeviceBarCode").val(chkArray);
-        var dvcode = $("#DeviceBarCode").val();
+
         $.ajax({
             type: "POST",
             url: "/Device/GenerateBarCodeDevice",
             data: {
-                dvcode: dvcode,
-                dvid: dvid
+                dvcode: $("#DeviceBarCode").val(),
+                dvid: $("#hiddenId").val()
             },
             async: false,
             success: function (response) {
                 var data = response.list;
-                var listdv = response.Listdv;
-                var url = '';
-                var win = window.open('');
-                for (var i = 0; i < data.length; i++) {
-                    var ProjectSymbol = listdv[i].ProjectSymbol;
-                    if (ProjectSymbol == null) { ProjectSymbol = "" }
-                    if ((listdv[i].DeviceCode.substring(0, 3) == "CHU" || listdv[i].DeviceCode.substring(0, 3) == "DCO") & ProjectSymbol.trim() == "VP") { url += '<div style="overflow:hidden;height:80px;width:225px;margin-top:15px;margin-right:30px;border: 1px solid black;display: inline-block;margin-left:5px;"><div style="overflow:hidden;margin-top:1px;margin-left:2px;width: 220px;height:30px"><img src="' + data[i] + '" onload="window.print();window.close()"/></div><div id="DetailBarCode1" style="margin-top:4px;border-top: 1px solid black"><div style="margin-left:3px;margin-top:3px"><label>Người SD : ' + listdv[i].FullName + '</label><br /><label>Mã TB : ' + listdv[i].DeviceCode + '</label><br /></div></div></div><br/>' }
-                    else if ((listdv[i].DeviceCode.substring(0, 3) == "CHU" || listdv[i].DeviceCode.substring(0, 3) == "DCO") & ProjectSymbol.trim() != "VP") { url += '<div style="overflow:hidden;height:80px;width:225px;margin-top:15px;margin-right:30px;border: 1px solid black;display: inline-block;margin-left:5px;"><div style="overflow:hidden;margin-top:1px;margin-left:2px;width: 220px;height:30px"><img src="' + data[i] + '" onload="window.print();window.close()"/></div><div id="DetailBarCode1" style="margin-top:4px;border-top: 1px solid black"><div style="margin-left:3px;margin-top:3px"><label>Mã TB : ' + listdv[i].DeviceCode + '</label><br /><label>Tên TB : ' + listdv[i].DeviceName + '</label><br /></div></div></div><br/>' }
-                    else if (ProjectSymbol.trim() == "VP") {
-                        url += '<div style="overflow:hidden;height:133px;width:220px;margin-top:8px;margin-right:30px;border: 1px solid black;display: inline-block;margin-left:10px"><div style="overflow:hidden;margin-top:1px;margin-left:2px;width: 216px;height:57px"><img src="' + data[i] + '" onload="window.print();window.close()"/></div><div id="DetailBarCode" style="margin-top:4px;border-top: 1px solid black"><div style="margin-left:3px;margin-top:3px"><label>Người SD : ' + listdv[i].FullName + '</label><br /><label>Mã TB : ' + listdv[i].DeviceCode + '</label><br /><label>Tên TB : ' + listdv[i].DeviceName + '</label><br /><label>Ngày BĐSD: ' + dateFormat(new Date(parseInt((listdv[i].CreatedDate).match(/\d+/)[0]))) + '</label><br /></div></div></div><br/>'
-                    }
-                    else url += '<div style="overflow:hidden;height:133px;width:220px;margin-top:8px;margin-right:30px;border: 1px solid black;display: inline-block;margin-left:10px"><div style="overflow:hidden;margin-top:1px;margin-left:2px;width: 216px;height:57px"><img src="' + data[i] + '" onload="window.print();window.close()"/></div><div id="DetailBarCode2" style="margin-top:4px;border-top: 1px solid black"><div style="margin-left:3px;margin-top:3px"><label>Mã TB : ' + listdv[i].DeviceCode + '</label><br /><label>Tên TB : ' + listdv[i].DeviceName + '</label><br /></div></div></div><br />'
+                var listdv = response.listdv;
+                var _url = '<body>';
 
+                for (var i = 0; i < data.length; i++) {
+                    var DeviceName = listdv[i].deviceName || 'N/A';
+                    var DeviceModel = listdv[i].typeName || 'N/A';
+                    var DeviceCode = listdv[i].deviceCode || 'N/A';
+                    var Price = listdv[i].priceOne || 'N/A';
+                    var Manufacturer = listdv[i].name || 'N/A';
+                    var rawDateAdded = listdv[i].createdDate;
+                    var DateAdded = rawDateAdded ? dateFormat(new Date(rawDateAdded)) : 'N/A';
+                    var url = data[i];
+
+                    _url += '<div style="padding-top:23px;margin-right:30px;overflow:hidden;display:inline-block;">' +
+                        '<table border="1" style="display:inline-block;width:250px;height:170px;">' +
+                        '<tbody>' +
+                        '<tr style="font-weight:bold;text-align:center;border:none;"><td>Tem thông tin thiết bị</td></tr>' +
+                        '<tr style="border:none;"><td style="padding:3px;font-size:12px;">Tên thiết bị: ' + DeviceName + '</td></tr>' +
+                        '<tr style="border:none;"><td>' +
+                        '<table style="width:100%;"><tbody><tr>' +
+                        '<td style="width:150px;border-right:1px solid black;padding-top:0px;font-size:12px;">' +
+                        'Loại thiết bị: ' + DeviceModel + '<br><hr style="margin:1px;">' +
+                        'Mã code: ' + DeviceCode + '<br><hr style="margin:1px;">' +
+                        'Giá: ' + Price + '<br><hr style="margin:1px;">' +
+                        'Nhà sản xuất: ' + Manufacturer + '<br><hr style="margin:1px;">' +
+                        'Ngày nhập: ' + DateAdded + '</td>' +
+                        '<td style="width:100px;border-width:1px;"><img src="' + url + '" style="width:90px;height:90px;"></td>' +
+                        '</tr></tbody></table></td></tr></tbody></table></div>';
                 }
+
+                _url += '</body>';
+
                 function dateFormat(d) {
-                    return d.getFullYear()
-                        + "/" + ((d.getMonth() + 1) + "").padStart(2, "0")
-                        + "/" + ((d.getDate() + "").padStart(2, "0"));
+                    return ((d.getDate() + "").padStart(2, "0")) + "/" + ((d.getMonth() + 1) + "").padStart(2, "0") + "/" + d.getFullYear();
                 }
-                var print = url.replace(/null/gi, "");
-                win.document.write('<html><head><title>Print</title><style>#DetailBarCode label {font-family: sans-serif;font-size: x-small;} #DetailBarCode1 label {font-family: sans-serif;font-size: xx-small;}</style> ');
-                win.document.write('</head><body >');
-                win.document.write(print);
-                win.document.write('</body></html>');
+
+                var print = _url.replace(/null|undefined/gi, "N/A");
+                var win = window.open("");
+                win.document.write('<html><head><title>Print</title><style>#DetailBarCode label{font-family:sans-serif;font-size:x-small;} #DetailBarCode1 label{font-family:sans-serif;font-size:xx-small;}</style>');
+                win.document.write('</head><body>' + print + '</body></html>');
+                win.onload();
                 win.focus();
             }
-        })
+        });
     }
-})
+});

@@ -1,4 +1,7 @@
-﻿namespace QLTAISAN.Controllers
+﻿using QRCoder;
+using System.Collections.Generic;
+using System.Drawing.Imaging;
+namespace QLTAISAN.Controllers
 {
     public class DeviceController : Controller
     {
@@ -695,57 +698,61 @@
                 data = src
             });
         }
+        private string GenerateQRCode(string code)
+        {
+            using (var qrGenerator = new QRCodeGenerator())
+            {
+                var qrCodeData = qrGenerator.CreateQrCode(code, QRCodeGenerator.ECCLevel.Q);
+                using (var qrCode = new QRCode(qrCodeData))
+                using (var bitmap = qrCode.GetGraphic(20))
+                using (var ms = new MemoryStream())
+                {
+                    bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                    byte[] byteImage = ms.ToArray();
+                    string result = "data:image/png;base64," + Convert.ToBase64String(byteImage);
+                    System.Diagnostics.Debug.WriteLine(result);
+
+                    return result;
+                }
+            }
+        }
         [HttpPost]
         [HasCredential(RoleID = "PRINTBARCODE_DEVICE")]
         public JsonResult GenerateBarCodeDevice(string dvcode, string dvid)
         {
-            List<int> idList = dvid.Split(',')
-                .Where(id => !string.IsNullOrEmpty(id))
-                .Select(id => Convert.ToInt32(id))
-                .ToList();
-            var Listdv = data.SearchDevice(null, null, null, null, null).AsEnumerable()
+            var idList = dvid.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                             .Select(int.Parse)
+                             .ToList();
+            var listdv = data.SearchDevice(null, null, null, null, null).AsEnumerable()
                 .Where(t => idList.Contains(t.Id))
                 .ToList();
-            List<string> list = new List<string>();
-            var lstdv = dvcode.Split(',');
+            List<string> barcodeImages = new List<string>();
+            var codes = dvcode.Split(',', StringSplitOptions.RemoveEmptyEntries);
 
-            foreach (var code in lstdv)
+            using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
             {
-                string barcodeImagePath = SaveBarcodeImage(code);
-                list.Add(barcodeImagePath);
-            }
-
-            var result = new { list, Listdv };
-            return Json(result); // Trả về kết quả dưới dạng JSON
-        }
-
-        private string SaveBarcodeImage(string barcode)
-        {
-            string fileName = $"{barcode}.png";  // Tạo tên tệp hình ảnh
-            string filePath = Path.Combine(_webHostEnvironment.WebRootPath, "barcodes", fileName);
-            using (Bitmap bitMap = new Bitmap(barcode.Length * 46, 80))
-            {
-                using (Graphics graphics = Graphics.FromImage(bitMap))
+                foreach (var code in codes)
                 {
-                    // Tải font từ file
-                    PrivateFontCollection pfc = new PrivateFontCollection();
-                    string path = Path.Combine(_webHostEnvironment.WebRootPath, "App_Data", "IDAutomationHC39XL.ttf");  // Đảm bảo font có sẵn trong thư mục wwwroot/App_Data
-                    pfc.AddFontFile(path);
-
-                    Font oFont = new Font(pfc.Families[0], 14, FontStyle.Regular);
-                    PointF point = new PointF(2f, 2f);
-                    SolidBrush blackBrush = new SolidBrush(Color.Black);
-                    SolidBrush whiteBrush = new SolidBrush(Color.White);
-
-                    graphics.FillRectangle(whiteBrush, 0, 0, bitMap.Width, bitMap.Height);
-                    graphics.DrawString("*" + barcode + "*", oFont, blackBrush, point);
+                    QRCodeData qrCodeData = qrGenerator.CreateQrCode(code, QRCodeGenerator.ECCLevel.Q);
+                    using (QRCode qrCode = new QRCode(qrCodeData))
+                    using (Bitmap bitmap = qrCode.GetGraphic(3))
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        bitmap.Save(ms, ImageFormat.Png);
+                        byte[] byteImage = ms.ToArray();
+                        string base64 = "data:image/png;base64," + Convert.ToBase64String(byteImage);
+                        barcodeImages.Add(base64);
+                    }
                 }
-                Directory.CreateDirectory(Path.GetDirectoryName(filePath));  // Tạo thư mục nếu chưa có
-                bitMap.Save(filePath, System.Drawing.Imaging.ImageFormat.Png);
             }
-            return "/barcodes/" + fileName;
-        }
+            var result = new
+            {
+                list = barcodeImages,
+                Listdv = listdv
+            };
 
+            return Json(result);
+        }
         public static string HtmlToPlainText(string html)
         {
             const string tagWhiteSpace = @"(>|$)(\W|\n|\r)+<";//matches one or more (white space or line breaks) between '>' and '<'
