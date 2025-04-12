@@ -133,30 +133,27 @@
 <script>
     function fnExcelReport() {
         $.ajax({
-            url: "/Device/ExportStatisticalDevice",
-            data: {
-            },
+            url: "/Device/ExportStatisticalDevice", // Gọi API của bạn
+            type: "GET",  // Phương thức GET vì không có body
             success: function (response) {
-                response = response.replace("DeviceCode", "Mã Thiết Bị");
-                response = response.replace("DeviceName", "Tên Thiết Bị");
-                response = response.replace("TimeUse", "Số Lần Sử Dụng");
-                response = response.replace("TimeRepair", "Số Lần Sửa Chữa");
-                response = response.replace("SumPrice", "Tổng Tiền Sửa Chữa");
-                response = response.replace("PriceOne", "Giá");
-                var ua = window.navigator.userAgent;
-                var msie = ua.indexOf("MSIE ");
-                if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./))      // If Internet Explorer
-                {
-                    txtArea1.document.open("txt/html", "replace");
-                    txtArea1.document.write(response);
-                    txtArea1.document.close();
-                    txtArea1.focus();
-                    sa = txtArea1.document.execCommand("SaveAs", true, "Say Thanks to Sumit.xls");
+                if (response.success) {
+                    // Lấy đường dẫn file Excel mà controller trả về
+                    var fileUrl = response.fileUrl;
+
+                    // Mở liên kết và tải file
+                    window.location.href = fileUrl;
+
+                    // Thông báo cho người dùng
+                    alert("Xuất Excel thành công!");
+                } else {
+                    // Nếu không thành công, hiển thị thông báo lỗi
+                    alert("Lỗi: " + response.message);
                 }
-                else                 //other browser not tested on IE 11
-                    sa = window.open('data:application/vnd.ms-excel,' + encodeURIComponent(response));
-                console.log(response)
+            },
+            error: function (xhr, status, error) {
+                // Nếu có lỗi trong quá trình gửi yêu cầu
+                alert("Có lỗi xảy ra trong quá trình xuất file: " + error);
             }
-        })
+        });
     }
 </script>

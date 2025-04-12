@@ -1,4 +1,6 @@
-﻿namespace QLTAISAN.Controllers
+﻿using ClosedXML.Excel;
+
+namespace QLTAISAN.Controllers
 {
     public class ProjectController : Controller
     {
@@ -274,10 +276,12 @@
             return st;
         }
 
+        [HasCredential(RoleID = "EXPORT_STATISTICAL_DEVICE")]
         public JsonResult ExportToExcel(int? IdProject)
         {
             Ql.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 
+            // Lấy dữ liệu từ cơ sở dữ liệu
             var charts = Ql.DeviceOfProjectAll(IdProject)
                 .Select(i => new
                 {
@@ -291,6 +295,7 @@
                 })
                 .ToList();
 
+            // Tạo danh sách NewConfig từ dữ liệu lấy về
             var model = new List<NewConfig>();
             foreach (var item in charts)
             {
@@ -319,35 +324,35 @@
             if (!Directory.Exists(folderPath))
                 Directory.CreateDirectory(folderPath);
 
-            // Sử dụng EPPlus để tạo file Excel
-            using (var package = new ExcelPackage())
+            // Sử dụng ClosedXML để tạo file Excel
+            using (var workbook = new XLWorkbook())
             {
-                var ws = package.Workbook.Worksheets.Add("Devices");
+                var worksheet = workbook.Worksheets.Add("Devices");
 
                 // Thêm header cho Excel
-                ws.Cells[1, 1].Value = "Mã";
-                ws.Cells[1, 2].Value = "Tên thiết bị";
-                ws.Cells[1, 3].Value = "Loại";
-                ws.Cells[1, 4].Value = "Cấu hình";
-                ws.Cells[1, 5].Value = "Ngày bàn giao";
-                ws.Cells[1, 6].Value = "Trạng thái sửa chữa";
-                ws.Cells[1, 7].Value = "Ghi chú";
+                worksheet.Cell(1, 1).Value = "Mã";
+                worksheet.Cell(1, 2).Value = "Tên thiết bị";
+                worksheet.Cell(1, 3).Value = "Loại";
+                worksheet.Cell(1, 4).Value = "Cấu hình";
+                worksheet.Cell(1, 5).Value = "Ngày bàn giao";
+                worksheet.Cell(1, 6).Value = "Trạng thái sửa chữa";
+                worksheet.Cell(1, 7).Value = "Ghi chú";
 
                 // Điền dữ liệu vào các hàng trong Excel
                 for (int i = 0; i < model.Count; i++)
                 {
                     var row = i + 2; // Bắt đầu từ hàng thứ 2 (hàng đầu tiên là header)
-                    ws.Cells[row, 1].Value = model[i].DeviceCode;
-                    ws.Cells[row, 2].Value = model[i].DeviceName;
-                    ws.Cells[row, 3].Value = model[i].TypeName;
-                    ws.Cells[row, 4].Value = model[i].Configuration;
-                    ws.Cells[row, 5].Value = model[i].DateOfDelivery;
-                    ws.Cells[row, 6].Value = model[i].Status;
-                    ws.Cells[row, 7].Value = model[i].Notes;
+                    worksheet.Cell(row, 1).Value = model[i].DeviceCode;
+                    worksheet.Cell(row, 2).Value = model[i].DeviceName;
+                    worksheet.Cell(row, 3).Value = model[i].TypeName;
+                    worksheet.Cell(row, 4).Value = model[i].Configuration;
+                    worksheet.Cell(row, 5).Value = model[i].DateOfDelivery;
+                    worksheet.Cell(row, 6).Value = model[i].Status;
+                    worksheet.Cell(row, 7).Value = model[i].Notes;
                 }
 
                 // Lưu file Excel vào đĩa
-                package.SaveAs(new FileInfo(filePath));
+                workbook.SaveAs(filePath);
             }
 
             // Đường dẫn file mà người dùng có thể tải về

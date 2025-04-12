@@ -193,57 +193,6 @@ $(document).ready(function () {
         var rows = table.$('tr', { search: 'applied' });
     });
 });
-//function fnExcelReport() {
-//    var TypeOfDevice = $('#TypeOfDevice').val();
-//    var Status = $('#Status').val();
-//    var Guarantee = $('#Guarantee').val();
-//    var ProjectDKC = $('#ProjectDKC').val();
-//    var DeviceCode = $('#DeviceCode').val();
-//    $.ajax({
-//        url: "/Device/ExportToExcel",
-//        data: {
-//            TypeOfDevice: TypeOfDevice,
-//            Status: Status,
-//            Guarantee: Guarantee,
-//            Project: ProjectDKC,
-//            DeviceCode: DeviceCode
-//        },
-//        success: function (response) {
-//            response = response.replace("DeviceCode", "Mã Thiết Bị ");
-//            response = response.replace("DeviceName", "Tên Thiết Bị");
-//            response = response.replace("TypeName", "Tên Loại");
-//            response = response.replace("PriceOne", "Giá");
-//            response = response.replace("FullName", "Tên Người Dùng");
-//            //  response = response.replace("Configuration", "Cấu Hình");
-
-//            response = response.replace("Name", "Nhà Cung Cấp");
-
-//            response = response.replace("ProjectSymbol", "Mã Dự Án");
-//            response = response.replace("Status", "Trạng Thái");
-//            //  response = response.replace(/&lt;p&gt;/gi, "");
-//            //   response = response.replace(/&lt;\/p&gt;/gi, " ");
-//            // response = response.replace(/&nbsp;/gi, " ");
-//            var ua = window.navigator.userAgent;
-//            var msie = ua.indexOf("MSIE ");
-//            if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:s11\./))      // If Internet Explorer
-//            {
-//                txtArea1.document.open("txt/html", "replace");
-//                txtArea1.document.write(response);
-//                txtArea1.document.close();
-//                txtArea1.focus();
-//                sa = txtArea1.document.execCommand("SaveAs", true, "Say Thanks to Sumit.xls");
-//            }
-//            else                 //other browser not tested on IE 11
-//            {
-//                console.log(response);
-//                var a = 1;
-//                sa = window.open('data:application/vnd.ms-excel,' + encodeURIComponent(response));
-//            }
-//        }
-//    })
-//}
-
-// In Table 
 function printDiv() {
     var divToPrint = document.getElementById('example');
     newWin = window.open("");

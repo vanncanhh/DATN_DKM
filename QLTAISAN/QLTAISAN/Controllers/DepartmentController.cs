@@ -1,4 +1,6 @@
-﻿namespace QLTAISAN.Controllers
+﻿using ClosedXML.Excel;
+
+namespace QLTAISAN.Controllers
 {
     public class DepartmentController : Controller
     {
@@ -398,33 +400,38 @@
             if (!Directory.Exists(folderPath))
                 Directory.CreateDirectory(folderPath);
 
-            using (var package = new ExcelPackage())
+            // Sử dụng ClosedXML để tạo file Excel
+            using (var workbook = new XLWorkbook())
             {
-                var ws = package.Workbook.Worksheets.Add("Devices");
+                var ws = workbook.Worksheets.Add("Devices");
 
-                ws.Cells[1, 1].Value = "Mã";
-                ws.Cells[1, 2].Value = "Tên thiết bị";
-                ws.Cells[1, 3].Value = "Loại";
-                ws.Cells[1, 4].Value = "Cấu hình";
-                ws.Cells[1, 5].Value = "Ngày bàn giao";
-                ws.Cells[1, 6].Value = "Trạng thái sửa chữa";
-                ws.Cells[1, 7].Value = "Ghi chú";
+                // Tạo tiêu đề cột
+                ws.Cell(1, 1).Value = "Mã";
+                ws.Cell(1, 2).Value = "Tên thiết bị";
+                ws.Cell(1, 3).Value = "Loại";
+                ws.Cell(1, 4).Value = "Cấu hình";
+                ws.Cell(1, 5).Value = "Ngày bàn giao";
+                ws.Cell(1, 6).Value = "Trạng thái sửa chữa";
+                ws.Cell(1, 7).Value = "Ghi chú";
 
+                // Điền dữ liệu vào các ô
                 for (int i = 0; i < model.Count; i++)
                 {
                     var row = i + 2;
-                    ws.Cells[row, 1].Value = model[i].DeviceCode;
-                    ws.Cells[row, 2].Value = model[i].DeviceName;
-                    ws.Cells[row, 3].Value = model[i].TypeName;
-                    ws.Cells[row, 4].Value = model[i].Configuration;
-                    ws.Cells[row, 5].Value = model[i].DateOfDelivery;
-                    ws.Cells[row, 6].Value = model[i].StatusRepair;
-                    ws.Cells[row, 7].Value = model[i].Notes;
+                    ws.Cell(row, 1).Value = model[i].DeviceCode;
+                    ws.Cell(row, 2).Value = model[i].DeviceName;
+                    ws.Cell(row, 3).Value = model[i].TypeName;
+                    ws.Cell(row, 4).Value = model[i].Configuration;
+                    ws.Cell(row, 5).Value = model[i].DateOfDelivery;
+                    ws.Cell(row, 6).Value = model[i].StatusRepair;
+                    ws.Cell(row, 7).Value = model[i].Notes;
                 }
 
-                package.SaveAs(new FileInfo(filePath));
+                // Lưu file Excel vào thư mục exports
+                workbook.SaveAs(filePath);
             }
 
+            // Trả về URL của tệp vừa tạo
             var fileUrl = Url.Content($"~/exports/{fileName}");
 
             return Json(new

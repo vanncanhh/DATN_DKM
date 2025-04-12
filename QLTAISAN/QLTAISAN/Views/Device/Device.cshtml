@@ -301,6 +301,8 @@
         var Guarantee = $('#Guarantee').val();
         var ProjectDKC = $('#ProjectDKC').val();
         var DeviceCode = $('#DeviceCode').val();
+
+        // Gửi request Ajax để xuất Excel
         $.ajax({
             url: "/Device/ExportToExcel",
             data: {
@@ -310,34 +312,24 @@
                 Project: ProjectDKC,
                 DeviceCode: DeviceCode
             },
+            type: "GET", // Đảm bảo phương thức GET
             success: function (response) {
-                response = response.replace("DeviceCode", "Mã Thiết Bị ");
-                response = response.replace("DeviceName", "Tên Thiết Bị");
-                response = response.replace("TypeName", "Tên Loại");
-                response = response.replace("PriceOne", "Giá");
-                response = response.replace("FullName", "Tên Người Dùng");
-                response = response.replace("Configuration", "Cấu Hình");
-                response = response.replace("Name", "Nhà Cung Cấp");
-                response = response.replace("ProjectSymbol", "Mã Phòng");
-                response = response.replace("Status", "Trạng Thái");
+                if (response.success) {
+                    var fileUrl = response.fileUrl;
 
-                var ua = window.navigator.userAgent;
-                var msie = ua.indexOf("MSIE ");
-                if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:s11\./))      // If Internet Explorer
-                {
-                    txtArea1.document.open("txt/html", "replace");
-                    txtArea1.document.write(response);
-                    txtArea1.document.close();
-                    txtArea1.focus();
-                    sa = txtArea1.document.execCommand("SaveAs", true, "Say Thanks to Sumit.xls");
+                    // Đưa ra liên kết tải file Excel
+                    window.location.href = fileUrl;
+                    alert("Xuất Excel thành công!"); // Thông báo cho người dùng
+                } else {
+                    // Nếu không thành công, hiển thị thông báo lỗi
+                    alert("Lỗi: " + response.message);
                 }
-                else                 //other browser not tested on IE 11
-                {
-                    console.log(response);
-                    var a = 1;
-                    sa = window.open('data:application/vnd.ms-excel,' + encodeURIComponent(response));
-                }
+            },
+            error: function (xhr, status, error) {
+                // Xử lý lỗi khi request không thành công
+                alert("Có lỗi xảy ra trong quá trình xuất file: " + error);
             }
-        })
+        });
     }
+
 </script>

@@ -1,5 +1,5 @@
-﻿using QRCoder;
-using System.Collections.Generic;
+﻿using ClosedXML.Excel;
+using QRCoder;
 using System.Drawing.Imaging;
 namespace QLTAISAN.Controllers
 {
@@ -794,7 +794,7 @@ namespace QLTAISAN.Controllers
                 Status = i.Status
             }).ToList();
 
-            // Tạo file Excel với EPPlus
+            // Tạo file Excel với ClosedXML
             var fileName = $"Devices_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
             var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "exports");
 
@@ -804,36 +804,36 @@ namespace QLTAISAN.Controllers
             var filePath = Path.Combine(folderPath, fileName);
 
             // Tạo file Excel
-            using (var package = new ExcelPackage())
+            using (var workbook = new XLWorkbook())
             {
-                var ws = package.Workbook.Worksheets.Add("Devices");
+                var ws = workbook.Worksheets.Add("Devices");
 
                 // Tạo các tiêu đề cột
-                ws.Cells[1, 1].Value = "Mã";
-                ws.Cells[1, 2].Value = "Tên thiết bị";
-                ws.Cells[1, 3].Value = "Loại";
-                ws.Cells[1, 4].Value = "Cấu hình";
-                ws.Cells[1, 5].Value = "Giá";
-                ws.Cells[1, 6].Value = "Họ và tên";
-                ws.Cells[1, 7].Value = "Tên dự án";
-                ws.Cells[1, 8].Value = "Trạng thái";
+                ws.Cell(1, 1).Value = "Mã";
+                ws.Cell(1, 2).Value = "Tên thiết bị";
+                ws.Cell(1, 3).Value = "Loại";
+                ws.Cell(1, 4).Value = "Cấu hình";
+                ws.Cell(1, 5).Value = "Giá";
+                ws.Cell(1, 6).Value = "Họ và tên";
+                ws.Cell(1, 7).Value = "Tên dự án";
+                ws.Cell(1, 8).Value = "Trạng thái";
 
                 // Thêm dữ liệu vào các ô
                 for (int i = 0; i < model.Count; i++)
                 {
                     var row = i + 2; // Dữ liệu bắt đầu từ dòng 2 (dòng 1 là tiêu đề)
-                    ws.Cells[row, 1].Value = model[i].DeviceCode;
-                    ws.Cells[row, 2].Value = model[i].DeviceName;
-                    ws.Cells[row, 3].Value = model[i].TypeName;
-                    ws.Cells[row, 4].Value = model[i].Configuration;
-                    ws.Cells[row, 5].Value = model[i].PriceOne;
-                    ws.Cells[row, 6].Value = model[i].FullName;
-                    ws.Cells[row, 7].Value = model[i].ProjectSymbol;
-                    ws.Cells[row, 8].Value = model[i].Status;
+                    ws.Cell(row, 1).Value = model[i].DeviceCode;
+                    ws.Cell(row, 2).Value = model[i].DeviceName;
+                    ws.Cell(row, 3).Value = model[i].TypeName;
+                    ws.Cell(row, 4).Value = model[i].Configuration;
+                    ws.Cell(row, 5).Value = model[i].PriceOne;
+                    ws.Cell(row, 6).Value = model[i].FullName;
+                    ws.Cell(row, 7).Value = model[i].ProjectSymbol;
+                    ws.Cell(row, 8).Value = model[i].Status;
                 }
 
                 // Lưu file Excel vào thư mục exports
-                await package.SaveAsAsync(new FileInfo(filePath));
+                await Task.Run(() => workbook.SaveAs(filePath));
             }
 
             // Trả về URL của tệp vừa tạo
@@ -869,10 +869,11 @@ namespace QLTAISAN.Controllers
             return View("StatisticalDevice", model);
         }
         [HasCredential(RoleID = "EXPORT_STATISTICAL_DEVICE")]
-        public IActionResult ExportStatisticalDevice()
+        public JsonResult ExportStatisticalDevice()
         {
             // Lấy dữ liệu từ cơ sở dữ liệu
             var charts = data.StatisticalDevice()
+                .AsEnumerable()
                 .Select(i => new
                 {
                     i.DeviceCode,
@@ -884,37 +885,50 @@ namespace QLTAISAN.Controllers
                 })
                 .ToList();
 
-            // Tạo file Excel bằng EPPlus
-            using (var package = new ExcelPackage())
+            // Tạo file Excel bằng ClosedXML
+            using (var workbook = new XLWorkbook())
             {
-                // Tạo worksheet trong file Excel
-                var worksheet = package.Workbook.Worksheets.Add("DeviceStatistics");
+                var worksheet = workbook.Worksheets.Add("DeviceStatistics");
 
                 // Tạo tiêu đề cột
-                worksheet.Cells[1, 1].Value = "Device Code";
-                worksheet.Cells[1, 2].Value = "Device Name";
-                worksheet.Cells[1, 3].Value = "Price One";
-                worksheet.Cells[1, 4].Value = "Time Use";
-                worksheet.Cells[1, 5].Value = "Time Repair";
-                worksheet.Cells[1, 6].Value = "Sum Price";
+                worksheet.Cell(1, 1).Value = "Device Code";
+                worksheet.Cell(1, 2).Value = "Device Name";
+                worksheet.Cell(1, 3).Value = "Price One";
+                worksheet.Cell(1, 4).Value = "Time Use";
+                worksheet.Cell(1, 5).Value = "Time Repair";
+                worksheet.Cell(1, 6).Value = "Sum Price";
 
                 // Điền dữ liệu vào các hàng
                 for (int i = 0; i < charts.Count; i++)
                 {
                     var item = charts[i];
-                    worksheet.Cells[i + 2, 1].Value = item.DeviceCode;
-                    worksheet.Cells[i + 2, 2].Value = item.DeviceName;
-                    worksheet.Cells[i + 2, 3].Value = item.PriceOne;
-                    worksheet.Cells[i + 2, 4].Value = item.TimeUse;
-                    worksheet.Cells[i + 2, 5].Value = item.TimeRepair;
-                    worksheet.Cells[i + 2, 6].Value = item.SumPrice;
+                    worksheet.Cell(i + 2, 1).Value = item.DeviceCode;
+                    worksheet.Cell(i + 2, 2).Value = item.DeviceName;
+                    worksheet.Cell(i + 2, 3).Value = item.PriceOne;
+                    worksheet.Cell(i + 2, 4).Value = item.TimeUse;
+                    worksheet.Cell(i + 2, 5).Value = item.TimeRepair;
+                    worksheet.Cell(i + 2, 6).Value = item.SumPrice;
                 }
 
-                // Thiết lập kiểu file Excel và trả về file cho người dùng
+                // Thiết lập tên file Excel và lưu file vào thư mục exports
                 var fileName = $"DeviceStatistics_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
-                var fileBytes = package.GetAsByteArray();
+                var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "exports");
+                if (!Directory.Exists(folderPath))
+                    Directory.CreateDirectory(folderPath);
 
-                return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+                var filePath = Path.Combine(folderPath, fileName);
+
+                // Lưu file vào thư mục
+                workbook.SaveAs(filePath);
+
+                // Trả về URL của file vừa tạo
+                var fileUrl = Url.Content($"~/exports/{fileName}");
+
+                return Json(new
+                {
+                    success = true,
+                    fileUrl = fileUrl
+                });
             }
         }
 
