@@ -1,6 +1,5 @@
 ﻿global using Libs.Models;
 global using Microsoft.AspNetCore.Mvc;
-global using Libs.Data;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.AspNetCore.Authorization;
 global using System.ComponentModel.DataAnnotations;
@@ -10,6 +9,5 @@ global using Libs.DTOs;
 global using System.Drawing;
 global using System.Drawing.Text;
 global using Libs.Common;
-global using OfficeOpenXml;
 global using System.Text.RegularExpressions;
 global using Libs.ViewModels;

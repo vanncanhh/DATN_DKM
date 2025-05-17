@@ -33,10 +33,24 @@
                                 <label class="col-md-4 "> Người yêu cầu</label>
                                 <div class="col-md-8">
                                     <select class="input-large form-control myctr" name="UserRequest" id="user">
-                                        <option value="0" selected="@((Model.UserRequest == 0) ? "selected" : "")">Chọn người yêu cầu</option>
+                                        @if (Model.UserRequest == 0)
+                                        {
+                                            <option value="0" selected>Chọn người yêu cầu</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="0" >Chọn người yêu cầu</option>
+                                        }
                                         @foreach (var item in ViewData["User"] as IList<User>)
                                         {
-                                            <option value="@item.Id" selected="@((Model.UserRequest == @item.Id) ? "selected" : "")">@item.FullName</option>
+                                            if (Model.UserRequest == @item.Id)
+                                            {
+                                                <option value="@item.Id" selected>@item.FullName</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@item.Id" >@item.FullName</option>
+                                            }
                                         }
                                     </select>
                                 </div>
@@ -68,10 +82,24 @@
                                 <label class="col-md-4 "> Kiểu thiết bị  </label>
                                 <div class="col-md-8">
                                     <select class="form-control myctr" name="TypeOfDevice">
-                                        <option value="0" selected="@((Model.TypeOfDevice == 0) ? "selected" : "")">Chọn kiểu thiết bị</option>
+                                        @if (Model.TypeOfDevice == 0)
+                                        {
+                                            <option value="0" selected>Chọn kiểu thiết bị</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="0">Chọn kiểu thiết bị</option>
+                                        }
                                         @foreach (var item in ViewData["DeviceTypes"] as IList<DeviceType>)
                                         {
-                                            <option value="@item.Id" selected="@((Model.TypeOfDevice == @item.Id) ? "selected" : "")">@item.TypeName</option>
+                                            if (Model.TypeOfDevice == @item.Id)
+                                            {
+                                                <option value="@item.Id" selected>@item.TypeName</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@item.Id">@item.TypeName</option>
+                                            }
                                         }
                                     </select>
                                 </div>
@@ -114,9 +142,30 @@
                                 <label class="col-md-4 "> Trạng thái yêu cầu  </label>
                                 <div class="col-md-8">
                                     <select class="form-control myctr " name="Status" id="Status" onchange="StatusRequest()">
-                                        <option value="0" selected="@((Model.Status == 0) ? "selected" : "")">Đang chờ duyệt</option>
-                                        <option value="1" selected="@((Model.Status == 1) ? "selected" : "")" class="disabled">Đã được duyệt</option>
-                                        <option value="2" selected="@((Model.Status == 2) ? "selected" : "")">Bị từ chối</option>
+                                        @if (Model.Status == 0)
+                                        {
+                                            <option value="0" selected>Đang chờ duyệt</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="0" >Đang chờ duyệt</option>
+                                        }
+                                        @if (Model.Status == 1)
+                                        {
+                                            <option value="1" selected class="disabled">Đã được duyệt</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="1"  class="disabled">Đã được duyệt</option>
+                                        }
+                                        @if (Model.Status == 2)
+                                        {
+                                            <option value="2" selected>Bị từ chối</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="2">Bị từ chối</option>
+                                        }
                                     </select>
                                 </div>
                             </div>
@@ -269,76 +318,75 @@
 </section>
 
 <script>
-
     $(document).ready(function () {
-    })
-    var sta = $("#Status").val();
-    if (sta == 1) {
-        $("#ApprovedTrue").hide();
-        $("#ApprovedFail").hide();
-        $("#StatusComplete").show();
-    }
-    else if (sta == 2) {
-        $("#ApprovedTrue").hide();
-        $("#ApprovedFail").hide();
-        $("#StatusComplete").hide();
-    }
-    else if (sta == 0) {
-        $("#ApprovedTrue").show();
-        $("#ApprovedFail").show();
-        $("#StatusComplete").hide();
-    }
-    CKEDITOR.replace('editer2');
-    $('#user').select2();
-    $('#UserApproved').select2();
-    $('#UserUnApproved').select2();
-    $('#InfoRequest').find('input, button, select, textarea').attr('disabled', 'disabled');
+        // Lấy giá trị trạng thái hiện tại từ dropdown
+        var sta = parseInt($("#Status").val());
+
+        // Kiểm soát hiển thị nút và khóa/mở form
+        if (sta === 1 || sta === 2) {
+            // Trạng thái đã duyệt hoặc từ chối → khóa form
+            $('#InfoRequest').find('input, select, textarea').attr('disabled', 'disabled');
+            $("#ApprovedTrue, #ApprovedFail").hide();
+
+            if (sta === 1) {
+                $("#StatusComplete").show(); // Đã duyệt thì cho phép cập nhật quá trình
+            } else {
+                $("#StatusComplete").hide(); // Bị từ chối thì ẩn luôn
+            }
+        } else if (sta === 0) {
+            // Đang chờ duyệt → mở form để chỉnh sửa
+            $('#InfoRequest').find('input, select, textarea').removeAttr('disabled');
+            $("#ApprovedTrue, #ApprovedFail").show();
+            $("#StatusComplete").hide();
+        }
+
+        // Kích hoạt CKEditor và Select2
+        CKEDITOR.replace('editer2');
+        $('#user').select2();
+        $('#UserApproved').select2();
+        $('#UserUnApproved').select2();
+    });
+
+    // Mở popup phê duyệt
     var ClickApproRequest = function () {
         $("#myModal1").modal('show');
     }
+
+    // Mở popup từ chối
     var ClickCancelRequest = function () {
         $("#myModal2").modal('show');
     }
+
+    // Mở popup cập nhật quá trình
     var ClickStatusComplete = function () {
         $("#myModal3").modal('show');
     }
-    var CancelApproved = function () { }
 
     // Phê duyệt yêu cầu
     var ApprovedOk = function () {
-        //var a = $('#UserApproved').val();
-        //if (a != "") {
-            $('#InfoRequest').find('input, button, select, textarea').removeAttr('disabled', 'disabled');
-            $("#Approved option[value=false]").prop("selected", "selected");
-            $("#Status option[value=1]").prop("selected", "selected")
-            $("#formIdRequestDv").submit();
-        //}
-        //else {
-        //    $("#TestNullPS").show();
-        //}
-    }
-    // Từ chối yêu cầu
-    var Approvedfail = function () {
-        var ctgr = $("#NoteReasonRefuse");
-        //var UserApproved = $("#UserUnApproved");
-        //if (!UserApproved.val().trim()) {
-        //    $("#TestUserUnApproved").show();
-        //}
-        //else
-            if (!ctgr.val().trim()) {
-                $("#TestNullType").show();
-            }
-        // if (ctgr.val().trim() != null && UserApproved.val().trim() != null) 
-            else  {
-                $("#Approved option[value=false]").prop("selected", "selected");
-                $('#InfoRequest').find('input, button, select, textarea').removeAttr('disabled', 'disabled');
-                $("#Status option[value=2]").prop("selected", "selected");
-                $("#formIdRequestDv").submit();
-            }
-    }
-    var ProcessApproved = function () {
-        $('#InfoRequest').find('input, button, select, textarea').removeAttr('disabled', 'disabled');
+        $('#InfoRequest').find('input, select, textarea').removeAttr('disabled');
+        $("#Approved option[value=false]").prop("selected", true);
+        $("#Status option[value=1]").prop("selected", true);
         $("#formIdRequestDv").submit();
     }
 
+    // Từ chối yêu cầu
+    var Approvedfail = function () {
+        var reason = $("#NoteReasonRefuse").val().trim();
+
+        if (!reason) {
+            $("#TestNullType").show();
+        } else {
+            $('#InfoRequest').find('input, select, textarea').removeAttr('disabled');
+            $("#Approved option[value=false]").prop("selected", true);
+            $("#Status option[value=2]").prop("selected", true);
+            $("#formIdRequestDv").submit();
+        }
+    }
+
+    // Cập nhật quá trình cung cấp thiết bị
+    var ProcessApproved = function () {
+        $('#InfoRequest').find('input, select, textarea').removeAttr('disabled');
+        $("#formIdRequestDv").submit();
+    }
 </script>

@@ -23,10 +23,38 @@
             <div class="col-md-10">
                 <div class="col-md-3 TcssMarg">
                     <select class="input-sm  form-control myctr " name="Status">
-                        <option value="" selected="@((ViewBag.Status == null) ? "selected" : "")">Trạng thái yêu cầu</option>
-                        <option value="0" selected="@((ViewBag.Status == 0) ? "selected" : "")">Đang chờ duyệt</option>
-                        <option value="1" selected="@((ViewBag.Status == 1) ? "selected" : "")">Đã được duyệt</option>
-                        <option value="2" selected="@((ViewBag.Status == 2) ? "selected" : "")">Bị từ chối</option>
+                        @if (ViewBag.Status == null)
+                        {
+                            <option value="" selected>Trạng thái yêu cầu</option>
+                        }
+                        else
+                        {
+                            <option value="" >Trạng thái yêu cầu</option>
+                        }
+                        @if (ViewBag.Status == 0)
+                        {
+                            <option value="0" selected>Đang chờ duyệt</option>
+                        }
+                        else
+                        {
+                            <option value="0" >Đang chờ duyệt</option>
+                        }
+                        @if (ViewBag.Status == 1)
+                        {
+                            <option value="1" selected>Đã được duyệt</option>
+                        }
+                        else
+                        {
+                            <option value="1" >Đã được duyệt</option>
+                        }
+                        @if (ViewBag.Status == 2)
+                        {
+                            <option value="2" selected>Bị từ chối</option>
+                        }
+                        else
+                        {
+                            <option value="2">Bị từ chối</option>
+                        }
                     </select>
                 </div>
                 <div class="col-md-3 TcssMarg" style="display:none">
